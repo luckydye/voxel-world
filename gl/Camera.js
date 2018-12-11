@@ -27,9 +27,13 @@ export class Camera {
 		this.farplane = farplane;
 		this.nearplane = nearplane;
 
-		this.position = new Vec(0, 500, -4000);
+		this.position = new Vec(0, 3000, -10000);
 		this.rotation = new Vec(15, 0, 0);
 		this.lookAt = new Vec(0, 0, 0);
+	}
+
+	zoom(dir) {
+		this.position.z += 1200 * dir;
 	}
 
 	controls(element) {
@@ -47,7 +51,7 @@ export class Camera {
 		})
 
 		element.addEventListener("wheel", e => {
-			this.position.z += -e.deltaY * 2;
+			this.position.z += -e.deltaY * 5;
 		})
 
 		window.addEventListener("mousemove", e => {

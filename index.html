@@ -4,18 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
-    <script type="module">
-        import VoxelWorld from './VoxelWorld.js';
 
-        window.addEventListener("load", () => {
-            const voxelWorld = new VoxelWorld({ canvas: world });
-            console.log(voxelWorld);
-        });
-    </script>
-
+    <script type="module" src="./main.js"></script>
     <style>
-
         body {
             background: #131313;
         }
@@ -32,10 +23,14 @@
             overflow: hidden;
         }
 
+        tb-toolbar {
+            position: fixed;
+            right: 20px;
+        }
+
         #world {
             width: 100%;
         }
-
     </style>
 </head>
 <body>
