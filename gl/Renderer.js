@@ -9,13 +9,13 @@ let nextFrame,
 
 let shaderPrograms = [];
 
-function gridbufferdata(s = 10) {
+function gridbufferdata(s = 15) {
 	const dataArray = [];
 
 	for(let x = 0; x < s-1; x++) {
 		for(let y = 0; y < s-1; y++) {
-			const w = 300;
-			const h = 300;
+			const w = 600;
+			const h = 600;
 	
 			dataArray.push(...[
 				x * w, 0, y * h, 0.25, 0.25, 0.25,

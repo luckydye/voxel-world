@@ -7,6 +7,7 @@ import { Vec } from "./gl/Math.js";
 const shaders = [
     new TestShader({ texturesrc: "./dirt.png" }),
     new TestShader({ texturesrc: "./stone.png" }),
+    new TestShader(),
 ];
 
 export default class VoxelWorld {
