@@ -1,0 +1,9 @@
+import { GLShader } from "../GLShader.js";
+
+export default class DefaultShader extends GLShader {
+
+    constructor() {
+        super("default");
+    }
+
+}
