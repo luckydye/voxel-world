@@ -17,7 +17,7 @@ export default class VoxelWorld {
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.buildCube(10, 10, 10);
+        this.buildCube(6, 6, 6);
     }
     
     makeCube(args) {

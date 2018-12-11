@@ -91,8 +91,9 @@ export class Renderer {
 			const shader = renderer.defaultShader;
 			if(shader.initialized) {
 				gl.useProgram(shader.program);
+				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer);
 				renderer.setProgramUniforms(gl, shader.uniforms, camera);
-				gl.drawArrays(gl.LINES, 0, Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer));
+				gl.drawArrays(gl.LINES, 0, count);
 			} else {
 				shader.cache(gl);
 			}
@@ -129,17 +130,16 @@ export class Renderer {
 				shader.cache(gl);
 			}
 
-			if(currentProgram) {
-				if(shader.texture) {
-					gl.bindTexture(gl.TEXTURE_2D, shader.texture);
-				}
+			if(currentProgram && shader.texture) {
+				const bufferinfo = Renderer.setBuffersAndAttributes(gl, shader.attributes, buffer);
 
 				this.setProgramUniforms(gl, shader.uniforms, camera, {
 					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
 					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
 				});
+				
+				gl.bindTexture(gl.TEXTURE_2D, shader.texture);
 
-				const bufferinfo = Renderer.setBuffersAndAttributes(gl, shader.attributes, buffer);
 				gl.drawArrays(gl[buffer.type], 0, bufferinfo);
 			}
 		}
@@ -201,12 +201,20 @@ export class Renderer {
 	static setBuffersAndAttributes(gl, attributes, bufferInfo) {
 		const elements = bufferInfo.elements;
 		const bpe = bufferInfo.vertecies.BYTES_PER_ELEMENT;
-		const buffer = gl.createBuffer();
+		let newbuffer = false;
+		
+		if(!('buffer' in bufferInfo)) {
+			bufferInfo.buffer = gl.createBuffer();
+			newbuffer = true;
+		}
+		const buffer = bufferInfo.buffer;
 	
 		if (!buffer) throw new Error('Failed to create buffer.');
 	
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, bufferInfo.vertecies, gl.STATIC_DRAW);
+		if(newbuffer) {
+			gl.bufferData(gl.ARRAY_BUFFER, bufferInfo.vertecies, gl.STATIC_DRAW);
+		}
 	
 		let lastElementSize = 0;
 	
