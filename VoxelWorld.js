@@ -24,8 +24,8 @@ export default class VoxelWorld {
 
     randomTexture() {
         const textures = [
-            "../dirt.jpg",
-            "../stone.jpg"
+            "./dirt.jpg",
+            "./stone.jpg"
         ];
         return textures[Math.floor(Math.random() * textures.length)];
     }
