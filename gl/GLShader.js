@@ -20,10 +20,12 @@ export class GLShader {
 		return this._attributes;
 	}
 
-	constructor(name) {
+	constructor({ name, texturesrc = "" } = {}) {
 		this.program = null;
 		this.src = null;
 		this.name = name;
+		this.texturesrc = texturesrc;
+		this.texture = null;
 
 		this.initialized = false;
 
@@ -57,6 +59,15 @@ export class GLShader {
 				this._uniforms = Renderer.getUniforms(gl, this.program);
 				this._attributes = Renderer.getAttributes(gl, this.program);
 			}
+		}
+		if(!this.texture && this.texturesrc) {
+			const image = new Image();
+			image.onload = () => {
+				this.texture = Renderer.createTexture(gl, image);
+				gl.useProgram(this.program);
+				gl.bindTexture(gl.TEXTURE_2D, this.texture);
+			}
+			image.src = this.texturesrc;
 		}
 		return this.program;
 	}

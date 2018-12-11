@@ -119,20 +119,6 @@ export class Renderer {
 		const buffer = obj.buffer;
 		if(buffer) {
 			const shader = obj.shader;
-			const objTexture = obj.texture;
-			const textureSrc = obj.textureimage;
-
-			if(!objTexture && textureSrc) {
-				const image = new Image();
-				image.src = textureSrc;
-				image.onload = () => {
-					const texture = Renderer.createTexture(gl, image);
-					obj.texture = texture;
-					gl.bindTexture(gl.TEXTURE_2D, objTexture);
-				}
-			} else {
-				gl.bindTexture(gl.TEXTURE_2D, objTexture);
-			}
 
 			let currentProgram = null;
 
@@ -144,6 +130,10 @@ export class Renderer {
 			}
 
 			if(currentProgram) {
+				if(shader.texture) {
+					gl.bindTexture(gl.TEXTURE_2D, shader.texture);
+				}
+
 				this.setProgramUniforms(gl, shader.uniforms, camera, {
 					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
 					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
