@@ -54,14 +54,16 @@ export class Renderer {
 
 		this.canvas = canvas;
 		this.clearColor = [0, 0, 0, 1.0];
+		
+		this.modelMatrix = mat4.create();
+		this.projMatrix = mat4.create();
+		this.viewMatrix = mat4.create();
+
+		this.updated = false;
 
 		this.initGl();
 
-		this.defaultShader = new DefaultShader();
-		
-		this.setScene(new Scene());
-
-		console.log(shaderPrograms);
+		this.gridBuffer = gridbufferdata();
 	}
 
 	initGl() {
@@ -69,6 +71,9 @@ export class Renderer {
 		gl.clearColor(...this.clearColor);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
+
+		this.defaultShader = new DefaultShader();
+		this.setScene(new Scene());
 	}
 
 	draw(gl) {
@@ -82,58 +87,56 @@ export class Renderer {
 			cancelAnimationFrame(nextFrame);
 		}
 
-		function draw() {
-			nextFrame = requestAnimationFrame(draw);
+		function drawGrid() {
+			const shader = renderer.defaultShader;
+			if(shader.initialized) {
+				gl.useProgram(shader.program);
+				renderer.setProgramUniforms(gl, shader.uniforms, camera);
+				gl.drawArrays(gl.LINES, 0, Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer));
+			} else {
+				shader.cache(gl);
+			}
+		}
+
+		function drawScene() {
+			nextFrame = requestAnimationFrame(drawScene);
 			currFrame = performance.now();
 
-			const defaultShader = renderer.defaultShader;
-			if(!defaultShader) return;
-
 			gl.clear(gl.DEPTH_BUFFER_BIT);
-			let currentProgram = defaultShader.program;
 
-			// update programs
+			drawGrid();
 
-			if(currentProgram) {
-				gl.useProgram(currentProgram);
-
-				renderer.setProgramUniforms(gl, currentProgram, camera);
-				gl.drawArrays(gl.LINES, 0, Renderer.setBuffersAndAttributes(gl, 
-					currentProgram, 
-					gridbufferdata()
-				));
-				
-				for(let obj of objects) {
-					renderer.drawGeo(obj, camera);
-				}
-			} else {
-				defaultShader.cache(gl);
+			for(let obj of objects) {
+				renderer.drawGeo(obj, camera);
 			}
 
 			lastFrame = currFrame;
 		}
-		draw();
+		drawScene();
 	}
 
 	drawGeo(obj, camera) {
-		if(obj.buffer) {
+		const buffer = obj.buffer;
+		if(buffer) {
 			const shader = obj.shader;
-			const texture = obj.texture;
+			const objTexture = obj.texture;
+			const textureSrc = obj.textureimage;
 
-			if(!obj.texture && obj.textureimage) {
+			if(!objTexture && textureSrc) {
 				const image = new Image();
-				image.src = obj.textureimage;
+				image.src = textureSrc;
 				image.onload = () => {
 					const texture = Renderer.createTexture(gl, image);
 					obj.texture = texture;
+					gl.bindTexture(gl.TEXTURE_2D, objTexture);
 				}
 			} else {
-				gl.bindTexture(gl.TEXTURE_2D, texture);
+				gl.bindTexture(gl.TEXTURE_2D, objTexture);
 			}
 
 			let currentProgram = null;
 
-			if(shader && shader.program) {
+			if(shader.initialized) {
 				currentProgram = shader.program;
 				gl.useProgram(currentProgram);
 			} else if(shader) {
@@ -141,26 +144,21 @@ export class Renderer {
 			}
 
 			if(currentProgram) {
-				this.setProgramUniforms(gl, currentProgram, camera, {
+				this.setProgramUniforms(gl, shader.uniforms, camera, {
 					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
 					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
 				});
 
-				const elements = Renderer.setBuffersAndAttributes(gl, currentProgram, obj.buffer);
-				gl.drawArrays(gl[obj.buffer.type], 0, elements);
+				const bufferinfo = Renderer.setBuffersAndAttributes(gl, shader.attributes, buffer);
+				gl.drawArrays(gl[buffer.type], 0, bufferinfo);
 			}
 		}
 	}
 
-	setProgramUniforms(gl, program, camera, {
-		translate = { x: 0, y: 0, z: 0, },
-		rotation = { x: 0, y: 0, z: 0, }
-	} = {}) {
-		const uniforms = Renderer.getUniforms(gl, program);
-	
-		const modelMatrix = mat4.create();
-		const projMatrix = mat4.create();
-		const viewMatrix = mat4.create();
+	updatePerspective(camera, translate, rotation) {
+		const modelMatrix = this.modelMatrix;
+		const projMatrix = this.projMatrix;
+		const viewMatrix = this.viewMatrix;
 	
 		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, gl.canvas.width / gl.canvas.height, camera.nearplane, camera.farplane);
 		mat4.lookAt(
@@ -195,61 +193,22 @@ export class Renderer {
 		mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * rotation.x);
 		mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * rotation.y);
 		mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * rotation.z);
-
-		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, modelMatrix);
-		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, viewMatrix);
-		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, projMatrix);
 	}
 
-	static createTexture(gl, image) {
-		const texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		
-		function isPowerOf2(value) {
-			return (value & (value - 1)) == 0;
-		}
+	setProgramUniforms(gl, uniforms, camera, {
+		translate = { x: 0, y: 0, z: 0, },
+		rotation = { x: 0, y: 0, z: 0, }
+	} = {}) {
+		this.updatePerspective(camera, translate, rotation);
 
-		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-			gl.generateMipmap(gl.TEXTURE_2D);
-		} else {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		}
-		return texture;
+		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, this.modelMatrix);
+		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, this.projMatrix);
+		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, this.viewMatrix);
 	}
 
-	static compileShader(gl, src, type) {
-		const shader = gl.createShader(type);
-		gl.shaderSource(shader, src);
-		gl.compileShader(shader);
-
-		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			throw new Error(gl.getShaderInfoLog(shader));
-		}
-
-		return shader;
-	}
-
-	static createProgram(gl, vertShader, fragShader) {
-		const program = gl.createProgram();
-		gl.attachShader(program, vertShader);
-		gl.attachShader(program, fragShader);
-		gl.linkProgram(program);
+	// static webgl functions
 	
-		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-			throw new Error(gl.getProgramInfoLog(program));
-		}
-
-		shaderPrograms.push(program);
-	
-		return program;
-	}
-	
-	static setBuffersAndAttributes(gl, program, bufferInfo) {
-		const attributes = Renderer.getAttributes(gl, program);
-	
+	static setBuffersAndAttributes(gl, attributes, bufferInfo) {
 		const elements = bufferInfo.elements;
 		const bpe = bufferInfo.vertecies.BYTES_PER_ELEMENT;
 		const buffer = gl.createBuffer();
@@ -299,5 +258,51 @@ export class Renderer {
 			uniforms[name] = gl.getUniformLocation(program, name);
 		}
 		return uniforms;
+	}
+
+	static compileShader(gl, src, type) {
+		const shader = gl.createShader(type);
+		gl.shaderSource(shader, src);
+		gl.compileShader(shader);
+
+		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			throw new Error(gl.getShaderInfoLog(shader));
+		}
+
+		return shader;
+	}
+
+	static createTexture(gl, image) {
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		
+		function isPowerOf2(value) {
+			return (value & (value - 1)) == 0;
+		}
+
+		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+			gl.generateMipmap(gl.TEXTURE_2D);
+		} else {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		}
+		return texture;
+	}
+
+	static createProgram(gl, vertShader, fragShader) {
+		const program = gl.createProgram();
+		gl.attachShader(program, vertShader);
+		gl.attachShader(program, fragShader);
+		gl.linkProgram(program);
+	
+		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			throw new Error(gl.getProgramInfoLog(program));
+		}
+
+		shaderPrograms.push(program);
+	
+		return program;
 	}
 }

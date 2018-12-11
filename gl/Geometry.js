@@ -1,7 +1,8 @@
 export class Geometry {
 
     get buffer() {
-		return null;
+		this._buffer = this._buffer || this.createBuffer();
+		return this._buffer;
 	}
 
 	constructor({
@@ -18,6 +19,10 @@ export class Geometry {
 
 		this.shader = null;
 		this.texture = null;
+	}
+
+	createBuffer() {
+		
 	}
 
 	assignShader(shader) {

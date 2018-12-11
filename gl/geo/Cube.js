@@ -1,7 +1,7 @@
 import { Geometry } from "../Geometry.js";
 
 export class Cube extends Geometry {
-	get buffer() {
+	createBuffer() {
 		return cubebufferdata(this.size, this.size);
 	}
 }

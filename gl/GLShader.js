@@ -12,10 +12,20 @@ export class GLShader {
 		return this._fragShader;
 	}
 
+	get uniforms() {
+		return this._uniforms;
+	}
+
+	get attributes() {
+		return this._attributes;
+	}
+
 	constructor(name) {
 		this.program = null;
 		this.src = null;
 		this.name = name;
+
+		this.initialized = false;
 
 		this.load(this.name);
 	}
@@ -43,6 +53,10 @@ export class GLShader {
 	cache(gl) {
 		if(!this.program) {
 			this.recompile(gl);
+			if(this.program) {
+				this._uniforms = Renderer.getUniforms(gl, this.program);
+				this._attributes = Renderer.getAttributes(gl, this.program);
+			}
 		}
 		return this.program;
 	}
@@ -52,10 +66,7 @@ export class GLShader {
 			this._vertShader = Renderer.compileShader(gl, this.src[0], gl.VERTEX_SHADER);
 			this._fragShader = Renderer.compileShader(gl, this.src[1], gl.FRAGMENT_SHADER);
 			this.program = Renderer.createProgram(gl, this._vertShader, this._fragShader);
+			this.initialized = true;
 		}
-	}
-
-	setUniforms(gl) {
-		
 	}
 }
