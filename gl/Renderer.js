@@ -7,23 +7,25 @@ let nextFrame,
 	gl, 
 	lastFrame;
 
-function gridbufferdata(s = 8) {
+let shaderPrograms = [];
+
+function gridbufferdata(s = 10) {
 	const dataArray = [];
 
 	for(let x = 0; x < s-1; x++) {
 		for(let y = 0; y < s-1; y++) {
-			const w = 50;
-			const h = 50;
+			const w = 300;
+			const h = 300;
 	
 			dataArray.push(...[
-				x * s * w, 0, y * s * h, 0.25, 0.25, 0.25,
-				x * s * w, 0, y * -s * h, 0.25, 0.25, 0.25,
-				x * s * w, 0, y * -s * h, 0.25, 0.25, 0.25,
-				x * -s * w, 0, y * -s * h, 0.25, 0.25, 0.25,
-				x * -s * w, 0, y * -s * h, 0.25, 0.25, 0.25,
-				x * -s * w, 0, y * s * h, 0.25, 0.25, 0.25,
-				x * -s * w, 0, y * s * h, 0.25, 0.25, 0.25,
-				x * s * w, 0, y * s * h, 0.25, 0.25, 0.25,
+				x * w, 0, y * h, 0.25, 0.25, 0.25,
+				x * w, 0, y * -h, 0.25, 0.25, 0.25,
+				x * w, 0, y * -h, 0.25, 0.25, 0.25,
+				x * -w, 0, y * -h, 0.25, 0.25, 0.25,
+				x * -w, 0, y * -h, 0.25, 0.25, 0.25,
+				x * -w, 0, y * h, 0.25, 0.25, 0.25,
+				x * -w, 0, y * h, 0.25, 0.25, 0.25,
+				x * w, 0, y * h, 0.25, 0.25, 0.25,
 			])
 		}
 	}
@@ -58,6 +60,8 @@ export class Renderer {
 		this.defaultShader = new DefaultShader();
 		
 		this.setScene(new Scene());
+
+		console.log(shaderPrograms);
 	}
 
 	initGl() {
@@ -65,6 +69,50 @@ export class Renderer {
 		gl.clearColor(...this.clearColor);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
+	}
+
+	draw(gl) {
+		if(!this.scene) return;
+
+		const objects = this.scene.objects;
+		const camera = this.scene.camera;
+		const renderer = this;
+
+		if(nextFrame) {
+			cancelAnimationFrame(nextFrame);
+		}
+
+		function draw() {
+			nextFrame = requestAnimationFrame(draw);
+			currFrame = performance.now();
+
+			const defaultShader = renderer.defaultShader;
+			if(!defaultShader) return;
+
+			gl.clear(gl.DEPTH_BUFFER_BIT);
+			let currentProgram = defaultShader.program;
+
+			// update programs
+
+			if(currentProgram) {
+				gl.useProgram(currentProgram);
+
+				renderer.setProgramUniforms(gl, currentProgram, camera);
+				gl.drawArrays(gl.LINES, 0, Renderer.setBuffersAndAttributes(gl, 
+					currentProgram, 
+					gridbufferdata()
+				));
+				
+				for(let obj of objects) {
+					renderer.drawGeo(obj, camera);
+				}
+			} else {
+				defaultShader.cache(gl);
+			}
+
+			lastFrame = currFrame;
+		}
+		draw();
 	}
 
 	drawGeo(obj, camera) {
@@ -87,7 +135,6 @@ export class Renderer {
 
 			if(shader && shader.program) {
 				currentProgram = shader.program;
-				shader.setUniforms(gl);
 				gl.useProgram(currentProgram);
 			} else if(shader) {
 				shader.cache(gl);
@@ -103,48 +150,6 @@ export class Renderer {
 				gl.drawArrays(gl[obj.buffer.type], 0, elements);
 			}
 		}
-	}
-
-	draw(gl) {
-		if(!this.scene) return;
-
-		const objects = this.scene.objects;
-		const camera = this.scene.camera;
-		const renderer = this;
-
-		if(nextFrame) {
-			cancelAnimationFrame(nextFrame);
-		}
-
-		function draw() {
-			nextFrame = requestAnimationFrame(draw);
-			currFrame = performance.now();
-
-			const defaultShader = renderer.defaultShader;
-
-			if(!defaultShader) return;
-
-			gl.clear(gl.DEPTH_BUFFER_BIT);
-			let currentProgram = defaultShader.program;
-
-			if(currentProgram) {
-				gl.useProgram(currentProgram);
-				renderer.setProgramUniforms(gl, currentProgram, camera);
-				gl.drawArrays(gl.LINES, 0, Renderer.setBuffersAndAttributes(gl, 
-					currentProgram, 
-					gridbufferdata()
-				));
-				
-				for(let obj of objects) {
-					renderer.drawGeo(obj, camera);
-				}
-			} else {
-				defaultShader.cache(gl);
-			}
-
-			lastFrame = currFrame;
-		}
-		draw();
 	}
 
 	setProgramUniforms(gl, program, camera, {
@@ -199,11 +204,19 @@ export class Renderer {
 	static createTexture(gl, image) {
 		const texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0,
-			gl.RGBA, gl.UNSIGNED_BYTE, image);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		
+		function isPowerOf2(value) {
+			return (value & (value - 1)) == 0;
+		}
 
-		gl.generateMipmap(gl.TEXTURE_2D);
-
+		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+			gl.generateMipmap(gl.TEXTURE_2D);
+		} else {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		}
 		return texture;
 	}
 
@@ -228,6 +241,8 @@ export class Renderer {
 		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			throw new Error(gl.getProgramInfoLog(program));
 		}
+
+		shaderPrograms.push(program);
 	
 		return program;
 	}

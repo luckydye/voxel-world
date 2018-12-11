@@ -27,7 +27,7 @@ export class Camera {
 		this.farplane = farplane;
 		this.nearplane = nearplane;
 
-		this.position = new Vec(0, 500, -2500);
+		this.position = new Vec(0, 500, -4000);
 		this.rotation = new Vec(15, 0, 0);
 		this.lookAt = new Vec(0, 0, 0);
 	}
