@@ -8,6 +8,7 @@ let nextFrame,
 	lastFrame;
 
 let shaderPrograms = [];
+let shaderTextures = new Map();
 
 function gridbufferdata(s = 15) {
 	const dataArray = [];
@@ -286,6 +287,10 @@ export class Renderer {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		}
+
+		// cache textures and reuse them?
+		shaderTextures.set(image.src, texture);
+
 		return texture;
 	}
 
