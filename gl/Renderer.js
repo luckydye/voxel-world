@@ -62,13 +62,13 @@ export class Renderer {
 
 		this.updated = false;
 
-		this.initGl();
+		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
+		this.initGl(gl);
 
 		this.gridBuffer = gridbufferdata();
 	}
 
-	initGl() {
-		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
+	initGl(gl) {
 		gl.clearColor(...this.clearColor);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
@@ -77,7 +77,7 @@ export class Renderer {
 		this.setScene(new Scene());
 	}
 
-	draw() {
+	draw(gl) {
 		if(!this.scene) return;
 		
 		const objects = this.scene.objects;
@@ -86,50 +86,44 @@ export class Renderer {
 			cancelAnimationFrame(nextFrame);
 		}
 
-		nextFrame = requestAnimationFrame(this.draw.bind(this));
+		nextFrame = requestAnimationFrame(() => {
+			this.draw(gl);
+		});
 		currFrame = performance.now();
 		
 		const renderPass = this.createRenderPass();
 		
 		for(let obj of objects) {
-			this.drawGeo(obj, true);
+			this.drawGeo(gl, obj, true);
 		}
-		
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		this.drawRenderPass(gl, renderPass);
 
 		// draw grid
-		{
-			const shader = this.defaultShader;
-			if(shader.initialized) {
-				gl.useProgram(shader.program);
-				this.updatePerspective(shader.uniforms, this.scene.camera);
-				this.setModelUniforms(shader.uniforms);
-				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
-				gl.drawArrays(gl.LINES, 0, count);
-			} else {
-				shader.cache(gl);
-			}
-		}
-
-		this.drawRenderPass(renderPass);
+		// {
+		// 	const shader = this.defaultShader;
+		// 	if(shader.initialized) {
+		// 		gl.useProgram(shader.program);
+		// 		this.updatePerspective(shader.uniforms, this.scene.camera);
+		// 		this.setModelUniforms(shader.uniforms);
+		// 		const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
+		// 		gl.drawArrays(gl.LINES, 0, count);
+		// 	} else {
+		// 		shader.cache(gl);
+		// 	}
+		// }
 
 		lastFrame = currFrame;
 	}
 
-	drawRenderPass(renderPass) {
+	drawRenderPass(gl, renderPass) {
+		gl.useProgram(this.defaultShader.program);
 		gl.bindTexture(gl.TEXTURE_2D, renderPass.texture);
 
-		if(this.scene.objects.length > 1) {
-			this.drawGeo(this.scene.objects[0], false);
-			this.drawGeo(this.scene.objects[1], false);
-		}
-
-		gl.drawBuffers([
-			gl.COLOR_ATTACHMENT0
-		]);
+		gl.drawBuffers([ gl.COLOR_ATTACHMENT0 ]);
+		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
 	createRenderPass() {
@@ -157,9 +151,7 @@ export class Renderer {
 
 		const fb = gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-
-		const attachmentPoint = gl.COLOR_ATTACHMENT0;
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, targetTexture, level);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, level);
 
 		return {
 			texture: targetTexture,
@@ -167,7 +159,7 @@ export class Renderer {
 		};
 	}
 
-	drawGeo(obj, textured) {
+	drawGeo(gl, obj, textured) {
 		const buffer = obj.buffer;
 		if(buffer) {
 			const shader = obj.shader;
