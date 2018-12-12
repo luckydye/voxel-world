@@ -8,13 +8,7 @@ uniform mat4 uProjMatrix;
 varying vec3 vColor;
 
 void main () {
-<<<<<<< HEAD
-=======
-  gl_PointSize = 1.5;
-
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-
->>>>>>> parent of 682294a... frame buffers
   vColor = aColor;
 }
 

@@ -82,87 +82,36 @@ export class Renderer {
 
 		const objects = this.scene.objects;
 		const camera = this.scene.camera;
-		const renderer = this;
 
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
 
-<<<<<<< HEAD
 		nextFrame = requestAnimationFrame(() => {
 			this.draw(gl);
 		});
 		currFrame = performance.now();
-		
-		const renderPass = this.createRenderPass();
-		
-		for(let obj of objects) {
-			this.drawGeo(gl, obj, true);
-		}
-
-		this.drawRenderPass(gl, renderPass);
 
 		// draw grid
-		// {
-		// 	const shader = this.defaultShader;
-		// 	if(shader.initialized) {
-		// 		gl.useProgram(shader.program);
-		// 		this.updatePerspective(shader.uniforms, this.scene.camera);
-		// 		this.setModelUniforms(shader.uniforms);
-		// 		const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
-		// 		gl.drawArrays(gl.LINES, 0, count);
-		// 	} else {
-		// 		shader.cache(gl);
-		// 	}
-		// }
-
-		lastFrame = currFrame;
-	}
-
-	drawRenderPass(gl, renderPass) {
-		gl.useProgram(this.defaultShader.program);
-		gl.bindTexture(gl.TEXTURE_2D, renderPass.texture);
-
-		gl.drawBuffers([ gl.COLOR_ATTACHMENT0 ]);
-		
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	}
-=======
-		function drawGrid() {
-			const shader = renderer.defaultShader;
+		{
+			const shader = this.defaultShader;
 			if(shader.initialized) {
 				gl.useProgram(shader.program);
-				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer);
-				renderer.setProgramUniforms(gl, shader.uniforms, camera);
+				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
+				this.setProgramUniforms(gl, shader.uniforms, camera);
 				gl.drawArrays(gl.LINES, 0, count);
 			} else {
 				shader.cache(gl);
 			}
 		}
 
-		function drawScene() {
-			nextFrame = requestAnimationFrame(drawScene);
-			currFrame = performance.now();
->>>>>>> parent of 682294a... frame buffers
+		gl.clear(gl.DEPTH_BUFFER_BIT);
 
-			gl.clear(gl.DEPTH_BUFFER_BIT);
-
-<<<<<<< HEAD
-		const fb = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, level);
-=======
-			drawGrid();
-
-			for(let obj of objects) {
-				renderer.drawGeo(obj, camera);
-			}
->>>>>>> parent of 682294a... frame buffers
-
-			lastFrame = currFrame;
+		for(let obj of objects) {
+			this.drawGeo(obj, camera);
 		}
-		drawScene();
+
+		lastFrame = currFrame;
 	}
 
 <<<<<<< HEAD
