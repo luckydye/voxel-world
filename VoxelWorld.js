@@ -7,12 +7,12 @@ import { Vec } from "./gl/Math.js";
 const shaders = [
     new TestShader({ texturesrc: "./images/dirt.png" }),
     new TestShader({ texturesrc: "./images/stone.png" }),
+    new TestShader({ texturesrc: "./images/grass.png" }),
     new TestShader({ texturesrc: "./images/lava.png" }),
-    new TestShader({ texturesrc: "./images/diamond_block.png" }),
-    new TestShader({ texturesrc: "./images/crafting_table_top.png" }),
+    new TestShader({  }),
 ];
 
-const size = 12;
+const size = 10;
 
 export default class VoxelWorld {
 
@@ -38,15 +38,29 @@ export default class VoxelWorld {
         for(let x = 0; x < w; x++) {
             for(let y = 0; y < h; y++) {
                 for(let z = 0; z < d; z++) {
-                    if(Math.random() > 0.66) {
+
+                    let shader = shaders[0];
+                    if(y < 2 || y < 3 && Math.random() > 0.5) {
+                        shader = shaders[2];
+                    } else if(y > 5 && Math.random() > 0.25) {
+                        if(Math.random() < 0.2) {
+                            shader = shaders[1];
+                        } else if(Math.random() > 0.33) {
+                            shader = shaders[4];
+                        } else {
+                            shader = shaders[3];
+                        }
+                    }
+
+                    if(Math.random() > 0.33 || y >= 1) {
                         this.scene.add(this.makeCube({
-                            shader: this.randomShader(),
+                            shader: shader,
                             position: new Vec(
                                 ((x * 600) + 300) - ((w/2) * 600),
                                 ((y * 600) + 300) - ((h) * 600),
                                 ((z * 600) + 300) - ((d/2) * 600),
                             )
-                        })); 
+                        }));
                     }
                 }
             }
