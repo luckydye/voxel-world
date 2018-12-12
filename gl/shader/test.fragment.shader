@@ -1,6 +1,7 @@
 precision mediump float;
 
 varying vec2 vTexColor;
+varying vec3 vFragCoord;
 
 uniform sampler2D uSampler;
 uniform float ambient;

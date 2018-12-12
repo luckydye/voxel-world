@@ -8,7 +8,11 @@ const shaders = [
     new TestShader({ texturesrc: "./images/dirt.png" }),
     new TestShader({ texturesrc: "./images/stone.png" }),
     new TestShader({ texturesrc: "./images/lava.png" }),
+    new TestShader({ texturesrc: "./images/diamond_block.png" }),
+    new TestShader({ texturesrc: "./images/crafting_table_top.png" }),
 ];
+
+const size = 20;
 
 export default class VoxelWorld {
 
@@ -18,8 +22,7 @@ export default class VoxelWorld {
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.buildCube(12, 12, 12);
-        console.log("drawing",12 * 12 * 12, "blocks, equals", 12 * 12 * 12 * 36, "verts");
+        this.buildCube(size, size, size);
     }
     
     makeCube(args) {
@@ -35,7 +38,7 @@ export default class VoxelWorld {
         for(let x = 0; x < w; x++) {
             for(let y = 0; y < h; y++) {
                 for(let z = 0; z < d; z++) {
-                    if(Math.random() > 0.65) {
+                    if(Math.random() > 0.66) {
                         this.scene.add(this.makeCube({
                             shader: this.randomShader(),
                             position: new Vec(
@@ -52,6 +55,6 @@ export default class VoxelWorld {
 
     regen() {
         this.scene.clear();
-        this.buildCube(10, 10, 10);
+        this.buildCube(size, size, size);
     }
 }
