@@ -65,7 +65,6 @@ export class GLShader {
 			image.onload = () => {
 				this.texture = Renderer.createTexture(gl, image);
 				gl.useProgram(this.program);
-				gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			}
 			image.src = this.texturesrc;
 		}
