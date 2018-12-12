@@ -42,6 +42,17 @@ export class Renderer {
 
 		this.defaultShader = new DefaultShader();
 		this.setScene(new Scene());
+		
+		window.addEventListener("resize", () => {
+			this.resize();
+		});
+		this.resize();
+	}
+
+	resize() {
+		gl.canvas.width = window.innerWidth;
+		gl.canvas.height = window.innerHeight;
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
 
 	draw(gl) {

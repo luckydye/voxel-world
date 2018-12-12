@@ -27,8 +27,8 @@ export class Camera {
 		this.farplane = farplane;
 		this.nearplane = nearplane;
 
-		this.position = new Vec(0, 3000, -10000);
-		this.rotation = new Vec(15, 0, 0);
+		this.position = new Vec(0, 4000, -13000);
+		this.rotation = new Vec(20, 0, 0);
 		this.lookAt = new Vec(0, 0, 0);
 	}
 
@@ -40,6 +40,10 @@ export class Camera {
 		let moving = false;
 		let lastEvent = null;
 		const viewport = document.body;
+
+		setInterval(() => {
+			if(!moving) this.rotation.y -= 0.25;
+		}, 16);
 
 		element.addEventListener("mousedown", e => {
 			moving = true;
