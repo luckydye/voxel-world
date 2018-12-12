@@ -134,6 +134,7 @@ export class Renderer {
 			if(currentProgram && shader.texture) {
 				const bufferinfo = Renderer.setBuffersAndAttributes(gl, shader.attributes, buffer);
 
+				shader.setUniforms(gl);
 				this.setProgramUniforms(gl, shader.uniforms, camera, {
 					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
 					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }

@@ -6,4 +6,8 @@ export default class TestShader extends GLShader {
         super({ name: "test", texturesrc });
     }
 
+    setUniforms(gl) {
+        gl.uniform3fv(this.uniforms.lightPos, [1, 1, 1]);
+    }
+
 }

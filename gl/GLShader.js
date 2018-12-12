@@ -33,10 +33,7 @@ export class GLShader {
 	}
 
 	setUniforms(gl) {
-		// give vars to shader
-		// gl.uniformMatrix4fv(uniforms.uModelMatrix, false, this.modelMatrix);
-		// gl.uniformMatrix4fv(uniforms.uProjMatrix, false, this.projMatrix);
-		// gl.uniformMatrix4fv(uniforms.uViewMatrix, false, this.viewMatrix);
+		
 	}
 
 	load(shaderName) {
@@ -66,7 +63,6 @@ export class GLShader {
 				this._uniforms = Renderer.getUniforms(gl, this.program);
 				this._attributes = Renderer.getAttributes(gl, this.program);
 			}
-			this.setUniforms(gl);
 		}
 		if(!this.texture && this.texturesrc) {
 			const image = new Image();
