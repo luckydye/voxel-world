@@ -82,39 +82,36 @@ export class Renderer {
 
 		const objects = this.scene.objects;
 		const camera = this.scene.camera;
-		const renderer = this;
 
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
 
-		function drawGrid() {
-			const shader = renderer.defaultShader;
+		nextFrame = requestAnimationFrame(() => {
+			this.draw(gl);
+		});
+		currFrame = performance.now();
+
+		// draw grid
+		{
+			const shader = this.defaultShader;
 			if(shader.initialized) {
 				gl.useProgram(shader.program);
-				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer);
-				renderer.setProgramUniforms(gl, shader.uniforms, camera);
+				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
+				this.setProgramUniforms(gl, shader.uniforms, camera);
 				gl.drawArrays(gl.LINES, 0, count);
 			} else {
 				shader.cache(gl);
 			}
 		}
 
-		function drawScene() {
-			nextFrame = requestAnimationFrame(drawScene);
-			currFrame = performance.now();
+		gl.clear(gl.DEPTH_BUFFER_BIT);
 
-			gl.clear(gl.DEPTH_BUFFER_BIT);
-
-			drawGrid();
-
-			for(let obj of objects) {
-				renderer.drawGeo(obj, camera);
-			}
-
-			lastFrame = currFrame;
+		for(let obj of objects) {
+			this.drawGeo(obj, camera);
 		}
-		drawScene();
+
+		lastFrame = currFrame;
 	}
 
 	drawGeo(obj, camera) {

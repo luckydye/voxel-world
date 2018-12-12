@@ -8,10 +8,7 @@ uniform mat4 uProjMatrix;
 varying vec3 vColor;
 
 void main () {
-  gl_PointSize = 1.5;
-
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-
   vColor = aColor;
 }
 
