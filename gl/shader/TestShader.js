@@ -7,6 +7,7 @@ export default class TestShader extends GLShader {
     }
 
     setUniforms(gl) {
+        gl.uniform1f(this.uniforms.ambient, 1);
         gl.uniform3fv(this.uniforms.lightPos, [1, 1, 1]);
     }
 

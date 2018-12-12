@@ -3,9 +3,10 @@ precision mediump float;
 varying vec2 vTexColor;
 
 uniform sampler2D uSampler;
-uniform vec3 lightPos;
+uniform float ambient;
 
 void main () {
   vec2 texcoord = vec2(vTexColor);
-  gl_FragColor = texture2D(uSampler, texcoord);
+  gl_FragColor = texture2D(uSampler, texcoord) * ambient;
+
 }

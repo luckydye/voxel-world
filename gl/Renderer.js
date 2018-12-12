@@ -77,47 +77,97 @@ export class Renderer {
 		this.setScene(new Scene());
 	}
 
-	draw(gl) {
+	draw() {
 		if(!this.scene) return;
-
+		
 		const objects = this.scene.objects;
-		const camera = this.scene.camera;
-		const renderer = this;
-
+		
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
 
-		function drawGrid() {
-			const shader = renderer.defaultShader;
+		nextFrame = requestAnimationFrame(this.draw.bind(this));
+		currFrame = performance.now();
+		
+		const renderPass = this.createRenderPass();
+		
+		for(let obj of objects) {
+			this.drawGeo(obj, true);
+		}
+		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+		// draw grid
+		{
+			const shader = this.defaultShader;
 			if(shader.initialized) {
 				gl.useProgram(shader.program);
-				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, renderer.gridBuffer);
-				renderer.setProgramUniforms(gl, shader.uniforms, camera);
+				this.updatePerspective(shader.uniforms, this.scene.camera);
+				this.setModelUniforms(shader.uniforms);
+				const count = Renderer.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
 				gl.drawArrays(gl.LINES, 0, count);
 			} else {
 				shader.cache(gl);
 			}
 		}
 
-		function drawScene() {
-			nextFrame = requestAnimationFrame(drawScene);
-			currFrame = performance.now();
+		this.drawRenderPass(renderPass);
 
-			gl.clear(gl.DEPTH_BUFFER_BIT);
-
-			drawGrid();
-
-			for(let obj of objects) {
-				renderer.drawGeo(obj, camera);
-			}
-
-			lastFrame = currFrame;
-		}
-		drawScene();
+		lastFrame = currFrame;
 	}
 
-	drawGeo(obj, camera) {
+	drawRenderPass(renderPass) {
+		gl.bindTexture(gl.TEXTURE_2D, renderPass.texture);
+
+		if(this.scene.objects.length > 1) {
+			this.drawGeo(this.scene.objects[0], false);
+			this.drawGeo(this.scene.objects[1], false);
+		}
+
+		gl.drawBuffers([
+			gl.COLOR_ATTACHMENT0
+		]);
+	}
+
+	createRenderPass() {
+		// create to render to
+		const targetTextureWidth = 1280;
+		const targetTextureHeight = 1280;
+		const targetTexture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+		
+		// define size and format of level 0
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const border = 0;
+		const format = gl.RGBA;
+		const type = gl.UNSIGNED_BYTE;
+		const data = null;
+		gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+						targetTextureWidth, targetTextureHeight, border,
+						format, type, data);
+		
+		// set the filtering so we don't need mips
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		const fb = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+		const attachmentPoint = gl.COLOR_ATTACHMENT0;
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, targetTexture, level);
+
+		return {
+			texture: targetTexture,
+			framebuffer: fb,
+		};
+	}
+
+	drawGeo(obj, textured) {
 		const buffer = obj.buffer;
 		if(buffer) {
 			const shader = obj.shader;
@@ -126,7 +176,12 @@ export class Renderer {
 
 			if(shader.initialized) {
 				currentProgram = shader.program;
+
 				gl.useProgram(currentProgram);
+				
+				this.updatePerspective(shader.uniforms, this.scene.camera);
+				shader.setUniforms(gl);
+
 			} else if(shader) {
 				shader.cache(gl);
 			}
@@ -134,21 +189,21 @@ export class Renderer {
 			if(currentProgram && shader.texture) {
 				const bufferinfo = Renderer.setBuffersAndAttributes(gl, shader.attributes, buffer);
 
-				shader.setUniforms(gl);
-				this.setProgramUniforms(gl, shader.uniforms, camera, {
+				this.setModelUniforms(shader.uniforms, {
 					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
 					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
 				});
 				
-				gl.bindTexture(gl.TEXTURE_2D, shader.texture);
+				if(textured) {
+					gl.bindTexture(gl.TEXTURE_2D, shader.texture);
+				}
 
 				gl.drawArrays(gl[buffer.type], 0, bufferinfo);
 			}
 		}
 	}
 
-	updatePerspective(camera, translate, rotation) {
-		const modelMatrix = this.modelMatrix;
+	updatePerspective(uniforms, camera) {
 		const projMatrix = this.projMatrix;
 		const viewMatrix = this.viewMatrix;
 	
@@ -174,6 +229,16 @@ export class Renderer {
 
 		mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.x);
 		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
+
+		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, this.projMatrix);
+		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, this.viewMatrix);
+	}
+
+	setModelUniforms(uniforms, {
+		translate = { x: 0, y: 0, z: 0, },
+		rotation = { x: 0, y: 0, z: 0, }
+	} = {}) {
+		const modelMatrix = this.modelMatrix;
 		
 		mat4.identity(modelMatrix);
 		
@@ -185,17 +250,8 @@ export class Renderer {
 		mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * rotation.x);
 		mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * rotation.y);
 		mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * rotation.z);
-	}
-
-	setProgramUniforms(gl, uniforms, camera, {
-		translate = { x: 0, y: 0, z: 0, },
-		rotation = { x: 0, y: 0, z: 0, }
-	} = {}) {
-		this.updatePerspective(camera, translate, rotation);
 
 		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, this.modelMatrix);
-		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, this.projMatrix);
-		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, this.viewMatrix);
 	}
 
 	// static webgl functions
@@ -275,6 +331,7 @@ export class Renderer {
 	static createTexture(gl, image) {
 		const texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
+
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
 		
 		function isPowerOf2(value) {
