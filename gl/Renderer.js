@@ -114,11 +114,7 @@ export class Renderer {
 		lastFrame = currFrame;
 	}
 
-<<<<<<< HEAD
-	drawGeo(gl, obj, textured) {
-=======
 	drawGeo(obj, camera) {
->>>>>>> parent of 682294a... frame buffers
 		const buffer = obj.buffer;
 		if(buffer) {
 			const shader = obj.shader;
