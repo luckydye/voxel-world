@@ -12,7 +12,7 @@ const shaders = [
     new TestShader({ texturesrc: "./images/crafting_table_top.png" }),
 ];
 
-const size = 20;
+const size = 12;
 
 export default class VoxelWorld {
 

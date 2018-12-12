@@ -1,4 +1,4 @@
-import { Renderer } from "./Renderer.js";
+import { GL } from "./Renderer.js";
 
 window.shaderStore = window.shaderStore || new Map();
 
@@ -60,14 +60,14 @@ export class GLShader {
 		if(!this.program) {
 			this.recompile(gl);
 			if(this.program) {
-				this._uniforms = Renderer.getUniforms(gl, this.program);
-				this._attributes = Renderer.getAttributes(gl, this.program);
+				this._uniforms = GL.getUniforms(gl, this.program);
+				this._attributes = GL.getAttributes(gl, this.program);
 			}
 		}
 		if(!this.texture && this.texturesrc) {
 			const image = new Image();
 			image.onload = () => {
-				this.texture = Renderer.createTexture(gl, image);
+				this.texture = GL.createTexture(gl, image);
 				gl.useProgram(this.program);
 			}
 			image.src = this.texturesrc;
@@ -77,9 +77,9 @@ export class GLShader {
 
 	recompile(gl) {
 		if(this.src) {
-			this._vertShader = Renderer.compileShader(gl, this.src[0], gl.VERTEX_SHADER);
-			this._fragShader = Renderer.compileShader(gl, this.src[1], gl.FRAGMENT_SHADER);
-			this.program = Renderer.createProgram(gl, this._vertShader, this._fragShader);
+			this._vertShader = GL.compileShader(gl, this.src[0], gl.VERTEX_SHADER);
+			this._fragShader = GL.compileShader(gl, this.src[1], gl.FRAGMENT_SHADER);
+			this.program = GL.createProgram(gl, this._vertShader, this._fragShader);
 			this.initialized = true;
 		}
 	}
