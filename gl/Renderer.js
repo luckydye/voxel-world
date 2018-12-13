@@ -9,7 +9,6 @@ let nextFrame,
 	gl, 
 	lastFrame;
 
-let shaderPrograms = [];
 let shaderTextures = new Map();
 
 const shaders = [
@@ -30,6 +29,11 @@ export class Renderer {
     constructor(canvas) {
 		if(!canvas) throw "Err: no canvas";
 
+		this.statistics = {
+			vertecies: 0,
+			elements: 0,
+		}
+
 		this.canvas = canvas;
 		this.clearColor = [0, 0, 0, 1.0];
 		
@@ -41,6 +45,8 @@ export class Renderer {
 		this.initGl(gl);
 
 		this.gridBuffer = VertexBuffer.GRID();
+
+		window.statistics = this.statistics;
 	}
 
 	initGl(gl) {
@@ -100,6 +106,10 @@ export class Renderer {
 
 		gl.clear(gl.DEPTH_BUFFER_BIT);
 
+		const stats = this.statistics;
+		stats.vertecies = 0;
+		stats.elements = 0;
+
 		// draw grid
 		{
 			const shader = this.defaultShader;
@@ -111,6 +121,8 @@ export class Renderer {
 				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
 				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
 				shader.done = true;
+
+				stats.vertecies += this.gridBuffer.vertecies.length;
 			}
 		}
 
@@ -132,12 +144,14 @@ export class Renderer {
 					GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
 					// draw only once on buffer
 					gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
+
+					stats.vertecies += obj.buffer.vertecies.length;
+					stats.elements += 1;
 				}
 			}
 
 			shader.done = true;
 		}
-		
 
 		lastFrame = currFrame;
 	}
@@ -203,7 +217,7 @@ export class GL {
 		let lastElementSize = 0;
 	
 		for(let i = 0; i < bufferInfo.attributes.length; i++) {
-			
+
 			gl.vertexAttribPointer(
 				attributes[bufferInfo.attributes[i].attribute], 
 				bufferInfo.attributes[i].size, 
@@ -263,8 +277,6 @@ export class GL {
 		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			throw new Error(gl.getProgramInfoLog(program));
 		}
-
-		shaderPrograms.push(program);
 	
 		return program;
 	}
