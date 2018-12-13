@@ -60,7 +60,7 @@ export class Renderer {
 	resize() {
 		gl.canvas.width = window.innerWidth;
 		gl.canvas.height = window.innerHeight;
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+		gl.viewport(0, 0, window.innerWidth, window.innerWidth);
 	}
 
 	draw(gl) {
