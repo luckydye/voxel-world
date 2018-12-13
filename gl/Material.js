@@ -28,8 +28,8 @@ export class Material {
 }
 
 mats = { 
-    DIRT: new Material({ texture: "../images/dirt.png" }),
-    STONE: new Material({ texture: "../images/stone.png" }),
-    LAVA: new Material({ texture: "../images/lava.png" }),
-    GRASS: new Material({ texture: "../images/grass.png" }),
+    DIRT: new Material({ texture: "./images/dirt.png" }),
+    STONE: new Material({ texture: "./images/stone.png" }),
+    LAVA: new Material({ texture: "./images/lava.png" }),
+    GRASS: new Material({ texture: "./images/grass.png" }),
 }
