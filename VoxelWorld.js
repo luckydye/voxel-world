@@ -29,14 +29,15 @@ export default class VoxelWorld {
         this.worldgen = new WorldGenerator({
             tileSize: 20,
             tileHeight: 20,
-            seed: 200,
-            threshold: 0.14,
-            resolution: 10,
+            seed: Math.random(),
+            threshold: 0.12,
+            resolution: 12,
         });
         this.regen();
     }
 
     regen() {
+        this.worldgen.setSeed(Math.random());
         this.scene.clear();
         const tile = this.worldgen.generateTile();
         this.buildTile(tile);

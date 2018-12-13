@@ -24,11 +24,14 @@ export class WorldGenerator {
 	} = {}) {
 		this.tileSize = tileSize;
 		this.tileHeight = tileHeight;
-		this.seed = seed;
 		this.resolution = resolution;
 		this.threshold = threshold;
-
-		noise.seed(this.seed);
+		this.setSeed(seed);
+	}
+	
+	setSeed(n) {
+		this.seed = n;
+		noise.seed(n);
 	}
 
 	generateTile() {
@@ -39,8 +42,9 @@ export class WorldGenerator {
 		for(let x = 0; x < tileData.length; x++) {
             for(let y = 0; y < tileData[x].length; y++) {
                 for(let z = 0; z < tileData[x][y].length; z++) {
-					var value = noise.perlin3(x / res, y / res, z / res);
-                    if(Math.abs(value) < this.threshold) {
+					const value = noise.perlin3(x / res, y / res, z / res);
+					let threshold = this.threshold;
+                    if(Math.abs(value) < threshold) {
 						tileData[x][y][z] = 1;
                     }
                 }
