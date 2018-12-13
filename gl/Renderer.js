@@ -130,9 +130,8 @@ export class Renderer {
 		if(shader && shader.initialized) {
 		
 			gl.useProgram(shader.program);
-			if(!shader.done) {
-				shader.setUniforms(gl);
-			}
+			
+			shader.setUniforms(gl);
 		
 			for(let obj of objects) {
 				if(shader.initialized && obj.buffer) {

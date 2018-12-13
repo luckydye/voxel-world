@@ -8,7 +8,8 @@ export default class TestShader extends GLShader {
 
     get uniform() {
         return {
-            ambient: 1.0
+            ambient: 1.0,
+            time: performance.now()
         }
     }
 

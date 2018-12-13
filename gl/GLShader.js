@@ -37,7 +37,7 @@ export class GLShader {
 
     setUniforms(gl) {
         for(let opt in this.uniform) {
-            gl.uniform1f(this.uniforms.ambient, this.uniform[opt]);
+            gl.uniform1f(this.uniforms[opt], this.uniform[opt]);
         }
     }
 

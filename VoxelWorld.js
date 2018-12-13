@@ -4,7 +4,7 @@ import { Cube } from "./gl/geo/Cube.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/Camera.js";
 
-const size = [15, 10, 15];
+const size = [4, 15, 4];
 
 export default class VoxelWorld {
 
