@@ -21,6 +21,10 @@ export class GLShader {
 		return this._attributes;
 	}
 
+	get uniform() {
+		return {};
+	}
+
 	constructor({ name, texturesrc = "" } = {}) {
 		this.program = null;
 		this.src = null;
@@ -31,9 +35,11 @@ export class GLShader {
 		this.load(this.name);
 	}
 
-	setUniforms(gl) {
-		
-	}
+    setUniforms(gl) {
+        for(let opt in this.uniform) {
+            gl.uniform1f(this.uniforms.ambient, this.uniform[opt]);
+        }
+    }
 
 	load(shaderName) {
 		return new Promise((resolve, reject) => {

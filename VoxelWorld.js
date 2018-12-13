@@ -4,7 +4,7 @@ import { Cube } from "./gl/geo/Cube.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/Camera.js";
 
-const size = [10, 6, 10];
+const size = [15, 10, 15];
 
 export default class VoxelWorld {
 
@@ -49,7 +49,7 @@ export default class VoxelWorld {
                         }
                     }
 
-                    if(Math.random() > 0.33 || y < 4) {
+                    if(Math.random() > 0.33) {
                         this.scene.add(this.makeCube({
                             material,
                             position: new Vec(

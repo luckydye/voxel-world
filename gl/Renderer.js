@@ -106,13 +106,11 @@ export class Renderer {
 			if(shader.initialized) {
 				gl.useProgram(shader.program);
 				if(!shader.done) {
-					GL.setProgramUniforms(gl, shader.uniforms);
+					GL.setModelUniforms(gl, shader.uniforms);
 				}
 				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
 				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
 				shader.done = true;
-			} else {
-				shader.cache(gl);
 			}
 		}
 
@@ -126,15 +124,13 @@ export class Renderer {
 		
 			for(let obj of objects) {
 				if(shader.initialized && obj.buffer) {
-					GL.setProgramUniforms(gl, shader.uniforms, {
-						translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
-						rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
-					});
+					GL.setModelUniforms(gl, shader.uniforms, obj);
 					if(obj.mat.texture && !obj.mat.gltexture) {
 						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
 					}
 					gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
 					GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
+					// draw only once on buffer
 					gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
 				}
 			}
@@ -154,23 +150,34 @@ export class GL {
 		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, camera.viewMatrix);
 	}
 
-	static setProgramUniforms(gl, uniforms, {
-		translate = { x: 0, y: 0, z: 0, },
-		rotation = { x: 0, y: 0, z: 0, }
-	} = {}) {
-		
-		const modelMatrix = mat4.create();
+	static setModelUniforms(gl, uniforms, obj) {
+		if(!obj) {
+			obj = {
+				position: { x: 0, y: 0, z: 0 },
+				rotation: { x: 0, y: 0, z: 0 }
+			}
+		}
 
-		mat4.identity(modelMatrix);
-		
-		mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
-			translate.x,
-			- translate.y,
-			translate.z,
-		));
-		mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * rotation.x);
-		mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * rotation.y);
-		mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * rotation.z);
+		let modelMatrix;
+
+		if(!obj.modelMatrix) {
+			obj.modelMatrix = mat4.create();
+
+			modelMatrix = obj.modelMatrix;
+			
+			mat4.identity(modelMatrix);
+			
+			mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
+				obj.position.x,
+				- obj.position.y,
+				obj.position.z,
+			));
+			mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.x);
+			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.y);
+			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.z);
+		}
+
+		modelMatrix = obj.modelMatrix;
 
 		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, modelMatrix);
 	}

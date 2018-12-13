@@ -6,8 +6,10 @@ export default class TestShader extends GLShader {
         super({ name: "test", texturesrc });
     }
 
-    setUniforms(gl) {
-        gl.uniform1f(this.uniforms.ambient, 1.0);
+    get uniform() {
+        return {
+            ambient: 1.0
+        }
     }
 
 }
