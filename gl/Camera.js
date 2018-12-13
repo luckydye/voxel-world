@@ -20,20 +20,59 @@ export class Camera {
 		fov = 50,
 		scale = 0.004,
 		farplane = 200,
-		nearplane = 0.25
+		nearplane = 0.25,
+		position = new Vec()
 	} = {}) {
 		this.scale = scale;
 		this.fov = fov;
 		this.farplane = farplane;
 		this.nearplane = nearplane;
 
-		this.position = new Vec(0, 4000, -13000);
+		this.position = position;
 		this.rotation = new Vec(20, 0, 0);
 		this.lookAt = new Vec(0, 0, 0);
+
+		this.updated = false;
+
+		this.projMatrix = mat4.create();
+		this.viewMatrix = mat4.create();
+
+		this.update();
 	}
 
 	zoom(dir) {
 		this.position.z += 1200 * dir;
+	}
+
+	update() {
+		const projMatrix = this.projMatrix;
+		const viewMatrix = this.viewMatrix;
+		const camera = this;
+
+		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, window.innerWidth / window.innerWidth, camera.nearplane, camera.farplane);
+		mat4.lookAt(
+			viewMatrix, 
+			vec3.fromValues(0, 0, 0),
+			vec3.fromValues(camera.lookAt.x, camera.lookAt.y, camera.lookAt.z), 
+			vec3.fromValues(0, 1, 0)
+		);
+
+		mat4.scale(viewMatrix, viewMatrix, vec3.fromValues(
+			camera.scale, 
+			camera.scale, 
+			camera.scale,
+		));
+
+		mat4.translate(viewMatrix, viewMatrix, vec3.fromValues(
+			camera.position.x,
+			-camera.position.y,
+			camera.position.z,
+		));
+
+		mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.x);
+		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
+
+		this.updated = false;
 	}
 
 	controls(element) {
@@ -42,20 +81,26 @@ export class Camera {
 		const viewport = document.body;
 
 		setInterval(() => {
-			if(!moving) this.rotation.y -= 0.25;
+			if(!moving) {
+				this.rotation.y -= 0.25;
+				this.update();
+			}
 		}, 16);
 
 		element.addEventListener("mousedown", e => {
 			moving = true;
+			this.update();
 		})
 
 		window.addEventListener("mouseup", e => {
 			moving = false;
 			viewport.style.cursor = "default";
+			this.update();
 		})
 
 		element.addEventListener("wheel", e => {
 			this.position.z += -e.deltaY * 5;
+			this.update();
 		})
 
 		window.addEventListener("mousemove", e => {
@@ -69,6 +114,7 @@ export class Camera {
 					this.rotation.x += (e.y - lastEvent.y) / element.width * 100;
 					viewport.style.cursor = "grabbing";
 				}
+				this.update();
 			}
 			lastEvent = e;
 		})

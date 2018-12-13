@@ -2,10 +2,10 @@ import { Camera } from './Camera.js';
 
 export class Scene {
 
-	constructor() {
+	constructor({ camera } = {}) {
 		this.objects = new Set();
 		
-		this.camera = new Camera({
+		this.camera = camera || new Camera({
 			fov: 65
 		});
 	}

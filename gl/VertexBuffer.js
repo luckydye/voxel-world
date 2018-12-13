@@ -1,10 +1,20 @@
-export class Buffer {
+export class VertexBuffer {
+	
+	get vertsPerElement() {
+		return this.vertecies.length / this.elements;
+	}
+
+	constructor({ elements, vertecies, attributes }) {
+		this.type = "TRIANGLES";
+		this.elements = elements;
+		this.vertecies = new Float32Array(vertecies);
+		this.attributes = attributes;
+	}
 
 	static CUBE(w = 300, h = 300, s = 1) {
-		return {
-			type: "TRIANGLES",
+		return new VertexBuffer({
 			elements: 5,
-			vertecies: new Float32Array([
+			vertecies: [
 			 // x      y      z          u  v //
 				s * w, 0 + s * w, s * h, 1, 1,
 				s * w, 0 + s * w, -s * h, 1, 0,
@@ -47,12 +57,12 @@ export class Buffer {
 				0 - s * w, s * w, s * h, 1, 1,
 				0 - s * w, -s * w, -s * h, 0, 0,
 				0 - s * w, -s * w, s * h, 0, 1,
-			]),
+			],
 			attributes: [
 				{ size: 3, attribute: "aPosition" },
 				{ size: 2, attribute: "aTextCords" }
 			]
-		}
+		})
 	}
 	
 	static GRID(s = 15) {

@@ -1,5 +1,6 @@
 import { GL } from "./Renderer.js";
 
+window.shaderCache = window.shaderCache || new Map();
 window.shaderStore = window.shaderStore || new Map();
 
 export class GLShader {
@@ -24,8 +25,6 @@ export class GLShader {
 		this.program = null;
 		this.src = null;
 		this.name = name;
-		this.texturesrc = texturesrc;
-		this.texture = null;
 
 		this.initialized = false;
 
@@ -38,8 +37,8 @@ export class GLShader {
 
 	load(shaderName) {
 		return new Promise((resolve, reject) => {
-			if(shaderStore.has(shaderName)) {
-				shaderStore.get(shaderName).then(data => {
+			if(shaderCache.has(shaderName)) {
+				shaderCache.get(shaderName).then(data => {
 					this.src = data;
 				});
 			} else {
@@ -49,9 +48,10 @@ export class GLShader {
 					fetch(`./gl/shader/${shaderName}.fragment.shader`).then(res => res.text()),
 				]).then(data => {
 					this.src = data;
+					shaderStore.set(shaderName, this);
 					return data;
 				})
-				shaderStore.set(shaderName, getting);
+				shaderCache.set(shaderName, getting);
 			}
 		})
 	}
@@ -63,14 +63,6 @@ export class GLShader {
 				this._uniforms = GL.getUniforms(gl, this.program);
 				this._attributes = GL.getAttributes(gl, this.program);
 			}
-		}
-		if(!this.texture && this.texturesrc) {
-			const image = new Image();
-			image.onload = () => {
-				this.texture = GL.createTexture(gl, image);
-				gl.useProgram(this.program);
-			}
-			image.src = this.texturesrc;
 		}
 		return this.program;
 	}

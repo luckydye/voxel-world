@@ -1,28 +1,27 @@
 import { Renderer } from "./gl/Renderer.js";
 import { Scene } from "./gl/Scene.js";
 import { Cube } from "./gl/geo/Cube.js";
-import TestShader from "./gl/shader/TestShader.js";
 import { Vec } from "./gl/Math.js";
+import { Camera } from "./gl/Camera.js";
 
-const shaders = [
-    new TestShader({ texturesrc: "./images/dirt.png" }),
-    new TestShader({ texturesrc: "./images/stone.png" }),
-    new TestShader({ texturesrc: "./images/grass.png" }),
-    new TestShader({ texturesrc: "./images/lava.png" }),
-    new TestShader({  }),
-];
-
-const size = 10;
+const size = [10, 6, 10];
 
 export default class VoxelWorld {
 
     constructor({ canvas } = {}) {
 
-        this.scene = new Scene();
+        const sceneOpts = {
+            camera: new Camera({ 
+                fov: 65, 
+                position: new Vec(0, 4000, -15000) 
+            })
+        }
+
+        this.scene = new Scene(sceneOpts);
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.buildCube(size, size, size);
+        this.buildCube(...size);
     }
     
     makeCube(args) {
@@ -39,22 +38,20 @@ export default class VoxelWorld {
             for(let y = 0; y < h; y++) {
                 for(let z = 0; z < d; z++) {
 
-                    let shader = shaders[0];
+                    let material = "DIRT";
                     if(y < 2 || y < 3 && Math.random() > 0.5) {
-                        shader = shaders[2];
-                    } else if(y > 5 && Math.random() > 0.25) {
+                        material = "GRASS";
+                    } else if(y > 4 && Math.random() > 0.25) {
                         if(Math.random() < 0.2) {
-                            shader = shaders[1];
-                        } else if(Math.random() > 0.33) {
-                            shader = shaders[4];
+                            material = "STONE";
                         } else {
-                            shader = shaders[3];
+                            material = "LAVA";
                         }
                     }
 
-                    if(Math.random() > 0.33 || y >= 1) {
+                    if(Math.random() > 0.33 || y < 4) {
                         this.scene.add(this.makeCube({
-                            shader: shader,
+                            material,
                             position: new Vec(
                                 ((x * 600) + 300) - ((w/2) * 600),
                                 ((y * 600) + 300) - ((h) * 600),
@@ -69,6 +66,6 @@ export default class VoxelWorld {
 
     regen() {
         this.scene.clear();
-        this.buildCube(size, size, size);
+        this.buildCube(...size);
     }
 }

@@ -1,7 +1,8 @@
 import './libs/gl-matrix.js';
 import { Scene } from './Scene.js';
 import DefaultShader from './shader/DefaultShader.js';
-import { Buffer } from './Buffer.js';
+import { VertexBuffer } from './VertexBuffer.js';
+import TestShader from './shader/TestShader.js';
 
 let nextFrame, 
 	currFrame,
@@ -10,6 +11,13 @@ let nextFrame,
 
 let shaderPrograms = [];
 let shaderTextures = new Map();
+
+const shaders = [
+    new TestShader({ texturesrc: "./images/dirt.png" }),
+    // new TestShader({ texturesrc: "./images/stone.png" }),
+    // new TestShader({ texturesrc: "./images/grass.png" }),
+    // new TestShader({ texturesrc: "./images/lava.png" }),
+];
 
 export class Renderer {
 
@@ -32,7 +40,7 @@ export class Renderer {
 		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
 		this.initGl(gl);
 
-		this.gridBuffer = Buffer.GRID();
+		this.gridBuffer = VertexBuffer.GRID();
 	}
 
 	initGl(gl) {
@@ -58,6 +66,14 @@ export class Renderer {
 	draw(gl) {
 		if(!this.scene) return;
 
+		/*
+		Pipeline:
+			1. Collect vertecies data
+			2. upload verts when needed! (chunk based?)
+			3. draw for every shader on framebuffer
+			4. draw buffers on canvas
+		*/
+
 		const objects = this.scene.objects;
 		const camera = this.scene.camera;
 
@@ -68,96 +84,80 @@ export class Renderer {
 		nextFrame = requestAnimationFrame(() => this.draw(gl));
 		currFrame = performance.now();
 
-		// draw grid
-		{
-			const shader = this.defaultShader;
-			if(shader.initialized) {
-				gl.useProgram(shader.program);
-				const count = GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
-				GL.setProgramUniforms(gl, shader.uniforms, camera);
-				gl.drawArrays(gl.LINES, 0, count);
-			} else {
-				shader.cache(gl);
+		if(!camera.updated) {
+			camera.updated = true;
+
+			for(let s of shaderStore) {
+				const shader = s[1];
+				if(shader.initialized) {
+					gl.useProgram(shader.program);
+					GL.updatePerspective(gl, shader.uniforms, camera);
+				} else if(shader) {
+					shader.cache(gl);
+				}
 			}
 		}
 
 		gl.clear(gl.DEPTH_BUFFER_BIT);
 
-		for(let obj of objects) {
-			this.drawGeo(obj, camera);
-		}
-
-		lastFrame = currFrame;
-	}
-
-	drawGeo(obj, camera) {
-		const buffer = obj.buffer;
-		if(buffer) {
-			const shader = obj.shader;
-
-			let currentProgram = null;
-
+		// draw grid
+		{
+			const shader = this.defaultShader;
 			if(shader.initialized) {
-				currentProgram = shader.program;
-				gl.useProgram(currentProgram);
-			} else if(shader) {
+				gl.useProgram(shader.program);
+				if(!shader.done) {
+					GL.setProgramUniforms(gl, shader.uniforms);
+				}
+				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
+				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
+				shader.done = true;
+			} else {
 				shader.cache(gl);
 			}
-
-			if(currentProgram && shader.texture) {
-				shader.setUniforms(gl);
-				GL.setProgramUniforms(gl, shader.uniforms, camera, {
-					translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
-					rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
-				});
-				
-				const bufferinfo = GL.setBuffersAndAttributes(gl, shader.attributes, buffer);
-
-				gl.bindTexture(gl.TEXTURE_2D, shader.texture);
-				gl.drawArrays(gl[buffer.type], 0, bufferinfo);
-			}
 		}
+
+		const shader = shaders[0];
+		if(shader && shader.initialized) {
+		
+			gl.useProgram(shader.program);
+			if(!shader.done) {
+				shader.setUniforms(gl);
+			}
+		
+			for(let obj of objects) {
+				if(shader.initialized && obj.buffer) {
+					GL.setProgramUniforms(gl, shader.uniforms, {
+						translate: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
+						rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z }
+					});
+					if(obj.mat.texture && !obj.mat.gltexture) {
+						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+					}
+					gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
+					GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
+					gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
+				}
+			}
+
+			shader.done = true;
+		}
+		
+
+		lastFrame = currFrame;
 	}
 }
 
 export class GL {
 
-	static setPerspective(gl, uniforms, camera) {
-		const projMatrix = mat4.create();
-		const viewMatrix = mat4.create();
-	
-		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, gl.canvas.width / gl.canvas.height, camera.nearplane, camera.farplane);
-		mat4.lookAt(
-			viewMatrix, 
-			vec3.fromValues(0, 0, 0),
-			vec3.fromValues(camera.lookAt.x, camera.lookAt.y, camera.lookAt.z), 
-			vec3.fromValues(0, 1, 0)
-		);
-
-		mat4.scale(viewMatrix, viewMatrix, vec3.fromValues(
-			camera.scale, 
-			camera.scale, 
-			camera.scale,
-		));
-
-		mat4.translate(viewMatrix, viewMatrix, vec3.fromValues(
-			camera.position.x,
-			-camera.position.y,
-			camera.position.z,
-		));
-
-		mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.x);
-		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
-
-		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, projMatrix);
-		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, viewMatrix);
+	static updatePerspective(gl, uniforms, camera) {
+		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, camera.projMatrix);
+		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, camera.viewMatrix);
 	}
 
-	static setProgramUniforms(gl, uniforms, camera, {
+	static setProgramUniforms(gl, uniforms, {
 		translate = { x: 0, y: 0, z: 0, },
 		rotation = { x: 0, y: 0, z: 0, }
 	} = {}) {
-		this.setPerspective(gl, uniforms, camera);
 		
 		const modelMatrix = mat4.create();
 

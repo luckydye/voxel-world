@@ -1,8 +1,8 @@
 import { Geometry } from "../Geometry.js";
-import { Buffer } from "../Buffer.js";
+import { VertexBuffer } from "../VertexBuffer.js";
 
 export class Cube extends Geometry {
 	createBuffer() {
-		return Buffer.CUBE(this.size, this.size);
+		return VertexBuffer.CUBE(this.size, this.size);
 	}
 }
