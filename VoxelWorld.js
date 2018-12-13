@@ -17,6 +17,11 @@ export default class VoxelWorld {
             })
         }
 
+		setInterval(() => {
+            sceneOpts.camera.rotation.y -= 0.25;
+            sceneOpts.camera.update();
+		}, 16);
+
         this.scene = new Scene(sceneOpts);
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);

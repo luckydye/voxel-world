@@ -80,13 +80,6 @@ export class Camera {
 		let lastEvent = null;
 		const viewport = document.body;
 
-		setInterval(() => {
-			if(!moving) {
-				this.rotation.y -= 0.25;
-				this.update();
-			}
-		}, 16);
-
 		element.addEventListener("mousedown", e => {
 			moving = true;
 			this.update();
@@ -106,8 +99,8 @@ export class Camera {
 		window.addEventListener("mousemove", e => {
 			if(moving && lastEvent) {
 				if(isMouseButton(e) == 2) {
-					this.position.x += (e.x - lastEvent.x) / element.height * Math.abs(this.position.z);
-					this.position.y += (e.y - lastEvent.y) / element.height * Math.abs(this.position.z);
+					this.position.x += (e.x - lastEvent.x) / element.width * Math.abs(this.position.z);
+					this.position.y += (e.y - lastEvent.y) / element.width * Math.abs(this.position.z);
 					viewport.style.cursor = "move";
 				} else if(isMouseButton(e) == 1) {
 					this.rotation.y += (e.x - lastEvent.x) / element.width * 100;
