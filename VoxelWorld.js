@@ -46,8 +46,12 @@ export default class VoxelWorld {
     voxel(x, y, z) {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
+        const mat = (() => {
+            const mats = [ "STONE", "LAVA" ];
+            return Material[mats[Math.floor(Math.random() * mats.length)]];
+        })();
         const cube = new Cube({
-            material: Material.STONE,
+            material: mat,
             position: new Vec(
                 ((x * 600) + 300) - ((tileSize/2) * 600),
                 ((y * 600) + 300) - ((tileHeight) * 600),
