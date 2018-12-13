@@ -27,8 +27,11 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         this.worldgen = new WorldGenerator({
-            tileSize: 16,
-            tileHeight: 10
+            tileSize: 20,
+            tileHeight: 20,
+            seed: 200,
+            threshold: 0.14,
+            resolution: 10,
         });
         this.regen();
     }
@@ -43,7 +46,7 @@ export default class VoxelWorld {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const cube = new Cube({
-            material: Material.LAVA,
+            material: Material.STONE,
             position: new Vec(
                 ((x * 600) + 300) - ((tileSize/2) * 600),
                 ((y * 600) + 300) - ((tileHeight) * 600),
