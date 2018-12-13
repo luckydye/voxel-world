@@ -110,22 +110,6 @@ export class Renderer {
 		stats.vertecies = 0;
 		stats.elements = 0;
 
-		// draw grid
-		{
-			const shader = this.defaultShader;
-			if(shader.initialized) {
-				gl.useProgram(shader.program);
-				if(!shader.done) {
-					GL.setModelUniforms(gl, shader.uniforms);
-				}
-				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
-				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
-				shader.done = true;
-
-				stats.vertecies += this.gridBuffer.vertecies.length;
-			}
-		}
-
 		const shader = shaders[0];
 		if(shader && shader.initialized) {
 		
@@ -150,6 +134,22 @@ export class Renderer {
 			}
 
 			shader.done = true;
+		}
+
+		// draw grid
+		{
+			const shader = this.defaultShader;
+			if(shader.initialized) {
+				gl.useProgram(shader.program);
+				if(!shader.done) {
+					GL.setModelUniforms(gl, shader.uniforms);
+				}
+				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
+				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
+				shader.done = true;
+
+				stats.vertecies += this.gridBuffer.vertecies.length;
+			}
 		}
 
 		lastFrame = currFrame;

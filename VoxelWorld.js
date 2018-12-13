@@ -3,8 +3,8 @@ import { Scene } from "./gl/Scene.js";
 import { Cube } from "./gl/geo/Cube.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/Camera.js";
-
-const size = [4, 15, 4];
+import { WorldGenerator } from "./WorldGenerator.js";
+import { Material } from "./gl/Material.js";
 
 export default class VoxelWorld {
 
@@ -13,64 +13,57 @@ export default class VoxelWorld {
         const sceneOpts = {
             camera: new Camera({ 
                 fov: 65, 
-                position: new Vec(0, 4000, -15000) 
+                position: new Vec(0, 7000, -18000) 
             })
         }
+        this.scene = new Scene(sceneOpts);
 
 		setInterval(() => {
             sceneOpts.camera.rotation.y -= 0.25;
             sceneOpts.camera.update();
 		}, 16);
 
-        this.scene = new Scene(sceneOpts);
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.buildCube(...size);
-    }
-    
-    makeCube(args) {
-        const cube = new Cube(args);
-        return cube;
-    }
-
-    randomShader() {
-        return shaders[Math.floor(Math.random() * shaders.length)];
-    }
-
-    buildCube(w, h, d) {
-        for(let x = 0; x < w; x++) {
-            for(let y = 0; y < h; y++) {
-                for(let z = 0; z < d; z++) {
-
-                    let material = "DIRT";
-                    if(y < 2 || y < 3 && Math.random() > 0.5) {
-                        material = "GRASS";
-                    } else if(y > 4 && Math.random() > 0.25) {
-                        if(Math.random() < 0.2) {
-                            material = "STONE";
-                        } else {
-                            material = "LAVA";
-                        }
-                    }
-
-                    if(Math.random() > 0.33) {
-                        this.scene.add(this.makeCube({
-                            material,
-                            position: new Vec(
-                                ((x * 600) + 300) - ((w/2) * 600),
-                                ((y * 600) + 300) - ((h) * 600),
-                                ((z * 600) + 300) - ((d/2) * 600),
-                            )
-                        }));
-                    }
-                }
-            }
-        }
+        this.worldgen = new WorldGenerator({
+            tileSize: 16,
+            tileHeight: 10
+        });
+        this.regen();
     }
 
     regen() {
         this.scene.clear();
-        this.buildCube(...size);
+        const tile = this.worldgen.generateTile();
+        this.buildTile(tile);
+    }
+
+    voxel(x, y, z) {
+        const tileSize = this.worldgen.tileSize;
+        const tileHeight = this.worldgen.tileHeight;
+        const cube = new Cube({
+            material: Material.LAVA,
+            position: new Vec(
+                ((x * 600) + 300) - ((tileSize/2) * 600),
+                ((y * 600) + 300) - ((tileHeight) * 600),
+                ((z * 600) + 300) - ((tileSize/2) * 600),
+            )
+        });
+        this.scene.add(cube);
+    }
+
+    buildTile(tile) {
+        const tileData = tile.tileData;
+
+        for(let x = 0; x < tileData.length; x++) {
+            for(let y = 0; y < tileData[x].length; y++) {
+                for(let z = 0; z < tileData[x][y].length; z++) {
+                    if(tileData[x][y][z]) {
+                        this.voxel(x, y, z);
+                    }
+                }
+            }
+        }
     }
 }

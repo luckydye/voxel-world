@@ -1,5 +1,5 @@
 import VoxelWorld from './VoxelWorld.js';
-import { Toolbar, IconButton } from './Toolbar.js';
+import { Toolbar, IconButton } from './components/Toolbar.js';
 
 let voxelWorld;
 

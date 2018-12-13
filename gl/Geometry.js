@@ -11,13 +11,13 @@ export class Geometry {
 		position = {x: 0, y: -300, z: 0},
 		rotation = {x: 0, y: 0, z: 0},
 		scale = 1,
-		material = "DIRT"
+		material = Material.DIRT
 	} = {}) {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
 		this.size = 300;
-		this.mat = Material.geo[material];
+		this.mat = material;
 	}
 
 	createBuffer() { }

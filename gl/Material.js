@@ -27,9 +27,7 @@ export class Material {
 
 }
 
-mats = { 
-    DIRT: new Material({ texture: "./images/dirt.png" }),
-    STONE: new Material({ texture: "./images/stone.png" }),
-    LAVA: new Material({ texture: "./images/lava.png" }),
-    GRASS: new Material({ texture: "./images/grass.png" }),
-}
+Material.DIRT = new Material({ texture: "./images/dirt.png" });
+Material.STONE = new Material({ texture: "./images/stone.png" });
+Material.LAVA = new Material({ texture: "./images/lava.png" });
+Material.GRASS = new Material({ texture: "./images/grass.png" });

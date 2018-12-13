@@ -29,7 +29,7 @@ export class Camera {
 		this.nearplane = nearplane;
 
 		this.position = position;
-		this.rotation = new Vec(20, 0, 0);
+		this.rotation = new Vec(5, 0, 0);
 		this.lookAt = new Vec(0, 0, 0);
 
 		this.updated = false;
