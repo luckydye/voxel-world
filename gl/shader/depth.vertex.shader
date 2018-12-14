@@ -15,9 +15,12 @@ uniform mat4 uLightProjMatrix;
 void main () {
   vTexColor = aTextCords;
 
+  float lightPower = 7.0;
+
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+  
   vec4 lightPosition = uLightProjMatrix * uLightViewMatrix * uLightModelMatrix * aPosition;
 
-  vec3 projCoord = (lightPosition.xyz / 66.0);
+  vec3 projCoord = lightPower / lightPosition.xyz;
   depth = projCoord.z;
 }

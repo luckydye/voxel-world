@@ -23,8 +23,8 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         const example = {
-            tileSize: 20,
-            tileHeight: 10,
+            tileSize: 25,
+            tileHeight: 12,
             seed: 0.9216802954674626,
             threshold: 0.12,
             resolution: 12,

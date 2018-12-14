@@ -136,10 +136,11 @@ export class Renderer {
 		statistics.vertecies = 0;
 		statistics.elements = 0;
 
+		const enableShadows = false;
 
 		let depthtexture;
 
-		{
+		if(enableShadows) {
 			const shader = shaders[1];
 			depthtexture = this.drawDepthTexture(gl);
 
@@ -149,9 +150,10 @@ export class Renderer {
 				gl.useProgram(shader.program);
 				shader.setUniforms(gl);
 
+				const lightSource = this.scene.light;
+
 				GL.updatePerspective(gl, shader.uniforms, this.scene.camera);
 				
-				const lightSource = this.scene.light;
 				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
 				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
 			
@@ -187,20 +189,22 @@ export class Renderer {
 				gl.useProgram(shader.program);
 				shader.setUniforms(gl);
 
-				var u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
 				var u_colorTexLoc = gl.getUniformLocation(shader.program, "uColorTexture");
+				gl.uniform1i(u_colorTexLoc, 0);
 
-				gl.uniform1i(u_depthTexLoc, 0);
-				gl.uniform1i(u_colorTexLoc, 1);
+				if(enableShadows) {
+					var u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
+					gl.uniform1i(u_depthTexLoc, 1);
 
-				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, depthtexture);
-
-				const lightSource = this.scene.light;
-				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
-				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
+					gl.activeTexture(gl.TEXTURE1);
+					gl.bindTexture(gl.TEXTURE_2D, depthtexture);
+	
+					const lightSource = this.scene.light;
+					gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
+					gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
+				}
 			
-				gl.activeTexture(gl.TEXTURE1);
+				gl.activeTexture(gl.TEXTURE0);
 				
 				for(let obj of objects) {
 
@@ -211,7 +215,9 @@ export class Renderer {
 						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
 
 						GL.setModelUniforms(gl, shader.uniforms, obj);
-						GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
+						if(enableShadows) {
+							GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
+						}
 
 						GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
 						

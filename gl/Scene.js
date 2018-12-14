@@ -17,10 +17,10 @@ export class Scene {
 		});
 
 		setInterval(() => {
-            // this.camera.rotation.y -= 0.25;
-			// this.camera.update();
+            this.camera.rotation.y -= 0.25;
+			this.camera.update();
 			
-            this.light.rotation.y -= 1;
+            this.light.rotation.y -= 2;
             this.light.update();
 		}, 16);
 	}
