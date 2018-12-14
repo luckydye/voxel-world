@@ -1,7 +1,6 @@
 import { GL } from "./Renderer.js";
 
 window.shaderCache = window.shaderCache || new Map();
-window.shaderStore = window.shaderStore || new Map();
 
 export class GLShader {
 
@@ -25,7 +24,7 @@ export class GLShader {
 		return {};
 	}
 
-	constructor({ name, texturesrc = "" } = {}) {
+	constructor({ name } = {}) {
 		this.program = null;
 		this.src = null;
 		this.name = name;
@@ -54,7 +53,6 @@ export class GLShader {
 					fetch(`./gl/shader/${shaderName}.fragment.shader`).then(res => res.text()),
 				]).then(data => {
 					this.src = data;
-					shaderStore.set(shaderName, this);
 					return data;
 				})
 				shaderCache.set(shaderName, getting);

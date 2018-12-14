@@ -1,7 +1,8 @@
 import './libs/gl-matrix.js';
 import { Scene } from './Scene.js';
-import DefaultShader from './shader/DefaultShader.js';
 import { VertexBuffer } from './VertexBuffer.js';
+import DefaultShader from './shader/DefaultShader.js';
+import DepthShader from './shader/DepthShader.js';
 import TestShader from './shader/TestShader.js';
 
 let nextFrame, 
@@ -9,13 +10,10 @@ let nextFrame,
 	gl, 
 	lastFrame;
 
-let shaderTextures = new Map();
-
 const shaders = [
-    new TestShader({ texturesrc: "./images/dirt.png" }),
-    // new TestShader({ texturesrc: "./images/stone.png" }),
-    // new TestShader({ texturesrc: "./images/grass.png" }),
-    // new TestShader({ texturesrc: "./images/lava.png" }),
+    new DefaultShader(),
+    new DepthShader(),
+    new TestShader(),
 ];
 
 export class Renderer {
@@ -41,14 +39,14 @@ export class Renderer {
 		this.projMatrix = mat4.create();
 		this.viewMatrix = mat4.create();
 
-		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
-		this.initGl(gl);
-
 		this.grid = {
 			buffer: VertexBuffer.GRID(600, 600),
 		}
 
 		window.statistics = this.statistics;
+
+		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
+		this.initGl(gl);
 	}
 
 	initGl(gl) {
@@ -56,7 +54,7 @@ export class Renderer {
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 
-		this.defaultShader = new DefaultShader();
+		this.defaultShader = shaders[0];
 		this.setScene(new Scene());
 		
 		window.addEventListener("resize", () => {
@@ -71,6 +69,35 @@ export class Renderer {
 		gl.viewport(0, 0, window.innerWidth, window.innerWidth);
 	}
 
+	drawDepthTexture() {
+		const fb = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+		// create texture
+		const h = 480;
+		const w = 480;
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 
+			0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		const renderBuffer = gl.createRenderbuffer()
+		gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h)
+		
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+			gl.TEXTURE_2D, texture, 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+			gl.RENDERBUFFER, renderBuffer);
+
+		return texture;
+	}
+
 	draw(gl) {
 		if(!this.scene) return;
 
@@ -82,7 +109,6 @@ export class Renderer {
 			4. draw buffers on canvas
 		*/
 
-		const objects = this.scene.objects;
 		const camera = this.scene.camera;
 
 		if(nextFrame) {
@@ -95,12 +121,11 @@ export class Renderer {
 		if(!camera.updated) {
 			camera.updated = true;
 
-			for(let s of shaderStore) {
-				const shader = s[1];
+			for(let shader of shaders) {
 				if(shader.initialized) {
 					gl.useProgram(shader.program);
 					GL.updatePerspective(gl, shader.uniforms, camera);
-				} else if(shader) {
+				} else {
 					shader.cache(gl);
 				}
 			}
@@ -108,34 +133,97 @@ export class Renderer {
 
 		gl.clear(gl.DEPTH_BUFFER_BIT);
 
-		const stats = this.statistics;
-		stats.vertecies = 0;
-		stats.elements = 0;
+		statistics.vertecies = 0;
+		statistics.elements = 0;
 
-		const shader = shaders[0];
-		if(shader && shader.initialized) {
-		
-			gl.useProgram(shader.program);
+
+		let depthtexture;
+
+		{
+			const shader = shaders[1];
+			depthtexture = this.drawDepthTexture(gl);
+
+			const objects = this.scene.objects;
+			if(shader && shader.initialized) {
 			
-			shader.setUniforms(gl);
-		
-			for(let obj of objects) {
-				if(shader.initialized && obj.buffer) {
-					GL.setModelUniforms(gl, shader.uniforms, obj);
-					if(obj.mat.texture && !obj.mat.gltexture) {
-						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+				gl.useProgram(shader.program);
+				shader.setUniforms(gl);
+
+				GL.updatePerspective(gl, shader.uniforms, this.scene.camera);
+				
+				const lightSource = this.scene.light;
+				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
+				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
+			
+				for(let obj of objects) {
+					if(shader.initialized && obj.buffer) {
+						GL.setModelUniforms(gl, shader.uniforms, obj);
+						GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
+						if(obj.mat.texture && !obj.mat.gltexture) {
+							obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+						}
+						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
+						GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
+						gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
+
+						statistics.vertecies += obj.buffer.vertecies.length;
+						statistics.elements += 1;
 					}
-					gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
-					GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
-					// draw only once on buffer
-					gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
-
-					stats.vertecies += obj.buffer.vertecies.length;
-					stats.elements += 1;
 				}
-			}
 
-			shader.done = true;
+				shader.done = true;
+			}
+			
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		}
+
+		// draw defuse
+		{
+			const shader = shaders[2];
+
+			const objects = this.scene.objects;
+			if(shader && shader.initialized) {
+			
+				gl.useProgram(shader.program);
+				shader.setUniforms(gl);
+
+				var u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
+				var u_colorTexLoc = gl.getUniformLocation(shader.program, "uColorTexture");
+
+				gl.uniform1i(u_depthTexLoc, 0);
+				gl.uniform1i(u_colorTexLoc, 1);
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, depthtexture);
+
+				const lightSource = this.scene.light;
+				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
+				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
+			
+				gl.activeTexture(gl.TEXTURE1);
+				
+				for(let obj of objects) {
+
+					if(shader.initialized && obj.buffer) {
+						if(obj.mat.texture && !obj.mat.gltexture) {
+							obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+						}
+						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
+
+						GL.setModelUniforms(gl, shader.uniforms, obj);
+						GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
+
+						GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
+						
+						gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
+
+						statistics.vertecies += obj.buffer.vertecies.length;
+						statistics.elements += 1;
+					}
+				}
+
+				shader.done = true;
+			}
 		}
 
 		// draw grid
@@ -152,7 +240,7 @@ export class Renderer {
 				gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
 				shader.done = true;
 
-				stats.vertecies += buffer.vertecies.length;
+				statistics.vertecies += buffer.vertecies.length;
 			}
 		}
 
@@ -167,7 +255,7 @@ export class GL {
 		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, camera.viewMatrix);
 	}
 
-	static setModelUniforms(gl, uniforms, obj) {
+	static setModelUniforms(gl, uniforms, obj, prefix = "uModelMatrix") {
 		if(!obj) {
 			obj = {
 				position: { x: 0, y: 0, z: 0 },
@@ -196,7 +284,7 @@ export class GL {
 
 		modelMatrix = obj.modelMatrix;
 
-		gl.uniformMatrix4fv(uniforms.uModelMatrix, false, modelMatrix);
+		gl.uniformMatrix4fv(uniforms[prefix], false, modelMatrix);
 	}
 
 	static setBuffersAndAttributes(gl, attributes, bufferInfo) {
@@ -300,9 +388,6 @@ export class GL {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		}
-
-		// cache textures and reuse them?
-		shaderTextures.set(image.src, texture);
 
 		return texture;
 	}

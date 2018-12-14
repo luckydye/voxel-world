@@ -1,4 +1,17 @@
-let mats;
+const mats = {
+    "DIRT": {
+        "texture": "./images/dirt.png"
+    },
+    "STONE": {
+        "texture": "./images/stone.png"
+    },
+    "LAVA": {
+        "texture": "./images/lava.png"
+    },
+    "GRASS": {
+        "texture": "./images/grass.png"
+    }
+}
 
 export class Material {
 
@@ -27,7 +40,6 @@ export class Material {
 
 }
 
-Material.DIRT = new Material({ texture: "./images/dirt.png" });
-Material.STONE = new Material({ texture: "./images/stone.png" });
-Material.LAVA = new Material({ texture: "./images/lava.png" });
-Material.GRASS = new Material({ texture: "./images/grass.png" });
+for(let key in mats) {
+    Material[key] = new Material(mats[key]);
+}

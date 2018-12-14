@@ -21,7 +21,8 @@ export class Camera {
 		scale = 0.004,
 		farplane = 200,
 		nearplane = 0.25,
-		position = new Vec()
+		position = new Vec(),
+		rotation = new Vec(),
 	} = {}) {
 		this.scale = scale;
 		this.fov = fov;
@@ -29,7 +30,7 @@ export class Camera {
 		this.nearplane = nearplane;
 
 		this.position = position;
-		this.rotation = new Vec(5, 0, 0);
+		this.rotation = rotation;
 		this.lookAt = new Vec(0, 0, 0);
 
 		this.updated = false;
