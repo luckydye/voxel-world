@@ -19,7 +19,7 @@ void main () {
   vec4 color = texture2D(uSampler, texCoord);
 
   if(dProd < 0.5) {
-    color = (dProd + color) / 2.0;
+    color = (dProd + color) / 4.0;
   }
 
   gl_FragColor = color * ambient;
