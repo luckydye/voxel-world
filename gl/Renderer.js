@@ -44,7 +44,9 @@ export class Renderer {
 		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
 		this.initGl(gl);
 
-		this.gridBuffer = VertexBuffer.GRID();
+		this.grid = {
+			buffer: VertexBuffer.GRID(600, 600),
+		}
 
 		window.statistics = this.statistics;
 	}
@@ -144,11 +146,13 @@ export class Renderer {
 				if(!shader.done) {
 					GL.setModelUniforms(gl, shader.uniforms);
 				}
-				GL.setBuffersAndAttributes(gl, shader.attributes, this.gridBuffer);
-				gl.drawArrays(gl.LINES, 0, this.gridBuffer.vertecies.length / this.gridBuffer.elements);
+
+				const buffer = this.grid.buffer;
+				GL.setBuffersAndAttributes(gl, shader.attributes, buffer);
+				gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
 				shader.done = true;
 
-				stats.vertecies += this.gridBuffer.vertecies.length;
+				stats.vertecies += buffer.vertecies.length;
 			}
 		}
 

@@ -8,7 +8,7 @@ export class Geometry {
 	}
 
 	constructor({
-		position = {x: 0, y: -300, z: 0},
+		position = {x: 0, y: -50, z: 0},
 		rotation = {x: 0, y: 0, z: 0},
 		scale = 1,
 		material = Material.DIRT
@@ -16,7 +16,7 @@ export class Geometry {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
-		this.size = 300;
+		this.size = 100;
 		this.mat = material;
 	}
 

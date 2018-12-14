@@ -11,7 +11,7 @@ export class VertexBuffer {
 		this.attributes = attributes;
 	}
 
-	static CUBE(w = 300, h = 300, s = 1) {
+	static CUBE(w = 100, h = 100, s = 1) {
 		return new VertexBuffer({
 			elements: 5,
 			vertecies: [
@@ -65,14 +65,11 @@ export class VertexBuffer {
 		})
 	}
 	
-	static GRID(s = 15) {
+	static GRID(w, h, s = 15) {
 		const dataArray = [];
 
 		for(let x = 0; x < s-1; x++) {
 			for(let y = 0; y < s-1; y++) {
-				const w = 600;
-				const h = 600;
-		
 				dataArray.push(...[
 					x * w, 0, y * h, 0.15, 0.15, 0.15,
 					x * w, 0, y * -h, 0.15, 0.15, 0.15,

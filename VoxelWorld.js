@@ -27,7 +27,7 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         const example = {
-            tileSize: 20,
+            tileSize: 40,
             tileHeight: 15,
             seed: 0.9216802954674626,
             threshold: 0.12,
@@ -56,9 +56,9 @@ export default class VoxelWorld {
         const cube = new Cube({
             material: mat,
             position: new Vec(
-                ((x * 600) + 300) - ((tileSize/2) * 600),
-                ((y * 600) + 300) - ((tileHeight) * 600),
-                ((z * 600) + 300) - ((tileSize/2) * 600),
+                ((x * 200) + 100) - ((tileSize/2) * 200),
+                ((y * 200) + 100) - ((tileHeight) * 200),
+                ((z * 200) + 100) - ((tileSize/2) * 200),
             )
         });
         this.scene.add(cube);
