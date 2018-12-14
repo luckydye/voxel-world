@@ -32,6 +32,7 @@ export class WorldGenerator {
 	setSeed(n) {
 		this.seed = n;
 		noise.seed(n);
+		statistics.seed = n;
 	}
 
 	generateTile() {

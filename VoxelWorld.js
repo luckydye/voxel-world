@@ -26,14 +26,17 @@ export default class VoxelWorld {
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.worldgen = new WorldGenerator({
+        const example = {
             tileSize: 20,
-            tileHeight: 20,
-            seed: Math.random(),
+            tileHeight: 15,
+            seed: 0.9216802954674626,
             threshold: 0.12,
             resolution: 12,
-        });
-        this.regen();
+        }
+
+        this.worldgen = new WorldGenerator(example);
+        const tile = this.worldgen.generateTile();
+        this.buildTile(tile);
     }
 
     regen() {
@@ -68,10 +71,31 @@ export default class VoxelWorld {
             for(let y = 0; y < tileData[x].length; y++) {
                 for(let z = 0; z < tileData[x][y].length; z++) {
                     if(tileData[x][y][z]) {
-                        this.voxel(x, y, z);
+                        if(this.shouldDraw(tileData, x, y ,z)) {
+                            this.voxel(x, y, z);
+                        }
                     }
                 }
             }
         }
+    }
+
+    shouldDraw(tileData, x, y, z) {
+
+        /* Order:
+            x  y  z
+            0  0  0  --  center
+
+            1  0  0  --  left
+            -1 0  0  --  right
+
+            0  1  0  --  top
+            0 -1  0  --  bottom
+
+            0  0  1  --  front
+            0  0 -1  --  back
+        */
+
+        return true;
     }
 }
