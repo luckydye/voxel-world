@@ -189,11 +189,10 @@ export class Renderer {
 				gl.useProgram(shader.program);
 				shader.setUniforms(gl);
 
-				var u_colorTexLoc = gl.getUniformLocation(shader.program, "uColorTexture");
-				gl.uniform1i(u_colorTexLoc, 0);
-
 				if(enableShadows) {
-					var u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
+					const u_colorTexLoc = gl.getUniformLocation(shader.program, "uColorTexture");
+					const u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
+					gl.uniform1i(u_colorTexLoc, 0);
 					gl.uniform1i(u_depthTexLoc, 1);
 
 					gl.activeTexture(gl.TEXTURE1);
@@ -202,9 +201,9 @@ export class Renderer {
 					const lightSource = this.scene.light;
 					gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
 					gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
+					
+					gl.activeTexture(gl.TEXTURE0);	
 				}
-			
-				gl.activeTexture(gl.TEXTURE0);
 				
 				for(let obj of objects) {
 
@@ -213,14 +212,8 @@ export class Renderer {
 							obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
 						}
 						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
-
 						GL.setModelUniforms(gl, shader.uniforms, obj);
-						if(enableShadows) {
-							GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
-						}
-
 						GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
-						
 						gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
 
 						statistics.vertecies += obj.buffer.vertecies.length;
