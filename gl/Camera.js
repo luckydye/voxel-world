@@ -51,7 +51,7 @@ export class Camera {
 		const viewMatrix = this.viewMatrix;
 		const camera = this;
 
-		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, window.innerWidth / window.innerWidth, camera.nearplane, camera.farplane);
+		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, 1, camera.nearplane, camera.farplane);
 		mat4.lookAt(
 			viewMatrix, 
 			vec3.fromValues(0, 0, 0),

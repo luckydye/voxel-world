@@ -12,7 +12,7 @@ export default class VoxelWorld {
 
         const sceneOpts = {
             camera: new Camera({ 
-                fov: 65, 
+                fov: 75, 
                 position: new Vec(0, 5000, -10000),
                 rotation: new Vec(12, 45, 0) 
             })
@@ -31,8 +31,8 @@ export default class VoxelWorld {
         }
 
         this.worldgen = new WorldGenerator({
-            tileSize: 20,
-            tileHeight: 20,
+            tileSize: 50,
+            tileHeight: 50,
             seed: Math.random(),
             threshold: 0.12,
             resolution: 12,
