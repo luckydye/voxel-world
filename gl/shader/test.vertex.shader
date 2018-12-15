@@ -8,11 +8,12 @@ uniform mat4 uProjMatrix;
 uniform mat4 uLightProjMatrix;
 uniform mat4 uLightViewMatrix;
 
-varying vec2 vTexCoords;
+varying highp vec2 vTexCoords;
 varying vec4 vVertexLightPos;
 
+
 void main () {
-  vTexCoords = aTextCords;
+  vTexCoords = aTextCords * 0.25;
   
   vVertexLightPos = (uLightProjMatrix * uLightViewMatrix) * aPosition;
 

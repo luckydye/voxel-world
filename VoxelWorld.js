@@ -13,7 +13,7 @@ export default class VoxelWorld {
         const sceneOpts = {
             camera: new Camera({ 
                 fov: 65, 
-                position: new Vec(0, 3000, -10000),
+                position: new Vec(0, 5000, -10000),
                 rotation: new Vec(12, 45, 0) 
             })
         }
@@ -23,8 +23,8 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         const example = {
-            tileSize: 25,
-            tileHeight: 12,
+            tileSize: 200,
+            tileHeight: 20,
             seed: 0.9216802954674626,
             threshold: 0.12,
             resolution: 12,
@@ -46,20 +46,21 @@ export default class VoxelWorld {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const mat = (() => {
-            let mats = [ "STONE", "STONE", "DIRT" ];
+            let mats = [ 3, 3, 0 ];
             if(y < 6) {
-                mats = [ "DIRT", "GRASS", "STONE" ];
+                mats = [ 0, 1, 3 ];
             }
             if(y < 2) {
-                mats = [ "GRASS" ];
+                mats = [ 1 ];
             }
             if(y > 9) {
-                mats = [ "STONE", "LAVA" ];
+                mats = [ 3, 2 ];
             }
-            return Material[mats[Math.floor(Math.random() * mats.length)]];
+            return mats[Math.floor(Math.random() * mats.length)];
         })();
         const cube = new Cube({
-            material: mat,
+            material: Material.TEXTUREMAP,
+            uv: [ mat, 0 ],
             position: new Vec(
                 ((x * 200) + 100) - ((tileSize/2) * 200),
                 ((y * 200) + 100) - ((tileHeight) * 200),

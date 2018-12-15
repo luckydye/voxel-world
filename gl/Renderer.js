@@ -216,6 +216,8 @@ export class Renderer {
 		}
 		
 		const shader = shaders[2];
+		gl.useProgram(shader.program);
+		shader.setUniforms(gl);
 
 		const vertxBuffer = this.scene.vertexBuffer;
 		const vertArray = [];
@@ -226,8 +228,8 @@ export class Renderer {
 				if(shader.initialized && !obj.invisible) {
 					if(obj.mat.texture && !obj.mat.gltexture) {
 						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
 					}
-					gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
 
 					if(!this.scene.cached) {
 						vertArray.push(...obj.buffer.vertArray);
@@ -246,8 +248,6 @@ export class Renderer {
 		}
 
 		if(this.scene.cached) {
-			gl.useProgram(shader.program);
-			shader.setUniforms(gl);
 			GL.setModelUniforms(gl, shader.uniforms);
 			GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
 			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
@@ -393,9 +393,8 @@ export class GL {
 		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
 			gl.generateMipmap(gl.TEXTURE_2D);
 		} else {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		}
 
 		return texture;

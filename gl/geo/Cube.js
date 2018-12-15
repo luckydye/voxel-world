@@ -23,9 +23,9 @@ export class Cube extends Geometry {
 			TOP: true,
 			BOTTOM: true,
 			LEFT: true,
-			RIGHT: false,
+			RIGHT: true,
 			FRONT: true,
-			BACK: false,
+			BACK: true,
 		}
 	}
 
@@ -60,11 +60,8 @@ export class Cube extends Geometry {
 		const w = 100;
 		const h = 100;
 
-		const sw = s * w;
-		const sh = s * h;
-
-		const u = 0;
-		const v = 0;
+		const u = this.uv[0];
+		const v = this.uv[1];
 
 		const x = this.position.x;
 		const y = -this.position.y;
@@ -72,52 +69,52 @@ export class Cube extends Geometry {
 		
 		return {
 			TOP: [
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, sw +y, -sh +z, u + 1, v + 0,
-				-sw +x, sw +y, -sh +z, u + 0, v + 0,
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				-sw +x, sw +y, -sh +z, u + 0, v + 0,
-				-sw +x, sw +y, sh +z, u + 0, v + 1,
+				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
+				-s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v,
+				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				-s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v,
+				-s * w + x, s * w + y, s * h + z, 0 + u, 1 + v,
 			],
 			BOTTOM: [
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, sw +y, -sh +z, u + 1, v + 0,
-				-sw +x, sw +y, -sh +z, u + 0, v + 0,
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				-sw +x, sw +y, -sh +z, u + 0, v + 0,
-				-sw +x, sw +y, sh +z, u + 0, v + 1,
+				s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v,
+				s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				-s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
 			],
 			LEFT: [
-				sw +x, sh +y, sw +z, u + 1, v + 1,
-				sw +x, -sh +y, sw +z, u + 1, v + 0,
-				-sw +x, -sh +y, sw +z, u + 0, v + 0,
-				sw +x, sh +y, sw +z, u + 1, v + 1,
-				-sw +x, -sh +y, sw +z, u + 0, v + 0,
-				-sw +x, sh +y, sw +z, u + 0, v + 1,
+				s * w + x, s * h + y, s * w + z, 1 + u, 1 + v,
+				s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v,
+				-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v,
+				s * w + x, s * h + y, s * w + z, 1 + u, 1 + v,
+				-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v,
+				-s * w + x, s * h + y, s * w + z, 0 + u, 1 + v,
 			],
 			RIGHT: [
-				sw +x, sh +y, sw +z, u + 1, v + 1,
-				sw +x, -sh +y, sw +z, u + 1, v + 0,
-				-sw +x, -sh +y, sw +z, u + 0, v + 0,
-				sw +x, sh +y, sw +z, u + 1, v + 1,
-				-sw +x, -sh +y, sw +z, u + 0, v + 0,
-				-sw +x, sh +y, sw +z, u + 0, v + 1,
+				s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v,
+				s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v,
+				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,
+				s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v,
+				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,
+				-s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v,
 			],
 			FRONT: [
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, sw +y, -sh +z, u + 1, v + 0,
-				sw +x, -sw +y, -sh +z, u + 0, v + 0,
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, -sw +y, -sh +z, u + 0, v + 0,
-				sw +x, -sw +y, sh +z, u + 0, v + 1,
+				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
+				s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
 			],
 			BACK: [
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, sw +y, -sh +z, u + 1, v + 0,
-				sw +x, -sw +y, -sh +z, u + 0, v + 0,
-				sw +x, sw +y, sh +z, u + 1, v + 1,
-				sw +x, -sw +y, -sh +z, u + 0, v + 0,
-				sw +x, -sw +y, sh +z, u + 0, v + 1,
+				-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				-s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
+				-s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
 			]
 		}
 	}

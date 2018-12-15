@@ -10,6 +10,9 @@ const mats = {
     },
     "GRASS": {
         "texture": "./images/grass.png"
+    },
+    "TEXTUREMAP": {
+        "texture": "./images/blocks.png"
     }
 }
 

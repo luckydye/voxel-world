@@ -19,6 +19,11 @@ export class VertexBuffer {
 		this.attributes = {};
 	}
 
+	clear() {
+		this.vertecies = new Float32Array([]);
+		this.vertArray = [];
+	}
+
 	static create(...args) {
 		return new VertexBuffer(...args);
 	}

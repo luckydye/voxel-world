@@ -18,19 +18,11 @@ export class Scene {
 			rotation: new Vec(10, 23, 0),
 		});
 
-		this.add(new Grid(600));
-
-		this.vertexBuffer = new VertexBuffer([]);
-		this.vertexBuffer.type = "TRIANGLES";
-		this.vertexBuffer.attributes = [
-			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTextCords" }
-		]
-		this.cached = false;
+		this.clear();
 
 		setInterval(() => {
-            // this.camera.rotation.y -= 0.25;
-			// this.camera.update();
+            this.camera.rotation.y -= 0.25;
+			this.camera.update();
 			
             this.light.rotation.y -= 2;
             this.light.update();
@@ -42,7 +34,15 @@ export class Scene {
 	}
 
 	clear() {
+		this.cached = false;
+		this.vertexBuffer = new VertexBuffer([]);
+		this.vertexBuffer.type = "TRIANGLES";
+		this.vertexBuffer.attributes = [
+			{ size: 3, attribute: "aPosition" },
+			{ size: 2, attribute: "aTextCords" }
+		]
 		this.objects.clear();
+		this.add(new Grid(600));
 	}
 
 }

@@ -1,6 +1,6 @@
 precision mediump float;
 
-varying vec2 vTexCoords;
+varying highp vec2 vTexCoords;
 varying vec4 vVertexLightPos;
 
 uniform sampler2D uDepthTexture;
