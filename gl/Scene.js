@@ -14,7 +14,7 @@ export class Scene {
 		
 		this.light = new Camera({
 			fov: 65, 
-			position: new Vec(0, 1500, -7000),
+			position: new Vec(0, 4500, -10000),
 			rotation: new Vec(10, 23, 0),
 		});
 

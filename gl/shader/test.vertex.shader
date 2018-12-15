@@ -15,7 +15,7 @@ varying vec4 vVertexLightPos;
 void main () {
   vTexCoords = aTextCords * 0.25;
   
-  vVertexLightPos = (uLightProjMatrix * uLightViewMatrix) * aPosition;
+  vVertexLightPos = uLightViewMatrix * uModelMatrix * aPosition;
 
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
 }

@@ -158,20 +158,11 @@ export class Renderer {
 				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
 				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
 			
-				for(let obj of objects) {
-					if(shader.initialized && obj.buffer) {
-						GL.setModelUniforms(gl, shader.uniforms, obj);
-						GL.setModelUniforms(gl, shader.uniforms, obj, "uLightModelMatrix");
-						if(obj.mat.texture && !obj.mat.gltexture) {
-							obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
-						}
-						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
-						GL.setBuffersAndAttributes(gl, shader.attributes, obj.buffer);
-						gl.drawArrays(gl.TRIANGLES, 0, obj.buffer.vertsPerElement);
-
-						statistics.vertecies += obj.buffer.vertecies.length;
-						statistics.elements += 1;
-					}
+				const vertxBuffer = this.scene.vertexBuffer;
+				if(this.scene.cached) {
+					GL.setModelUniforms(gl, shader.uniforms);
+					GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
+					gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 				}
 
 				shader.done = true;
