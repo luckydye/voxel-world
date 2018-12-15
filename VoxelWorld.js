@@ -23,11 +23,11 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         const example = {
-            tileSize: 200,
-            tileHeight: 20,
+            tileSize: 35,
+            tileHeight: 30,
             seed: 0.9216802954674626,
-            threshold: 0.12,
-            resolution: 12,
+            threshold: 0.23,
+            resolution: 15,
         }
 
         this.worldgen = new WorldGenerator(example);
