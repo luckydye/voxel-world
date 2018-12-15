@@ -24,7 +24,7 @@ bool in_shadow(void) {
 
 void main () {
 
-  float light = 1.1;
+  float light = 1.0;
 
   if(in_shadow()) {
     light = 0.5;

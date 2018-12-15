@@ -42,7 +42,7 @@ export default class VoxelWorld {
         this.buildTile(tile);
     }
 
-    voxel(x, y, z) {
+    voxel(tileData, x, y, z) {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const mat = (() => {
@@ -66,6 +66,26 @@ export default class VoxelWorld {
                 ((z * 200) + 100) - ((tileSize/2) * 200),
             )
         });
+
+        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
+            cube.visible.TOP = false;
+        }
+        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
+            cube.visible.BOTTOM = false;
+        }
+        if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {
+            cube.visible.RIGHT = false;
+        }
+        if((z+1 > 0 && z+1 < tileSize) && tileData[x][y][z+1]) {
+            cube.visible.LEFT = false;
+        }
+        if((x-1 > 0 && x-1 < tileSize) && tileData[x-1][y][z]) {
+            cube.visible.BACK = false;
+        }
+        if((x+1 > 0 && x+1 < tileSize) && tileData[x+1][y][z]) {
+            cube.visible.FRONT = false;
+        }
+
         this.scene.add(cube);
     }
 
@@ -76,31 +96,10 @@ export default class VoxelWorld {
             for(let y = 0; y < tileData[x].length; y++) {
                 for(let z = 0; z < tileData[x][y].length; z++) {
                     if(tileData[x][y][z]) {
-                        if(this.shouldDraw(tileData, x, y ,z)) {
-                            this.voxel(x, y, z);
-                        }
+                        this.voxel(tileData, x, y, z);
                     }
                 }
             }
         }
-    }
-
-    shouldDraw(tileData, x, y, z) {
-
-        /* Order:
-            x  y  z
-            0  0  0  --  center
-
-            1  0  0  --  left
-            -1 0  0  --  right
-
-            0  1  0  --  top
-            0 -1  0  --  bottom
-
-            0  0  1  --  front
-            0  0 -1  --  back
-        */
-
-        return true;
     }
 }

@@ -1,5 +1,7 @@
 import { Camera } from './Camera.js';
 import { Vec } from './Math.js';
+import { Grid } from './geo/Grid.js';
+import { VertexBuffer } from './VertexBuffer.js';
 
 export class Scene {
 
@@ -16,9 +18,19 @@ export class Scene {
 			rotation: new Vec(10, 23, 0),
 		});
 
+		this.add(new Grid(600));
+
+		this.vertexBuffer = new VertexBuffer([]);
+		this.vertexBuffer.type = "TRIANGLES";
+		this.vertexBuffer.attributes = [
+			{ size: 3, attribute: "aPosition" },
+			{ size: 2, attribute: "aTextCords" }
+		]
+		this.cached = false;
+
 		setInterval(() => {
-            this.camera.rotation.y -= 0.25;
-			this.camera.update();
+            // this.camera.rotation.y -= 0.25;
+			// this.camera.update();
 			
             this.light.rotation.y -= 2;
             this.light.update();
