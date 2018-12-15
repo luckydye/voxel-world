@@ -19,14 +19,6 @@ export class Scene {
 		});
 
 		this.clear();
-
-		setInterval(() => {
-            this.camera.rotation.y -= 0.25;
-			this.camera.update();
-			
-            this.light.rotation.y -= 2;
-            this.light.update();
-		}, 16);
 	}
 
 	add(obj) {

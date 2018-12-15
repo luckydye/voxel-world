@@ -1,4 +1,6 @@
-const mats = {
+import { Resources } from "../Resources.js";
+
+const materials = {
     "DIRT": {
         "texture": "./images/dirt.png"
     },
@@ -16,12 +18,10 @@ const mats = {
     }
 }
 
+Resources.add("materials", Resources.JSON, './gl/materials/materials.json');
+
 export class Material {
 
-    static get geo() {
-        return mats;
-    }
-    
     constructor({ texture } = {}) {
         this.texture = null;
         this.gltexture = null;
@@ -43,6 +43,6 @@ export class Material {
 
 }
 
-for(let key in mats) {
-    Material[key] = new Material(mats[key]);
+for(let key in materials) {
+    Material[key] = new Material(materials[key]);
 }

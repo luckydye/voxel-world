@@ -62,12 +62,13 @@ export class Renderer {
 		window.addEventListener("resize", () => {
 			this.resize();
 		});
+		this.resize();
 	}
 
 	resize() {
-		// gl.canvas.width = window.innerWidth;
-		// gl.canvas.height = window.innerHeight;
-		// gl.viewport(0, 0, window.innerWidth, window.innerWidth);
+		gl.canvas.width = 1280;
+		gl.canvas.height = 1280;
+		gl.viewport(0, 0, 1280, 1280);
 	}
 
 	drawDepthTexture() {
