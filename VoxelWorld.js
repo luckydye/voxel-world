@@ -23,39 +23,48 @@ export default class VoxelWorld {
         this.renderer.setScene(this.scene);
 
         const example = {
-            tileSize: 35,
-            tileHeight: 30,
+            tileSize: 50,
+            tileHeight: 13,
             seed: 0.9216802954674626,
             threshold: 0.23,
             resolution: 15,
         }
 
-        this.worldgen = new WorldGenerator(example);
-        const tile = this.worldgen.generateTile();
-        this.buildTile(tile);
+        this.worldgen = new WorldGenerator({
+            tileSize: 20,
+            tileHeight: 20,
+            seed: Math.random(),
+            threshold: 0.12,
+            resolution: 12,
+        });
+
+        this.regen();
     }
 
     regen() {
         this.worldgen.setSeed(Math.random());
         this.scene.clear();
-        const tile = this.worldgen.generateTile();
-        this.buildTile(tile);
+        const tiles = [
+            this.worldgen.generateTile(0, 0),
+        ]
+        this.buildTiles(tiles);
     }
 
     voxel(tileData, x, y, z) {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const mat = (() => {
-            let mats = [ 3, 3, 0 ];
-            if(y < 6) {
-                mats = [ 0, 1, 3 ];
-            }
-            if(y < 2) {
-                mats = [ 1 ];
-            }
-            if(y > 9) {
-                mats = [ 3, 2 ];
-            }
+            let mats = [ 3, 2 ];
+            // let mats = [ 3, 3, 0 ];
+            // if(y < 6) {
+            //     mats = [ 0, 1, 3 ];
+            // }
+            // if(y < 2) {
+            //     mats = [ 1 ];
+            // }
+            // if(y > 9) {
+            //     mats = [ 3, 2 ];
+            // }
             return mats[Math.floor(Math.random() * mats.length)];
         })();
         const cube = new Cube({
@@ -90,14 +99,15 @@ export default class VoxelWorld {
         this.scene.add(cube);
     }
 
-    buildTile(tile) {
-        const tileData = tile.tileData;
-
-        for(let x = 0; x < tileData.length; x++) {
-            for(let y = 0; y < tileData[x].length; y++) {
-                for(let z = 0; z < tileData[x][y].length; z++) {
-                    if(tileData[x][y][z]) {
-                        this.voxel(tileData, x, y, z);
+    buildTiles(tiles) {
+        for(let tile of tiles) {
+            const tileData = tile.tileData;
+            for(let x = 0; x < tileData.length; x++) {
+                for(let y = 0; y < tileData[x].length; y++) {
+                    for(let z = 0; z < tileData[x][y].length; z++) {
+                        if(tileData[x][y][z]) {
+                            this.voxel(tileData, x + tile.pos.x, y, z + tile.pos.y);
+                        }
                     }
                 }
             }

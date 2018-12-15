@@ -8,14 +8,14 @@ uniform mat4 uProjMatrix;
 uniform mat4 uLightProjMatrix;
 uniform mat4 uLightViewMatrix;
 
-varying highp vec2 vTexCoords;
-varying vec4 vVertexLightPos;
+varying vec2 vTexCoords;
+varying vec4 vPos;
 
 
 void main () {
   vTexCoords = aTextCords * 0.25;
   
-  vVertexLightPos = uLightViewMatrix * uModelMatrix * aPosition;
-
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+
+  vPos = gl_Position;
 }

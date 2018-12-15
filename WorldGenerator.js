@@ -1,8 +1,9 @@
 import noise from './perlin.js';
 
 class Tile {
-	constructor(size, height) {
+	constructor(x, y, size, height) {
 		this.tileData = new Array(size);
+		this.pos = { x, y };
 
 		for(let i = 0; i < this.tileData.length; i++) {
 			this.tileData[i] = new Array(height);
@@ -35,15 +36,15 @@ export class WorldGenerator {
 		statistics.seed = n;
 	}
 
-	generateTile() {
-		const tile = new Tile(this.tileSize, this.tileHeight);
+	generateTile(x, y) {
+		const tile = new Tile(x * this.tileSize, y * this.tileSize, this.tileSize, this.tileHeight);
 		const tileData = tile.tileData;
 		const res = this.resolution;
 
 		for(let x = 0; x < tileData.length; x++) {
             for(let y = 0; y < tileData[x].length; y++) {
                 for(let z = 0; z < tileData[x][y].length; z++) {
-					const value = noise.perlin3(x / res, y / res, z / res);
+					const value = noise.perlin3((x + tile.pos.x) / res, y / res, (z + tile.pos.y) / res);
 					let threshold = this.threshold;
                     if(Math.abs(value) < threshold) {
 						tileData[x][y][z] = 1;

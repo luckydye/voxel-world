@@ -9,7 +9,7 @@ export class Scene {
 		this.objects = new Set();
 		
 		this.camera = camera || new Camera({
-			fov: 65
+			fov: 90
 		});
 		
 		this.light = new Camera({
@@ -21,8 +21,8 @@ export class Scene {
 		this.clear();
 
 		setInterval(() => {
-            this.camera.rotation.y -= 0.25;
-			this.camera.update();
+            // this.camera.rotation.y -= 0.25;
+			// this.camera.update();
 			
             this.light.rotation.y -= 2;
             this.light.update();

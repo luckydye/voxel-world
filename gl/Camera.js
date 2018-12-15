@@ -24,6 +24,7 @@ export class Camera {
 		position = new Vec(),
 		rotation = new Vec(),
 	} = {}) {
+		
 		this.scale = scale;
 		this.fov = fov;
 		this.farplane = farplane;
