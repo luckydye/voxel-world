@@ -31,8 +31,8 @@ export default class VoxelWorld {
         }
 
         this.worldgen = new WorldGenerator({
-            tileSize: 50,
-            tileHeight: 50,
+            tileSize: 200,
+            tileHeight: 30,
             seed: Math.random(),
             threshold: 0.12,
             resolution: 12,
