@@ -100,7 +100,7 @@ export class Camera {
 					this.position.x += (e.x - lastEvent.x) / element.width * Math.abs(this.position.z);
 					this.position.y += (e.y - lastEvent.y) / element.width * Math.abs(this.position.z);
 					viewport.style.cursor = "move";
-				} else if(isMouseButton(e) == 1) {
+				} else if(isMouseButton(e) == 1 || e.type == "touchmove") {
 					this.rotation.y += (e.x - lastEvent.x) / element.width * 100;
 					this.rotation.x += (e.y - lastEvent.y) / element.width * 100;
 					viewport.style.cursor = "grabbing";
@@ -110,14 +110,17 @@ export class Camera {
 			lastEvent = e;
 		}
 
-		element.addEventListener("touchstart", down);
-		window.addEventListener("touchend", up);
-		window.addEventListener("touchcancle", up);
-		window.addEventListener("touchmove", move);
-
 		element.addEventListener("mousedown", down);
 		window.addEventListener("mouseup", up);
 		window.addEventListener("mousemove", move);
+
+		window.addEventListener("touchstart", down);
+		window.addEventListener("touchend", up);
+		window.addEventListener("touchmove", e => {
+			e.x = e.touches[0].clientX;
+			e.y = e.touches[0].clientY;
+			move(e);
+		});
 
 		element.addEventListener("wheel", e => {
 			this.position.z += -e.deltaY * 5;
