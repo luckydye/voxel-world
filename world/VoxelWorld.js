@@ -7,11 +7,11 @@ import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "../gl/Material.js";
 import { Resources } from "../lib/Resources.js";
 
-Resources.add([
-    ['materials', './resources/materials/materials.json'],
-    ['worldtextures', './resources/images/blocks.png'],
-    ['world', './resources/worlds/example.json'],
-], false);
+Resources.add({
+    'materials': './resources/materials/materials.json',
+    'worldtextures': './resources/images/blocks.png',
+    'world': './resources/worlds/example.json',
+}, false);
 
 export default class VoxelWorld {
 

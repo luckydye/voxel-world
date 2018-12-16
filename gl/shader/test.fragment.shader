@@ -7,11 +7,9 @@ uniform sampler2D uDepthTexture;
 uniform sampler2D uColorTexture;
 
 uniform float ambient;
-uniform float frameIndexMod4;
+uniform float ligthIntesity;
 
 void main () {
-
-  float ligthIntesity = 20.0;
   
   float depth = ligthIntesity / vPos.z;
   vec4 color = texture2D(uColorTexture, vTexCoords).rgba;
