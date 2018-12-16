@@ -55,16 +55,16 @@ export default class VoxelWorld {
 
         this.worldgen = new WorldGenerator(settings.world);
 
+        this.regen(settings.world.seed);
+    }
+
+    regen(seed) {
+        seed = seed || Math.random();
+        this.worldgen.setSeed(seed);
+        this.scene.clear();
         this.tiles = [
             this.worldgen.generateTile(0, 0),
         ]
-
-        this.regen();
-    }
-
-    regen() {
-        this.worldgen.setSeed(Math.random());
-        this.scene.clear();
         this.buildTiles(this.tiles);
     }
 
@@ -72,32 +72,32 @@ export default class VoxelWorld {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const mat = (() => {
-            let mats = [ 3, 3, 0 ];
-            if(y < 6) {
-                mats = [ 0, 1, 3 ];
+            let mats = [ [3,0], [3,0], [0,0] ];
+            if(tileSize - y >= tileHeight - 3) {
+                mats = [ [0,0] ];
             }
-            if(y < 2) {
-                mats = [ 1 ];
+            if(tileSize - y >= tileHeight - 1) {
+                mats = [ [1,0] ];
             }
-            if(y > 9) {
-                mats = [ 3, 2 ];
+            if(y > tileSize-2 && tileData[x][y-1][z] !== 1) {
+                mats = [ [0,1] ];
             }
             return mats[Math.floor(Math.random() * mats.length)];
         })();
         const cube = new Cube({
             material: Material.WORLD,
-            uv: [ mat, 0 ],
+            uv: mat,
             position: new Vec(
                 ((x * 200) + 100) - ((tileSize/2) * 200),
-                ((y * 200) + 100) - ((tileHeight) * 200),
+                ((y * 200) + 100) - ((tileSize) * 200),
                 ((z * 200) + 100) - ((tileSize/2) * 200),
             )
         });
 
-        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
+        if((y-1 > 0 && y-1 < tileSize) && tileData[x][y-1][z]) {
             cube.visible.TOP = false;
         }
-        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
+        if((y+1 > 0 && y+1 < tileSize) && tileData[x][y+1][z]) {
             cube.visible.BOTTOM = false;
         }
         if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {

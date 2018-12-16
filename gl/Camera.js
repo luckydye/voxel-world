@@ -83,23 +83,18 @@ export class Camera {
 		let lastEvent = null;
 		const viewport = document.body;
 
-		element.addEventListener("mousedown", e => {
+		const down = e => {
 			moving = true;
 			this.update();
-		})
+		}
 
-		window.addEventListener("mouseup", e => {
+		const up = e => {
 			moving = false;
 			viewport.style.cursor = "default";
 			this.update();
-		})
+		}
 
-		element.addEventListener("wheel", e => {
-			this.position.z += -e.deltaY * 5;
-			this.update();
-		})
-
-		window.addEventListener("mousemove", e => {
+		const move = e => {
 			if(moving && lastEvent) {
 				if(isMouseButton(e) == 2) {
 					this.position.x += (e.x - lastEvent.x) / element.width * Math.abs(this.position.z);
@@ -113,6 +108,19 @@ export class Camera {
 				this.update();
 			}
 			lastEvent = e;
+		}
+
+		element.addEventListener("touchdown", down);
+		window.addEventListener("touchup", up);
+		window.addEventListener("touchmove", move);
+
+		element.addEventListener("mousedown", down);
+		window.addEventListener("mouseup", up);
+		window.addEventListener("mousemove", move);
+
+		element.addEventListener("wheel", e => {
+			this.position.z += -e.deltaY * 5;
+			this.update();
 		})
 	}
 }
