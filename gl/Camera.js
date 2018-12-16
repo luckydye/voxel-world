@@ -110,8 +110,9 @@ export class Camera {
 			lastEvent = e;
 		}
 
-		element.addEventListener("touchdown", down);
-		window.addEventListener("touchup", up);
+		element.addEventListener("touchstart", down);
+		window.addEventListener("touchend", up);
+		window.addEventListener("touchcancle", up);
 		window.addEventListener("touchmove", move);
 
 		element.addEventListener("mousedown", down);
