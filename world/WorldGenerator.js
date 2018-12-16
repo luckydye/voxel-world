@@ -1,4 +1,4 @@
-import noise from './perlin.js';
+import noise from '../lib/perlin.js';
 
 class Tile {
 	constructor(x, y, size, height) {

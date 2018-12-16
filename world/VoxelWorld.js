@@ -1,32 +1,26 @@
-import { Renderer } from "./gl/Renderer.js";
-import { Scene } from "./gl/Scene.js";
-import { Cube } from "./gl/geo/Cube.js";
-import { Vec } from "./gl/Math.js";
-import { Camera } from "./gl/Camera.js";
+import { Renderer } from "../gl/Renderer.js";
+import { Scene } from "../gl/Scene.js";
+import { Cube } from "../gl/geo/Cube.js";
+import { Vec } from "../gl/Math.js";
+import { Camera } from "../gl/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
-import { Material } from "./gl/Material.js";
-import { Resources } from "./Resources.js";
+import { Material } from "../gl/Material.js";
+import { Resources } from "../lib/Resources.js";
 
 /* TESTING RESOURCES */
 
-Resources.add("materials", Resources.JSON, './gl/materials/materials.json');
-
-Resources.subscribe("materials", (data) => {
-    console.log("loaded", data);
-})
-
-Resources.subscribe("all", (map) => {
-    console.log("all done", map);
-})
-
-Resources.load();
+Resources.add("materials", './gl/materials/materials.json');
 
 /* TESTING RESOURCES END */
 
 export default class VoxelWorld {
 
     constructor({ canvas } = {}) {
-        this.init(canvas);
+        Resources.wait('all', (map) => {
+            console.log("resources loaded");
+            this.init(canvas);
+        })
+        Resources.load();
     }
 
     init(canvas) {
@@ -40,33 +34,19 @@ export default class VoxelWorld {
         this.scene = new Scene(sceneOpts);
         
         setInterval(() => {
-            this.scene.camera.position.z += 10;
-            this.scene.camera.position.y += 3;
+            this.scene.camera.rotation.y += 0.25;
             this.scene.camera.update();
-
-            if(this.scene.camera.position.z > 400) {
-                this.scene.camera.position.z = -28000;
-                this.scene.camera.position.y = 500;
-            }
         }, 14);
 
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        const example = {
+        this.worldgen = new WorldGenerator({
             tileSize: 60,
             tileHeight: 10,
             seed: 0.9216802954674626,
             threshold: 0.23,
             resolution: 15,
-        }
-
-        this.worldgen = new WorldGenerator({
-            tileSize: 200,
-            tileHeight: 25,
-            seed: Math.random(),
-            threshold: 0.12,
-            resolution: 12,
         });
 
         this.tiles = [

@@ -1,4 +1,4 @@
-import { Resources } from "../Resources.js";
+import { Resources } from "../lib/Resources.js";
 
 const materials = {
     "DIRT": {
@@ -17,8 +17,6 @@ const materials = {
         "texture": "./images/blocks.png"
     }
 }
-
-Resources.add("materials", Resources.JSON, './gl/materials/materials.json');
 
 export class Material {
 
