@@ -1,46 +1,17 @@
-import { Resources } from "../lib/Resources.js";
-
-const materials = {
-    "DIRT": {
-        "texture": "./images/dirt.png"
-    },
-    "STONE": {
-        "texture": "./images/stone.png"
-    },
-    "LAVA": {
-        "texture": "./images/lava.png"
-    },
-    "GRASS": {
-        "texture": "./images/grass.png"
-    },
-    "TEXTUREMAP": {
-        "texture": "./images/blocks.png"
-    }
-}
-
 export class Material {
 
-    constructor({ texture } = {}) {
+    static create({ name, texture }) {
+        Material[name] = new Material({ texture });
+        return Material[name];
+    }
+
+    constructor() {
         this.texture = null;
         this.gltexture = null;
-
-        if(texture) {
-            this.loadTexture(texture);
-        }
     }
 
-    loadTexture(src) {
-		if(!this.texture && src) {
-			const image = new Image();
-			image.onload = () => {
-				this.texture = image;
-			}
-            image.src = src;
-		}
+    setTexture(img) {
+        this.texture = img;
     }
 
-}
-
-for(let key in materials) {
-    Material[key] = new Material(materials[key]);
 }

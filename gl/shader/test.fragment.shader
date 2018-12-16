@@ -12,10 +12,9 @@ uniform float frameIndexMod4;
 void main () {
 
   float ligthIntesity = 20.0;
-  float distance = 5.0;
   
   float depth = ligthIntesity / vPos.z;
   vec4 color = texture2D(uColorTexture, vTexCoords).rgba;
 
-  gl_FragColor = color * min(ambient * log(depth * distance), 1.3);
+  gl_FragColor = color * min(ambient * (depth), 1.3);
 }

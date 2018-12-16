@@ -44,6 +44,7 @@ export class Camera {
 
 	zoom(dir) {
 		this.position.z += 1200 * dir;
+		this.update();
 	}
 
 	update() {

@@ -7,47 +7,53 @@ import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "../gl/Material.js";
 import { Resources } from "../lib/Resources.js";
 
-/* TESTING RESOURCES */
-
-Resources.add("materials", './gl/materials/materials.json');
-
-/* TESTING RESOURCES END */
+Resources.add([
+    ['materials', './resources/materials/materials.json'],
+    ['worldtextures', './resources/images/blocks.png'],
+    ['world', './resources/worlds/example.json'],
+], false);
 
 export default class VoxelWorld {
 
     constructor({ canvas } = {}) {
-        Resources.wait('all', (map) => {
+        Resources.onloaded = () => {
             console.log("resources loaded");
             this.init(canvas);
-        })
+        };
         Resources.load();
     }
 
+    initMaterials() {
+        const mats = Resources.get('materials');
+        for(let name in mats) {
+            const mat = Material.create({ name });
+            mat.texture = Resources.get(mats[name].texture);
+        }
+    }
+
     init(canvas) {
+        this.initMaterials();
+
+        const settings = Resources.get('world');
+
         const sceneOpts = {
             camera: new Camera({ 
-                fov: 70, 
-                position: new Vec(0, 500, -28000),
-                rotation: new Vec(30, 0, 0) 
+                fov: settings.scene.camera.fov,
+                position: new Vec(0, 4000, -15000),
+                rotation: new Vec(12, 0, 0) 
             })
         }
         this.scene = new Scene(sceneOpts);
         
         setInterval(() => {
-            this.scene.camera.rotation.y += 0.25;
-            this.scene.camera.update();
+            // this.scene.camera.rotation.y += 0.25;
+            // this.scene.camera.update();
         }, 14);
 
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.worldgen = new WorldGenerator({
-            tileSize: 60,
-            tileHeight: 10,
-            seed: 0.9216802954674626,
-            threshold: 0.23,
-            resolution: 15,
-        });
+        this.worldgen = new WorldGenerator(settings.world);
 
         this.tiles = [
             this.worldgen.generateTile(0, 0),
@@ -66,7 +72,6 @@ export default class VoxelWorld {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
         const mat = (() => {
-            // let mats = [ 3, 2, 0, 1 ];
             let mats = [ 3, 3, 0 ];
             if(y < 6) {
                 mats = [ 0, 1, 3 ];
@@ -80,7 +85,7 @@ export default class VoxelWorld {
             return mats[Math.floor(Math.random() * mats.length)];
         })();
         const cube = new Cube({
-            material: Material.TEXTUREMAP,
+            material: Material.WORLD,
             uv: [ mat, 0 ],
             position: new Vec(
                 ((x * 200) + 100) - ((tileSize/2) * 200),
