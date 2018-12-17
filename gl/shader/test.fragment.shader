@@ -8,6 +8,7 @@ uniform sampler2D uColorTexture;
 
 uniform float ambient;
 uniform float ligthIntesity;
+uniform vec4 dcolor;
 
 void main () {
   

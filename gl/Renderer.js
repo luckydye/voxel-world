@@ -219,12 +219,13 @@ export class Renderer {
 		const vertArray = [];
 
 		for(let obj of objects) {
-
 			if(obj instanceof Cube) {
 				if(shader.initialized && !this.scene.cached && !obj.invisible) {
 					if(obj.mat.texture && !obj.mat.gltexture) {
 						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
 						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
+					} else {
+						GL.setModelUniforms(gl, shader.uniforms, obj);
 					}
 
 					if(!this.scene.cached) {
@@ -233,7 +234,6 @@ export class Renderer {
 					}
 				}
 			}
-
 		}
 
 		if(!this.scene.cached && vertArray.length > 0) {
@@ -259,34 +259,37 @@ export class GL {
 		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, camera.viewMatrix);
 	}
 
-	static setModelUniforms(gl, uniforms, obj, prefix = "uModelMatrix") {
-		obj = obj || {
+	static setModelUniforms(gl, uniforms, geo) {
+		const transform = {
 			position: { x: 0, y: 0, z: 0 },
 			rotation: { x: 0, y: 0, z: 0 }
 		}
 
 		let modelMatrix;
 
-		if(!obj.modelMatrix) {
-			obj.modelMatrix = mat4.create();
+		if(!transform.modelMatrix) {
+			transform.modelMatrix = mat4.create();
 
-			modelMatrix = obj.modelMatrix;
+			modelMatrix = transform.modelMatrix;
 			
 			mat4.identity(modelMatrix);
 			
 			mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
-				obj.position.x,
-				- obj.position.y,
-				obj.position.z,
+				transform.position.x,
+				- transform.position.y,
+				transform.position.z,
 			));
-			mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.x);
-			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.y);
-			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * obj.rotation.z);
+			mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.x);
+			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
+			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 		}
 
-		modelMatrix = obj.modelMatrix;
+		gl.uniformMatrix4fv(uniforms["uModelMatrix"], false, transform.modelMatrix);
 
-		gl.uniformMatrix4fv(uniforms[prefix], false, modelMatrix);
+		if(geo && geo.mat) {
+			const defuseColor = geo.mat.defuseColor;
+			gl.uniform4fv(uniforms.dcolor, defuseColor);
+		}
 	}
 
 	static setBuffersAndAttributes(gl, attributes, bufferInfo) {

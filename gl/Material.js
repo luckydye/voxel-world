@@ -8,6 +8,7 @@ export class Material {
     constructor() {
         this.texture = null;
         this.gltexture = null;
+        this.defuseColor = [1, 1, 1, 1];
     }
 
     setTexture(img) {
