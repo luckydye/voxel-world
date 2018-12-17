@@ -15,21 +15,11 @@ Resources.add({
 
 export default class VoxelWorld {
 
-    constructor({ canvas } = {}) {
-        Resources.onloaded = () => {
+    render(canvas) {
+        Resources.load().then(() => {
             console.log("resources loaded");
             this.init(canvas);
-        };
-        Resources.load();
-    }
-
-    initMaterials() {
-        const mats = Resources.get('materials');
-        for(let name in mats) {
-            const mat = Material.create({ name });
-            mat.texture = Resources.get(mats[name].texture);
-            mat.defuseColor = mats[name].defuseColor;
-        }
+        });
     }
 
     init(canvas) {
@@ -61,6 +51,15 @@ export default class VoxelWorld {
         this.worldgen = new WorldGenerator(settings.world);
 
         this.regen(settings.world.seed);
+    }
+
+    initMaterials() {
+        const mats = Resources.get('materials');
+        for(let name in mats) {
+            const mat = Material.create({ name });
+            mat.texture = Resources.get(mats[name].texture);
+            mat.defuseColor = mats[name].defuseColor;
+        }
     }
 
     regen(seed) {

@@ -59,8 +59,6 @@ export class Renderer extends GLContext {
 	draw() {
 		if(!this.scene) return;
 
-		const gl = this.gl;
-
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
@@ -69,7 +67,9 @@ export class Renderer extends GLContext {
 			this.time = ms;
 			this.draw();
 		});
-		currFrame = performance.now();
+
+		currFrame = this.time;
+		statistics.fps = Math.floor(1000 / (currFrame - lastFrame));
 		
 		this.clear();
 

@@ -13,10 +13,10 @@ global.queue = new Set();
 global.map = new Map();
 
 /* @DOCS
-	Resource.add({ name, path }: arr, startLoading: bool)
+	Resource.add({ name, path }: arr, startLoading: bool): startLoading ? Promise : null
 		# add resource to queue
 
-	Resource.load()
+	Resource.load(): Promise
 		# initiate loading of queue
 
 	Resource.map(void)
@@ -27,9 +27,6 @@ global.map = new Map();
 
 	Resource.finished: bool
 		# returns if queue is finished
-
-	Resource.onloaded = f
-		# gets called when queue is done initially
 */
 
 export class Resources {
@@ -47,7 +44,7 @@ export class Resources {
 			global.queue.add({ name: key, path: obj[key] });
 		}
 		if(startLoad !== false) {
-			Resources.load();
+			return Resources.load();
 		}
 	}
 
@@ -70,20 +67,13 @@ export class Resources {
 			loads.push(loading);
 		}
 
-		Promise.all(loads).then(() => {
+		return Promise.all(loads).then(() => {
 			global.queue.clear();
 
 			if(!global.initLoaded && Resources.finished) {
-				Resources._onloaded();
 				global.initLoaded = true;
 			}
 		})
-	}
-
-	static _onloaded() {
-		if(Resources.onloaded) {
-			Resources.onloaded(global.map);
-		}
 	}
 
 	static _fetch(path) {

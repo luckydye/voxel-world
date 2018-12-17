@@ -1,25 +1,16 @@
 import VoxelWorld from './world/VoxelWorld.js';
 import { Toolbar, IconButton } from './components/Toolbar.js';
 
-let voxelWorld;
-
+window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
 
-window.addEventListener("load", () => {
-	voxelWorld = new VoxelWorld({ canvas: world });
+function onPageLod() {
+	const voxelWorld = new VoxelWorld();
+	voxelWorld.render(world);
 
-	const hud = document.querySelector('hud #statistics');
-	setInterval(() => {
-		hud.innerText = JSON.stringify(statistics);
-	}, 100);
+	displayHud();
 
-	createToolbar();
-});
-
-function createToolbar() {
-	const toolbar = new Toolbar({ theme: "dark" });
-
-	const toolbarButtons = {
+	createToolbar({
 		zoomIn: IconButton({
 			icon: "+",
 			onclick() {
@@ -46,11 +37,20 @@ function createToolbar() {
 				voxelWorld.turntable = btn.active;
 			}
 		})
-	}
+	});
+}
 
-	for(let btn in toolbarButtons) {
-		toolbar.appendChild(toolbarButtons[btn]);
-	}
+function displayHud() {
+	const hud = document.querySelector('hud #statistics');
+	setInterval(() => {
+		hud.innerText = JSON.stringify(statistics);
+	}, 100);
+}
 
+function createToolbar(buttonConfig) {
+	const toolbar = new Toolbar({ theme: "dark" });
+	for(let btn in buttonConfig) {
+		toolbar.appendChild(buttonConfig[btn]);
+	}
 	document.getElementsByTagName("main")[0].appendChild(toolbar);
 }
