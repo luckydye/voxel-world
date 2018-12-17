@@ -173,11 +173,6 @@ export class GLContext {
 			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 		}
 		gl.uniformMatrix4fv(uniforms["uModelMatrix"], false, modelMatrix);
-
-		if(geo && geo.mat) {
-			const defuseColor = geo.mat.defuseColor;
-			gl.uniform4fv(uniforms.dcolor, defuseColor);
-		}
 	}
 
 	setBuffersAndAttributes(attributes, bufferInfo) {

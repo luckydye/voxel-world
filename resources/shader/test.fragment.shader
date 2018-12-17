@@ -7,7 +7,6 @@ in vec2 vTexCoords;
 uniform sampler2D uTextureArray;
 uniform float ambient;
 uniform float ligthIntesity;
-uniform vec4 dcolor;
 
 out vec4 oFragColor;
 

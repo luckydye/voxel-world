@@ -1,10 +1,10 @@
 import '../lib/gl-matrix.js';
 import { Scene } from './scene/Scene.js';
-import DefaultShader from './shader/DefaultShader.js';
-import TestShader from './shader/TestShader.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
 import { GLContext } from './GL.js';
+import DefaultShader from './shader/DefaultShader.js';
+import TestShader from './shader/TestShader.js';
 
 let nextFrame,
 	currFrame,
@@ -25,11 +25,10 @@ export class Renderer extends GLContext {
 			new DefaultShader(),
 			new TestShader(),
 		];
+
 		this.renderpasses = [
 			// new RenderPass("depth"),
 		];
-
-		this.canvas = canvas;
 
 		this.setScene(new Scene());
 		
@@ -87,16 +86,17 @@ export class Renderer extends GLContext {
 		for(let obj of this.scene.objects) {
 			if(obj instanceof Grid) {
 				const gl = this.gl;
-				const shader = this.shaders[0];
+				const shader = this.currentShader;
 				const camera = this.scene.camera;
 
+				const buffer = obj.buffer;
 				gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 				gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
-				const buffer = obj.buffer;
 				this.setBuffersAndAttributes(shader.attributes, buffer);
-
 				gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
+
+				statistics.gridVerts = buffer.vertecies.length;
 
 				statistics.vertecies += buffer.vertecies.length;
 			}

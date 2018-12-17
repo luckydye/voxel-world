@@ -7,10 +7,16 @@ window.addEventListener("contextmenu", e => e.preventDefault());
 
 window.addEventListener("load", () => {
 	voxelWorld = new VoxelWorld({ canvas: world });
-	init();
+
+	const hud = document.querySelector('hud #statistics');
+	setInterval(() => {
+		hud.innerText = JSON.stringify(statistics);
+	}, 100);
+
+	createToolbar();
 });
 
-function init() {
+function createToolbar() {
 	const toolbar = new Toolbar({ theme: "dark" });
 
 	const toolbarButtons = {
