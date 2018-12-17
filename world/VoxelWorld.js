@@ -5,11 +5,10 @@ import { Vec } from "../gl/Math.js";
 import { Camera } from "../gl/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "../gl/Material.js";
-import { Resources } from "../lib/Resources.js";
+import { Resources } from "../gl/Resources.js";
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    // 'worldtextures': './resources/images/blocks.png',
     'worldtextures': './resources/images/blocks_solid.png',
     'world': './resources/worlds/example.json',
 }, false);

@@ -1,22 +1,20 @@
 import { Material } from "./Material.js";
+import { Transform } from "./Math.js";
 
-export class Geometry {
+export class Geometry extends Transform {
 
     get buffer() {
 		this._buffer = this._buffer || this.createBuffer();
 		return this._buffer;
 	}
 
-	constructor({
-		position = {x: 0, y: -50, z: 0},
-		rotation = {x: 0, y: 0, z: 0},
-		scale = 1,
-		material = Material.DIRT,
-		uv = [0, 0]
-	} = {}) {
-		this.position = position;
-		this.rotation = rotation;
-		this.scale = scale;
+	constructor(args = {}) {
+		const {
+			material = Material.DIRT,
+			uv = [0, 0]
+		} = args;
+		super(args);
+		
 		this.size = 100;
 		this.mat = material;
 		this.uv = uv;

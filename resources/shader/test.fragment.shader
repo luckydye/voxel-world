@@ -12,7 +12,7 @@ uniform vec4 dcolor;
 out vec4 oFragColor;
 
 void main () {
-  vec4 color = texture(uTextureArray, vTexCoords / 8.0 );
+  vec4 color = texture(uTextureArray, vTexCoords / 8.0);
 
   oFragColor = vec4(color.rgb * 0.9, 1);
 }

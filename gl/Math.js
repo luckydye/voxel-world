@@ -5,3 +5,15 @@ export class Vec {
 		this.z = z;
 	}
 }
+
+export class Transform {
+	constructor({
+		position = new Vec(),
+		rotation = new Vec(),
+		scale = 1,
+	} = {}) {
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = scale;
+	}
+}

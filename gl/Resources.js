@@ -5,7 +5,8 @@ global.initLoaded = false;
 global.resourceTypes = {
 	JSON: [".json"],
 	TEXT: [".txt"],
-	IMAGE: [".png", ".jpg"]
+	IMAGE: [".png", ".jpg"],
+	SHADER: [".shader", ".fs", ".vs"],
 };
 
 global.queue = new Set();
@@ -17,6 +18,9 @@ global.map = new Map();
 
 	Resource.load()
 		# initiate loading of queue
+
+	Resource.map(void)
+		# return resource map
 
 	Resource.get(name: str)
 		# return resource data by name
@@ -47,6 +51,10 @@ export class Resources {
 		}
 	}
 
+	static map() {
+		return global.map;
+	}
+
 	static get(name) {
 		return global.map.get(name);
 	}
@@ -74,7 +82,7 @@ export class Resources {
 
 	static _onloaded() {
 		if(Resources.onloaded) {
-			Resources.onloaded();
+			Resources.onloaded(global.map);
 		}
 	}
 
@@ -103,6 +111,9 @@ export class Resources {
 				});
 				
 			case Resources.Types.TEXT:
+				return fetch(path).then(res => res.text());
+				
+			case Resources.Types.SHADER:
 				return fetch(path).then(res => res.text());
 
 			default:

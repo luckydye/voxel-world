@@ -1,11 +1,20 @@
+import { Resources } from '../Resources.js';
 import { GLShader } from "../GLShader.js";
 
-export default class TestShader extends GLShader {
+Resources.add({
+    'test.vs': './resources/shader/test.vertex.shader',
+    'test.fs': './resources/shader/test.fragment.shader',
+}, false);
 
+export default class TestShader extends GLShader {
+    
     constructor() {
         super({ name: "test" });
 
-		this.load(this.name);
+        this.src = [
+            Resources.get('test.vs'),
+            Resources.get('test.fs'),
+        ];
     }
 
     get uniform() {

@@ -1,4 +1,4 @@
-import { Vec } from './Math.js';
+import { Vec, Transform } from './Math.js';
 
 function isMouseButton(e) {
 	let mbutton;
@@ -14,30 +14,27 @@ function isMouseButton(e) {
 	return mbutton;
 }
 
-export class Camera {
+export class Camera extends Transform {
 
-	constructor({
-		fov = 50,
-		scale = 0.004,
-		farplane = 200,
-		nearplane = 0.25,
-		position = new Vec(),
-		rotation = new Vec(),
-	} = {}) {
+	constructor(args = {}) {
+		const {
+			fov = 50,
+			scale = 0.004,
+			farplane = 200,
+			nearplane = 0.25,
+		} = args;
+		super(args);
 		
 		this.scale = scale;
 		this.fov = fov;
 		this.farplane = farplane;
 		this.nearplane = nearplane;
-
-		this.position = position;
-		this.rotation = rotation;
 		this.lookAt = new Vec(0, 0, 0);
-
-		this.updated = false;
 
 		this.projMatrix = mat4.create();
 		this.viewMatrix = mat4.create();
+
+		this.updated = false;
 
 		this.update();
 	}
