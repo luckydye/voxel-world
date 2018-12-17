@@ -1,5 +1,5 @@
 import { Material } from "./Material.js";
-import { Transform } from "./Math.js";
+import { Transform } from "../Math.js";
 
 export class Geometry extends Transform {
 

@@ -1,6 +1,6 @@
 import { Camera } from './Camera.js';
-import { Vec } from './Math.js';
-import { Grid } from './geo/Grid.js';
+import { Vec } from '../Math.js';
+import { Grid } from '../geo/Grid.js';
 import { VertexBuffer } from './VertexBuffer.js';
 
 export class Scene {
@@ -10,12 +10,6 @@ export class Scene {
 		
 		this.camera = camera || new Camera({
 			fov: 90
-		});
-		
-		this.light = new Camera({
-			fov: 65, 
-			position: new Vec(0, 4500, -10000),
-			rotation: new Vec(10, 23, 0),
 		});
 
 		this.clear();

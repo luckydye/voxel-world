@@ -1,24 +1,46 @@
-import { GLShader } from "./GLShader.js";
-
 export class GLContext {
 
 	constructor(canvas) {
-		if(!canvas) throw "Err: no canvas";
-		
-		this.canvas = canvas;
+		if(!canvas) throw "GLContext: Err: no canvas";
 
+		this.cache = {
+			textures: []
+		}
+
+		this.currentShader = null;
+
+		this.getContext(canvas);
+	}
+
+	clear() {
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+	}
+
+	getContext(canvas) {
 		const ctxtOpts = {
 			premultipliedAlpha: false
 		}
-
+		
+		this.canvas = canvas;
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
-				   canvas.getContext("webgl", ctxtOpts);
+				  canvas.getContext("webgl", ctxtOpts);
+
+		this.gl.clearColor(0.1, 0.1, 0.1, 1);
+		this.gl.enable(this.gl.DEPTH_TEST);
 	}
 
-	init() {
-		this.gl.clearColor(0.1, 0.1, 0.1, 1);
-		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-		this.gl.enable(this.gl.DEPTH_TEST);
+	useShader(shader) {
+		const gl = this.gl;
+		gl.useProgram(shader.program);
+		shader.setUniforms(gl);
+		this.currentShader = shader;
+	}
+
+	useTexture(uniformStr, type, slot) {
+		this.gl.activeTexture(this.gl["TEXTURE" + slot]);
+		const texture = this.cache.textures[slot];
+		this.gl.bindTexture(type, texture);
+		this.gl.uniform1i(this.currentShader.uniforms[uniformStr], slot);
 	}
 
 	prepareShader(shader) {
@@ -41,13 +63,102 @@ export class GLContext {
 		}
 	}
 
-	setModelUniforms(uniforms, geo, transform) {
+	getAttributes(program) {
+		const gl = this.gl;
+		const attributes = {};
+	
+		const numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+		for (let i = 0; i < numAttributes; ++i) {
+			const name = gl.getActiveAttrib(program, i).name;
+			attributes[name] = gl.getAttribLocation(program, name);
+		}
+	
+		return attributes;
+	}
+
+	getUniforms(program) {
+		const gl = this.gl;
+		const uniforms = {};
+		const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+		for (let i = 0; i < numUniforms; ++i) {
+			const name = gl.getActiveUniform(program, i).name;
+			uniforms[name] = gl.getUniformLocation(program, name);
+		}
+		return uniforms;
+	}
+
+	compileShader(src, type) {
+		const gl = this.gl;
+		const shader = gl.createShader(type);
+		gl.shaderSource(shader, src);
+		gl.compileShader(shader);
+
+		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			throw new Error(gl.getShaderInfoLog(shader));
+		}
+
+		return shader;
+	}
+
+	createProgram(vertShader, fragShader) {
+		const gl = this.gl;
+		const program = gl.createProgram();
+		gl.attachShader(program, vertShader);
+		gl.attachShader(program, fragShader);
+		gl.linkProgram(program);
+
+		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			throw new Error(gl.getProgramInfoLog(program));
+		}
+	
+		return program;
+	}
+
+	createTexture(image, slot) {
+		const gl = this.gl;
+
+		const texture = gl.createTexture();
+		gl.activeTexture(gl["TEXTURE" + slot]);
+		this.cache.textures[slot] = texture;
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		return texture;
+	}
+
+	createTextureArray(image, slot, w, h, textureCount) {
+		const gl = this.gl;
+		const texture = gl.createTexture();
+		gl.activeTexture(gl["TEXTURE" + slot]);
+		this.cache.textures[slot] = texture;
+		gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
+		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texImage3D(
+			gl.TEXTURE_2D_ARRAY,
+			0,
+			gl.RGBA,
+			w,
+			h,
+			textureCount,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			image
+		);
+		gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+		return texture;
+	}
+
+	setTransformUniforms(uniforms, geo, transform) {
 		const gl = this.gl;
 		let modelMatrix = mat4.create();
 		if(transform) {
 			transform = {
-				position: transform.position ||new Vec(),
-				rotation: transform.rotation ||new Vec()
+				position: transform.position || new Vec(),
+				rotation: transform.rotation || new Vec()
 			}
 			
 			mat4.identity(modelMatrix);
@@ -109,92 +220,45 @@ export class GLContext {
 			lastElementSize = bufferInfo.attributes[i].size;
 		}
 	}
-
-	getAttributes(program) {
-		const gl = this.gl;
-		const attributes = {};
 	
-		const numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-		for (let i = 0; i < numAttributes; ++i) {
-			const name = gl.getActiveAttrib(program, i).name;
-			attributes[name] = gl.getAttribLocation(program, name);
+}
+
+export class GLShader {
+
+	get vertexShader() {
+		return this._vertShader;
+	}
+
+	get fragementShader() {
+		return this._fragShader;
+	}
+
+	get uniforms() {
+		return this._uniforms;
+	}
+
+	get attributes() {
+		return this._attributes;
+	}
+
+	get uniform() {
+		return {};
+	}
+
+	constructor({ name } = {}) {
+		this.name = name;
+		this.src = [];
+		
+		this.program = null;
+		this.initialized = false;
+	}
+
+    setUniforms(gl) {
+		const uniforms = this.uniforms;
+		if(uniforms) {
+			for(let opt in this.uniform) {
+				gl.uniform1f(uniforms[opt], this.uniform[opt]);
+			}
 		}
-	
-		return attributes;
-	}
-
-	getUniforms(program) {
-		const gl = this.gl;
-		const uniforms = {};
-		const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-		for (let i = 0; i < numUniforms; ++i) {
-			const name = gl.getActiveUniform(program, i).name;
-			uniforms[name] = gl.getUniformLocation(program, name);
-		}
-		return uniforms;
-	}
-
-	compileShader(src, type) {
-		const gl = this.gl;
-		const shader = gl.createShader(type);
-		gl.shaderSource(shader, src);
-		gl.compileShader(shader);
-
-		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			throw new Error(gl.getShaderInfoLog(shader));
-		}
-
-		return shader;
-	}
-
-	createProgram(vertShader, fragShader) {
-		const gl = this.gl;
-		const program = gl.createProgram();
-		gl.attachShader(program, vertShader);
-		gl.attachShader(program, fragShader);
-		gl.linkProgram(program);
-
-		if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-			throw new Error(gl.getProgramInfoLog(program));
-		}
-	
-		return program;
-	}
-
-	createTexture(image, slot) {
-		const gl = this.gl;
-
-		const texture = gl.createTexture();
-		gl.activeTexture(gl["TEXTURE" + slot]);
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		return texture;
-	}
-
-	createTextureArray(textureCount, image, w, h, slot) {
-		const gl = this.gl;
-		const texture = gl.createTexture();
-		gl.activeTexture(gl["TEXTURE" + slot]);
-		gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
-		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texImage3D(
-			gl.TEXTURE_2D_ARRAY,
-			0,
-			gl.RGBA,
-			w,
-			h,
-			textureCount,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			image
-		);
-		gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-		return texture;
-	}
-	
+    }
 }

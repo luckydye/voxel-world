@@ -1,5 +1,5 @@
-import { Geometry } from "../Geometry.js";
-import { VertexBuffer } from "../VertexBuffer.js";
+import { Geometry } from "../scene/Geometry.js";
+import { VertexBuffer } from "../scene/VertexBuffer.js";
 
 export class Cube extends Geometry {
 

@@ -1,4 +1,4 @@
-import { Vec, Transform } from './Math.js';
+import { Vec, Transform } from '../Math.js';
 
 function isMouseButton(e) {
 	let mbutton;

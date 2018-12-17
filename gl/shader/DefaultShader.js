@@ -1,5 +1,5 @@
 import { Resources } from '../Resources.js';
-import { GLShader } from "../GLShader.js";
+import { GLShader } from "../GL.js";
 
 Resources.add({
     'default.vs': './resources/shader/default.vertex.shader',

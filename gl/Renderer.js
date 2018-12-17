@@ -1,17 +1,19 @@
 import '../lib/gl-matrix.js';
-import { Scene } from './Scene.js';
+import { Scene } from './scene/Scene.js';
 import DefaultShader from './shader/DefaultShader.js';
 import TestShader from './shader/TestShader.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
 import { GLContext } from './GL.js';
 
-let gl,
- 	nextFrame,
+let nextFrame,
 	currFrame,
 	lastFrame;
 
-const statistics = {};
+const statistics = {
+	vertecies: 0,
+	voxels: 0,
+};
 window.statistics = statistics;
 
 export class Renderer extends GLContext {
@@ -19,32 +21,29 @@ export class Renderer extends GLContext {
     constructor(canvas) {
 		super(canvas);
 
-		gl = this.gl;
-
-		this.renderpasses = [
-			// new RenderPass("depth"),
-		]
-
 		this.shaders = [
 			new DefaultShader(),
 			new TestShader(),
 		];
-
-		this.statistics = {
-			vertecies: 0,
-			elements: 0,
-		}
+		this.renderpasses = [
+			// new RenderPass("depth"),
+		];
 
 		this.canvas = canvas;
-
-		this.defaultShader = this.shaders[0];
 
 		this.setScene(new Scene());
 		
 		window.addEventListener("resize", () => {
-			this.resize();
+			this.setResolution(window.innerWidth, window.innerHeight);
 		});
-		this.resize();
+		this.setResolution(window.innerWidth, window.innerHeight);
+	}
+
+	setResolution(w, h) {
+		this.gl.canvas.width = w;
+		this.gl.canvas.height = h;
+		this.gl.viewport(0, 0, w, h);
+		this.scene.camera.update();
 	}
 
 	setScene(scene) {
@@ -58,13 +57,6 @@ export class Renderer extends GLContext {
 		this.draw();
 	}
 
-	resize() {
-		gl.canvas.width = window.innerWidth;
-		gl.canvas.height = window.innerHeight;
-		this.scene.camera.update();
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-	}
-
 	draw() {
 		if(!this.scene) return;
 
@@ -73,53 +65,46 @@ export class Renderer extends GLContext {
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
-
+		
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
 			this.draw();
 		});
 		currFrame = performance.now();
 		
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		this.clear();
 
-		gl.useProgram(this.shaders[1].program);
-		this.shaders[1].setUniforms(gl);
+		this.useShader(this.shaders[1]);
 		this.drawScene(this.scene, this.shaders[1]);
 
-		// draw scene grid
-		const objects = this.scene.objects;
-		for(let obj of objects) {
-			if(obj instanceof Grid) {
-				// TODO: Duplication
-				const shader = this.defaultShader;
-				const camera = this.scene.camera;
-
-				if(shader.initialized) {
-					gl.useProgram(shader.program);
-					if(!shader.done) {
-						this.setModelUniforms(shader.uniforms);
-					}
-					gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-					gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-
-					const buffer = obj.buffer;
-					this.setBuffersAndAttributes(shader.attributes, buffer);
-					gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
-					shader.done = true;
-
-					statistics.vertecies += buffer.vertecies.length;
-				}
-			}
-		}
-
+		this.useShader(this.shaders[0]);
+		this.drawGrid();
+		
 		lastFrame = currFrame;
 	}
 
+	drawGrid() {
+		for(let obj of this.scene.objects) {
+			if(obj instanceof Grid) {
+				const gl = this.gl;
+				const shader = this.shaders[0];
+				const camera = this.scene.camera;
+
+				gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+				gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+				const buffer = obj.buffer;
+				this.setBuffersAndAttributes(shader.attributes, buffer);
+
+				gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
+
+				statistics.vertecies += buffer.vertecies.length;
+			}
+		}
+	}
+
 	drawScene(scene, shader) {
-
 		const gl = this.gl;
-
-		statistics.vertecies = 0;
 
 		const camera = scene.camera;
 		const objects = scene.objects;
@@ -127,20 +112,20 @@ export class Renderer extends GLContext {
 		const vertxBuffer = scene.vertexBuffer;
 		const vertArray = [];
 
+		statistics.vertecies = 0;
+
 		if(!camera.updated) {
 			camera.updated = true;
 
-			if(shader.initialized) {
-				gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-				gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-			}
+			gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+			gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 		}
 
 		for(let obj of objects) {
 			if(obj instanceof Cube) {
 				if(shader.initialized && !scene.cached && !obj.invisible) {
 					vertArray.push(...obj.buffer.vertArray);
-					statistics.elements += 1;
+					statistics.voxels += 1;
 				}
 			}
 		}
@@ -151,8 +136,6 @@ export class Renderer extends GLContext {
 				const img = obj.mat.texture;
 				scene.texturemap = this.createTexture(img, 0);
 			}
-		} else {
-			this.setModelUniforms(shader.uniforms);
 		}
 
 		if(!scene.cached && vertArray.length > 0) {
@@ -160,14 +143,16 @@ export class Renderer extends GLContext {
 			scene.cached = true;
 		}
 
-		if(scene.cached && shader.initialized) {
+		if(scene.cached) {
 			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
-			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D, scene.texturemap);
-			gl.uniform1i(shader.uniforms.uTextureArray, 0);
+			this.setTransformUniforms(shader.uniforms);
+			
+			this.useTexture("uTextureArray", gl.TEXTURE_2D, 0);
+
 			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 			statistics.vertecies += vertxBuffer.vertecies.length;
 		}
+
 	}
 }
 

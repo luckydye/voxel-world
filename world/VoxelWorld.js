@@ -1,10 +1,10 @@
 import { Renderer } from "../gl/Renderer.js";
-import { Scene } from "../gl/Scene.js";
+import { Scene } from "../gl/scene/Scene.js";
 import { Cube } from "../gl/geo/Cube.js";
 import { Vec } from "../gl/Math.js";
-import { Camera } from "../gl/Camera.js";
+import { Camera } from "../gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
-import { Material } from "../gl/Material.js";
+import { Material } from "../gl/scene/Material.js";
 import { Resources } from "../gl/Resources.js";
 
 Resources.add({
