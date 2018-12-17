@@ -60,6 +60,9 @@ export class WorldGenerator {
 						if(y > tileSize-2 && !tileData[x][y-1][z]) {
 							mats = [ [0,1] ];
 						}
+						if (y < tileSize-1 && y > tileSize-5) {
+							mats = [ [4,1] ];
+						}
 						return mats[Math.floor(Math.random() * mats.length)];
 					})();
 

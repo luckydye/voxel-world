@@ -1,5 +1,6 @@
 {
     "WORLD": {
-        "texture": "worldtextures"
+        "texture": "worldtextures",
+        "defuseColor": [1, 1, 1, 1]
     }
 }

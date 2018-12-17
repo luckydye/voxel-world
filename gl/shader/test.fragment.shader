@@ -13,7 +13,7 @@ uniform vec4 dcolor;
 void main () {
   
   float depth = ligthIntesity / vPos.z;
-  vec4 color = texture2D(uColorTexture, vTexCoords).rgba;
+  vec4 color = texture2D(uColorTexture, vTexCoords * 0.25).rgba;
 
   gl_FragColor = color * max(min(ambient * depth, 1.3), 0.7);
 }

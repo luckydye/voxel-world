@@ -13,11 +13,9 @@ varying vec4 vPos;
 
 
 void main () {
-  vTexCoords = aTextCords * 0.25;
-  
   vec4 pos = aPosition;
-  
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * pos;
 
+  vTexCoords = aTextCords;
   vPos = gl_Position;
 }
