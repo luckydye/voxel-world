@@ -61,7 +61,7 @@ export class WorldGenerator {
 							mats = [ [0,1] ];
 						}
 						if (y < tileSize-1 && y > tileSize-5) {
-							mats = [ [4,1] ];
+							mats = [ [3,1] ];
 						}
 						return mats[Math.floor(Math.random() * mats.length)];
 					})();
@@ -102,7 +102,7 @@ export class WorldGenerator {
 							tileData[x][y+1][z][0] == 1) {
 								
 							if(x === dx && z === dz) {
-								this.makeTree(tileData, x, y, z, 7);
+								this.makeTree(tileData, x, y, z, 3 + Math.random() * (7 - 3));
 							}
 						}
 					}

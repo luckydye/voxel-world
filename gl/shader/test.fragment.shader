@@ -1,20 +1,18 @@
+#version 300 es
 precision mediump float;
+precision highp sampler2DArray;
 
-varying vec2 vTexCoords;
-varying vec4 vPos;
+in vec2 vTexCoords;
 
-uniform sampler2D uDepthTexture;
-uniform sampler2D uColorTexture;
-
+uniform sampler2D uTextureArray;
 uniform float ambient;
 uniform float ligthIntesity;
 uniform vec4 dcolor;
 
-void main () {
-  
-  float depth = ligthIntesity / vPos.z;
-  vec4 color = texture2D(uColorTexture, vTexCoords * 0.25).rgba;
+out vec4 oFragColor;
 
-  gl_FragColor = color * max(min(ambient * depth, 1.3), 0.7);
-  // gl_FragColor = gl_FragCoord;
+void main () {
+  vec4 color = texture(uTextureArray, vTexCoords / 8.0);
+
+  oFragColor = (gl_FragCoord.z / 2.0) * color;
 }

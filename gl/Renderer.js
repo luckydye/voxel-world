@@ -19,6 +19,7 @@ const shaders = [
 ];
 
 class RenderPass {
+
 	constructor(id) {
 		this.id = id;
 	}
@@ -107,6 +108,7 @@ export class Renderer {
 	resize() {
 		gl.canvas.width = window.innerWidth;
 		gl.canvas.height = window.innerHeight;
+		this.scene.camera.update();
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
 
@@ -130,13 +132,13 @@ export class Renderer {
 		this.drawScene(gl, this.scene, shaders[2]);
 
 		// render passes
-		for(let pass of this.renderpasses) {
-			gl.useProgram(shaders[1].program);
-			shaders[1].setUniforms(gl);
-			const bufferTexture = pass.colorBuffer(gl);
-			this.drawScene(gl, this.scene, shaders[1]);
-			pass.clear(gl);
-		}
+		// for(let pass of this.renderpasses) {
+		// 	gl.useProgram(shaders[1].program);
+		// 	shaders[1].setUniforms(gl);
+		// 	const bufferTexture = pass.colorBuffer(gl);
+		// 	this.drawScene(gl, this.scene, shaders[1]);
+		// 	pass.clear(gl);
+		// }
 
 		// draw scene grid
 		const objects = this.scene.objects;
@@ -193,19 +195,21 @@ export class Renderer {
 		for(let obj of objects) {
 			if(obj instanceof Cube) {
 				if(shader.initialized && !scene.cached && !obj.invisible) {
-					if(obj.mat.texture && !obj.mat.gltexture) {
-						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
-						scene.texturemap = obj.mat.gltexture;
-					} else {
-						GL.setModelUniforms(gl, shader.uniforms, obj);
-					}
-
-					if(!scene.cached) {
-						vertArray.push(...obj.buffer.vertArray);
-						statistics.elements += 1;
-					}
+					vertArray.push(...obj.buffer.vertArray);
+					statistics.elements += 1;
 				}
 			}
+		}
+
+		if(!scene.texturemap) {
+			const obj = [...objects].find(o => o instanceof Cube);
+			if(obj && obj.mat) {
+				const img = obj.mat.texture;
+				// scene.texturemap = GL.createTextureArray(gl, 4, img, 64, 64, 0);
+				scene.texturemap = GL.createTexture(gl, img, 0);
+			}
+		} else {
+			GL.setModelUniforms(gl, shader.uniforms);
 		}
 
 		if(!scene.cached && vertArray.length > 0) {
@@ -215,7 +219,9 @@ export class Renderer {
 
 		if(scene.cached && shader.initialized) {
 			GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
+			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, scene.texturemap);
+			gl.uniform1i(shader.uniforms.uTextureArray, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 			statistics.vertecies += vertxBuffer.vertecies.length;
 		}
@@ -338,23 +344,36 @@ export class GL {
 		return program;
 	}
 
-	static createTexture(gl, image) {
+	static createTexture(gl, image, slot) {
 		const texture = gl.createTexture();
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+		gl.activeTexture(gl["TEXTURE" + slot]);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		
-		function isPowerOf2(value) {
-			return (value & (value - 1)) == 0;
-		}
-
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		return texture;
+	}
 
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 7);
-
+	static createTextureArray(gl, textureCount, image, w, h, slot) {
+		const texture = gl.createTexture();
+		gl.activeTexture(gl["TEXTURE" + slot]);
+		gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
+		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texImage3D(
+			gl.TEXTURE_2D_ARRAY,
+			0,
+			gl.RGBA,
+			w,
+			h,
+			textureCount,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			image
+		);
+		gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
 		return texture;
 	}
 }

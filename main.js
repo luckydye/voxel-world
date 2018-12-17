@@ -3,6 +3,8 @@ import { Toolbar, IconButton } from './components/Toolbar.js';
 
 let voxelWorld;
 
+window.addEventListener("contextmenu", e => e.preventDefault());
+
 window.addEventListener("load", () => {
 	voxelWorld = new VoxelWorld({ canvas: world });
 	init();
