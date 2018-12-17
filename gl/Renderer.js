@@ -5,6 +5,7 @@ import DepthShader from './shader/DepthShader.js';
 import TestShader from './shader/TestShader.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
+import { Vec } from './Math.js';
 
 let nextFrame, 
 	currFrame,
@@ -18,12 +19,39 @@ const shaders = [
 ];
 
 class RenderPass {
-	constructor() {
-		// good idea??
+	constructor(id) {
+		this.id = id;
 	}
 
-	draw(gl) {
+	depthBuffer(gl) {
+		
+	}
 
+	colorBuffer(gl) {
+		// create texture
+		const h = gl.canvas.height;
+		const w = gl.canvas.width;
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		// assign to a framebuffer
+		const fb = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+		return texture;
+	}
+
+	clear(gl) {
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 }
 
@@ -32,28 +60,25 @@ export class Renderer {
 	setScene(scene) {
 		this.scene = scene;
 		this.scene.camera.controls(this.canvas);
+		this.scene.clear();
 		this.draw(gl);
 	}
 
     constructor(canvas) {
 		if(!canvas) throw "Err: no canvas";
 
-		this.settings = {
-			shadowsEnabled: false
-		}
+		this.renderpasses = [
+			// new RenderPass("depth"),
+		]
 
 		this.statistics = {
 			vertecies: 0,
 			elements: 0,
 		}
 
-		this.canvas = canvas;
-		
-		this.modelMatrix = mat4.create();
-		this.projMatrix = mat4.create();
-		this.viewMatrix = mat4.create();
-
 		window.statistics = this.statistics;
+
+		this.canvas = canvas;
 
 		const ctxtOpts = {
 			premultipliedAlpha: false
@@ -85,51 +110,8 @@ export class Renderer {
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
 
-	drawDepthTexture() {
-		const fb = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-
-		// create texture
-		const h = 480;
-		const w = 480;
-		const texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 
-			0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-		const renderBuffer = gl.createRenderbuffer()
-		gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h)
-		
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
-
-		return texture;
-	}
-
-	drawScene(gl) {
-		// draw all renderpass buffers
-		// then call .draw for final pass
-	}
-
 	draw(gl) {
 		if(!this.scene) return;
-
-		statistics.vertecies = 0;
-
-		/*
-		Pipeline:
-			1. Collect vertecies data
-			3. draw for every shader on framebuffer
-			4. draw buffers on canvas
-		*/
-
-		const camera = this.scene.camera;
 
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
@@ -140,119 +122,37 @@ export class Renderer {
 			this.draw(gl)
 		});
 		currFrame = performance.now();
-
-		if(!camera.updated) {
-			camera.updated = true;
-
-			for(let shader of shaders) {
-				if(shader.initialized) {
-					gl.useProgram(shader.program);
-					GL.updatePerspective(gl, shader.uniforms, camera);
-				} else {
-					shader.cache(gl);
-				}
-			}
-		}
 		
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		const enableShadows = this.settings.shadowsEnabled;
+		gl.useProgram(shaders[2].program);
+		shaders[2].setUniforms(gl);
+		this.drawScene(gl, this.scene, shaders[2]);
 
-		let depthtexture;
+		// render passes
+		for(let pass of this.renderpasses) {
+			gl.useProgram(shaders[1].program);
+			shaders[1].setUniforms(gl);
+			const bufferTexture = pass.colorBuffer(gl);
+			this.drawScene(gl, this.scene, shaders[1]);
+			pass.clear(gl);
+		}
 
+		// draw scene grid
 		const objects = this.scene.objects;
-
-		if(enableShadows) {
-			// draw depth/shadow pass
-			const shader = shaders[1];
-			depthtexture = this.drawDepthTexture(gl);
-			if(shader && shader.initialized) {
-			
-				gl.useProgram(shader.program);
-				shader.setUniforms(gl);
-
-				const lightSource = this.scene.light;
-
-				GL.updatePerspective(gl, shader.uniforms, this.scene.camera);
-				
-				gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
-				gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
-			
-				const vertxBuffer = this.scene.vertexBuffer;
-				if(this.scene.cached) {
-					GL.setModelUniforms(gl, shader.uniforms);
-					GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
-					gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
-				}
-
-				shader.done = true;
-			}
-			
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-
-			const u_colorTexLoc = gl.getUniformLocation(shader.program, "uColorTexture");
-			const u_depthTexLoc = gl.getUniformLocation(shader.program, "uDepthTexture");
-			gl.uniform1i(u_colorTexLoc, 0);
-			gl.uniform1i(u_depthTexLoc, 1);
-
-			gl.activeTexture(gl.TEXTURE1);
-			gl.bindTexture(gl.TEXTURE_2D, depthtexture);
-
-			const lightSource = this.scene.light;
-			gl.uniformMatrix4fv(shader.uniforms.uLightProjMatrix, false, lightSource.projMatrix);
-			gl.uniformMatrix4fv(shader.uniforms.uLightViewMatrix, false, lightSource.viewMatrix);
-			
-			gl.activeTexture(gl.TEXTURE0);
-		}
-		
-		const shader = shaders[2];
-		gl.useProgram(shader.program);
-		shader.setUniforms(gl);
-
-		const vertxBuffer = this.scene.vertexBuffer;
-		const vertArray = [];
-
-		for(let obj of objects) {
-			if(obj instanceof Cube) {
-				if(shader.initialized && !this.scene.cached && !obj.invisible) {
-					if(obj.mat.texture && !obj.mat.gltexture) {
-						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
-						gl.bindTexture(gl.TEXTURE_2D, obj.mat.gltexture);
-					} else {
-						GL.setModelUniforms(gl, shader.uniforms, obj);
-					}
-
-					if(!this.scene.cached) {
-						vertArray.push(...obj.buffer.vertArray);
-						statistics.elements += 1;
-					}
-				}
-			}
-		}
-
-		if(!this.scene.cached && vertArray.length > 0) {
-			vertxBuffer.vertecies = new Float32Array(vertArray);
-			this.scene.cached = true;
-		}
-
-		if(this.scene.cached) {
-			GL.setModelUniforms(gl, shader.uniforms);
-			GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
-			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
-			statistics.vertecies += vertxBuffer.vertecies.length;
-		}
-
-		// draw grid
-
 		for(let obj of objects) {
 			if(obj instanceof Grid) {
+				// TODO: Duplication
 				const shader = this.defaultShader;
+				const camera = this.scene.camera;
+
 				if(shader.initialized) {
 					gl.useProgram(shader.program);
 					if(!shader.done) {
 						GL.setModelUniforms(gl, shader.uniforms);
 					}
+					gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+					gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 					const buffer = obj.buffer;
 					GL.setBuffersAndAttributes(gl, shader.attributes, buffer);
@@ -260,33 +160,77 @@ export class Renderer {
 					shader.done = true;
 
 					statistics.vertecies += buffer.vertecies.length;
+				} else {
+					shader.cache(gl);
 				}
 			}
 		}
 
 		lastFrame = currFrame;
 	}
+
+	drawScene(gl, scene, shader) {
+
+		statistics.vertecies = 0;
+
+		const camera = scene.camera;
+		const objects = scene.objects;
+
+		const vertxBuffer = scene.vertexBuffer;
+		const vertArray = [];
+
+		if(!camera.updated) {
+			camera.updated = true;
+
+			if(shader.initialized) {
+				gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+				gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+			} else {
+				shader.cache(gl);
+			}
+		}
+
+		for(let obj of objects) {
+			if(obj instanceof Cube) {
+				if(shader.initialized && !scene.cached && !obj.invisible) {
+					if(obj.mat.texture && !obj.mat.gltexture) {
+						obj.mat.gltexture = GL.createTexture(gl, obj.mat.texture);
+						scene.texturemap = obj.mat.gltexture;
+					} else {
+						GL.setModelUniforms(gl, shader.uniforms, obj);
+					}
+
+					if(!scene.cached) {
+						vertArray.push(...obj.buffer.vertArray);
+						statistics.elements += 1;
+					}
+				}
+			}
+		}
+
+		if(!scene.cached && vertArray.length > 0) {
+			vertxBuffer.vertecies = new Float32Array(vertArray);
+			scene.cached = true;
+		}
+
+		if(scene.cached && shader.initialized) {
+			GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
+			gl.bindTexture(gl.TEXTURE_2D, scene.texturemap);
+			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
+			statistics.vertecies += vertxBuffer.vertecies.length;
+		}
+	}
 }
 
 export class GL {
 
-	static updatePerspective(gl, uniforms, camera) {
-		gl.uniformMatrix4fv(uniforms.uProjMatrix, false, camera.projMatrix);
-		gl.uniformMatrix4fv(uniforms.uViewMatrix, false, camera.viewMatrix);
-	}
-
-	static setModelUniforms(gl, uniforms, geo) {
-		const transform = {
-			position: { x: 0, y: 0, z: 0 },
-			rotation: { x: 0, y: 0, z: 0 }
-		}
-
-		let modelMatrix;
-
-		if(!transform.modelMatrix) {
-			transform.modelMatrix = mat4.create();
-
-			modelMatrix = transform.modelMatrix;
+	static setModelUniforms(gl, uniforms, geo, transform) {
+		let modelMatrix = mat4.create();
+		if(transform) {
+			transform = {
+				position: transform.position ||new Vec(),
+				rotation: transform.rotation ||new Vec()
+			}
 			
 			mat4.identity(modelMatrix);
 			
@@ -299,8 +243,7 @@ export class GL {
 			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
 			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 		}
-
-		gl.uniformMatrix4fv(uniforms["uModelMatrix"], false, transform.modelMatrix);
+		gl.uniformMatrix4fv(uniforms["uModelMatrix"], false, modelMatrix);
 
 		if(geo && geo.mat) {
 			const defuseColor = geo.mat.defuseColor;
