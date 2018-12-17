@@ -16,4 +16,5 @@ void main () {
   vec4 color = texture2D(uColorTexture, vTexCoords * 0.25).rgba;
 
   gl_FragColor = color * max(min(ambient * depth, 1.3), 0.7);
+  // gl_FragColor = gl_FragCoord;
 }

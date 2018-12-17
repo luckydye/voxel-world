@@ -17,6 +17,16 @@ const shaders = [
     new TestShader(),
 ];
 
+class RenderPass {
+	constructor() {
+		// good idea??
+	}
+
+	draw(gl) {
+
+	}
+}
+
 export class Renderer {
 
 	setScene(scene) {
@@ -102,6 +112,11 @@ export class Renderer {
 		return texture;
 	}
 
+	drawScene(gl) {
+		// draw all renderpass buffers
+		// then call .draw for final pass
+	}
+
 	draw(gl) {
 		if(!this.scene) return;
 
@@ -110,7 +125,6 @@ export class Renderer {
 		/*
 		Pipeline:
 			1. Collect vertecies data
-			2. upload verts when needed! (chunk based?)
 			3. draw for every shader on framebuffer
 			4. draw buffers on canvas
 		*/
@@ -140,7 +154,7 @@ export class Renderer {
 			}
 		}
 		
-		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		const enableShadows = this.settings.shadowsEnabled;
 
@@ -191,25 +205,6 @@ export class Renderer {
 			
 			gl.activeTexture(gl.TEXTURE0);
 		}
-
-		for(let obj of objects) {
-			if(obj instanceof Grid) {
-				const shader = this.defaultShader;
-				if(shader.initialized) {
-					gl.useProgram(shader.program);
-					if(!shader.done) {
-						GL.setModelUniforms(gl, shader.uniforms);
-					}
-
-					const buffer = obj.buffer;
-					GL.setBuffersAndAttributes(gl, shader.attributes, buffer);
-					gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
-					shader.done = true;
-
-					statistics.vertecies += buffer.vertecies.length;
-				}
-			}
-		}
 		
 		const shader = shaders[2];
 		gl.useProgram(shader.program);
@@ -246,6 +241,27 @@ export class Renderer {
 			GL.setBuffersAndAttributes(gl, shader.attributes, vertxBuffer);
 			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 			statistics.vertecies += vertxBuffer.vertecies.length;
+		}
+
+		// draw grid
+
+		for(let obj of objects) {
+			if(obj instanceof Grid) {
+				const shader = this.defaultShader;
+				if(shader.initialized) {
+					gl.useProgram(shader.program);
+					if(!shader.done) {
+						GL.setModelUniforms(gl, shader.uniforms);
+					}
+
+					const buffer = obj.buffer;
+					GL.setBuffersAndAttributes(gl, shader.attributes, buffer);
+					gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
+					shader.done = true;
+
+					statistics.vertecies += buffer.vertecies.length;
+				}
+			}
 		}
 
 		lastFrame = currFrame;

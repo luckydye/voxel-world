@@ -30,8 +30,6 @@ export class GLShader {
 		this.name = name;
 
 		this.initialized = false;
-
-		this.load(this.name);
 	}
 
     setUniforms(gl) {

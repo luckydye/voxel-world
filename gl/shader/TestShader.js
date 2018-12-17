@@ -4,6 +4,8 @@ export default class TestShader extends GLShader {
 
     constructor() {
         super({ name: "test" });
+
+		this.load(this.name);
     }
 
     get uniform() {
