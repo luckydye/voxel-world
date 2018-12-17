@@ -5,7 +5,6 @@ import DepthShader from './shader/DepthShader.js';
 import TestShader from './shader/TestShader.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
-import { VertexBuffer } from './VertexBuffer.js';
 
 let nextFrame, 
 	currFrame,
@@ -39,7 +38,6 @@ export class Renderer {
 		}
 
 		this.canvas = canvas;
-		this.clearColor = [0, 0, 0, 1.0];
 		
 		this.modelMatrix = mat4.create();
 		this.projMatrix = mat4.create();
@@ -47,12 +45,18 @@ export class Renderer {
 
 		window.statistics = this.statistics;
 
-		gl = this.canvas.getContext("webgl2") || this.canvas.getContext("webgl");
+		const ctxtOpts = {
+			premultipliedAlpha: false
+		}
+
+		gl = this.canvas.getContext("webgl2", ctxtOpts) || 
+			 this.canvas.getContext("webgl", ctxtOpts);
+
 		this.initGl(gl);
 	}
 
 	initGl(gl) {
-		gl.clearColor(...this.clearColor);
+		gl.clearColor(0.1, 0.1, 0.1, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 
@@ -66,9 +70,9 @@ export class Renderer {
 	}
 
 	resize() {
-		gl.canvas.width = 1280;
-		gl.canvas.height = 1280;
-		gl.viewport(0, 0, 1280, 1280);
+		gl.canvas.width = window.innerWidth;
+		gl.canvas.height = window.innerHeight;
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
 
 	drawDepthTexture() {
@@ -102,7 +106,6 @@ export class Renderer {
 		if(!this.scene) return;
 
 		statistics.vertecies = 0;
-		statistics.elements = 0;
 
 		/*
 		Pipeline:
@@ -118,7 +121,10 @@ export class Renderer {
 			cancelAnimationFrame(nextFrame);
 		}
 
-		nextFrame = requestAnimationFrame(() => this.draw(gl));
+		nextFrame = requestAnimationFrame((ms) => {
+			this.time = ms;
+			this.draw(gl)
+		});
 		currFrame = performance.now();
 
 		if(!camera.updated) {
@@ -133,8 +139,8 @@ export class Renderer {
 				}
 			}
 		}
-
-		gl.clear(gl.DEPTH_BUFFER_BIT);
+		
+		gl.clear(gl.COLOR_BUFFER_BIT);
 
 		const enableShadows = this.settings.shadowsEnabled;
 
@@ -201,7 +207,6 @@ export class Renderer {
 					shader.done = true;
 
 					statistics.vertecies += buffer.vertecies.length;
-					statistics.elements += 1;
 				}
 			}
 		}
@@ -224,9 +229,8 @@ export class Renderer {
 
 					if(!this.scene.cached) {
 						vertArray.push(...obj.buffer.vertArray);
+						statistics.elements += 1;
 					}
-
-					statistics.elements += 1;
 				}
 			}
 
@@ -374,6 +378,7 @@ export class GL {
 
 	static createTexture(gl, image) {
 		const texture = gl.createTexture();
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
 		

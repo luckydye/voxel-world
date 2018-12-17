@@ -1,12 +1,12 @@
 {
 	"scene": {
 		"camera": {
-			"fov": 70
+			"fov": 75
 		}
 	},
 	"world": {
-		"tileSize": 60,
-		"tileHeight": 12,
+		"tileSize": 49,
+		"tileHeight": 33,
 		"seed": 0.9216802954674626,
 		"threshold": 0.23,
 		"resolution": 15

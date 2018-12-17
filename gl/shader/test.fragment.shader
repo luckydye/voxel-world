@@ -14,5 +14,5 @@ void main () {
   float depth = ligthIntesity / vPos.z;
   vec4 color = texture2D(uColorTexture, vTexCoords).rgba;
 
-  gl_FragColor = color * min(ambient * (depth), 1.3);
+  gl_FragColor = color * max(min(ambient * depth, 1.3), 0.7);
 }

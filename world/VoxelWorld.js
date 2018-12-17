@@ -39,15 +39,19 @@ export default class VoxelWorld {
         const sceneOpts = {
             camera: new Camera({ 
                 fov: settings.scene.camera.fov,
-                position: new Vec(0, 4000, -15000),
-                rotation: new Vec(12, 0, 0) 
+                position: new Vec(0, 3500, -13000),
+                rotation: new Vec(19, -45, 0) 
             })
         }
         this.scene = new Scene(sceneOpts);
         
+        let lastTick = 0;
         setInterval(() => {
-            // this.scene.camera.rotation.y += 0.25;
-            // this.scene.camera.update();
+            if(this.turntable) {
+                this.scene.camera.rotation.y += 0.02 * (this.renderer.time - lastTick);
+                this.scene.camera.update();
+            }
+            lastTick = this.renderer.time;
         }, 14);
 
         this.renderer = new Renderer(canvas);
@@ -70,23 +74,9 @@ export default class VoxelWorld {
 
     voxel(tileData, x, y, z) {
         const tileSize = this.worldgen.tileSize;
-        const tileHeight = this.worldgen.tileHeight;
-        const mat = (() => {
-            let mats = [ [3,0], [3,0], [0,0] ];
-            if(tileSize - y >= tileHeight - 3) {
-                mats = [ [0,0] ];
-            }
-            if(tileSize - y >= tileHeight - 1) {
-                mats = [ [1,0] ];
-            }
-            if(y > tileSize-2 && tileData[x][y-1][z] !== 1) {
-                mats = [ [0,1] ];
-            }
-            return mats[Math.floor(Math.random() * mats.length)];
-        })();
         const cube = new Cube({
             material: Material.WORLD,
-            uv: mat,
+            uv: tileData[x][y][z],
             position: new Vec(
                 ((x * 200) + 100) - ((tileSize/2) * 200),
                 ((y * 200) + 100) - ((tileSize) * 200),

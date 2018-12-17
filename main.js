@@ -29,6 +29,14 @@ function init() {
 			onclick() {
 				voxelWorld.regen();
 			}
+		}),
+		turntable: IconButton({
+			icon: "O",
+			activeIcon: "X",
+			activeDefault: false,
+			onclick(btn) {
+				voxelWorld.turntable = btn.active;
+			}
 		})
 	}
 
