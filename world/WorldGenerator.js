@@ -63,7 +63,10 @@ export class WorldGenerator {
 						return mats[Math.floor(Math.random() * mats.length)];
 					})();
 
-					if(y > this.tileSize - this.tileHeight) {
+					if (y > this.tileSize - this.tileHeight &&
+						x+1 < this.tileSize && x > 0 &&
+						z+1 < this.tileSize && z > 0) {
+
 						const value = noise.perlin3((x + tile.pos.x) / res, y / res, (z + tile.pos.y) / res);
 						let threshold = this.threshold;
 						if(Math.abs(value) < threshold) {
@@ -71,6 +74,8 @@ export class WorldGenerator {
 						} else if(y > this.tileSize-2) {
 							tileData[x][y][z] = mat;
 						}
+					} else if(y > this.tileSize-2) {
+						tileData[x][y][z] = mat;
 					}
                 }
             }

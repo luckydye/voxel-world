@@ -34,7 +34,7 @@ export class Scene {
 			{ size: 2, attribute: "aTextCords" }
 		]
 		this.objects.clear();
-		this.add(new Grid(600));
+		this.add(new Grid(800));
 	}
 
 }
