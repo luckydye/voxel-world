@@ -8,11 +8,18 @@ uniform sampler2D uTextureArray;
 uniform float ambient;
 uniform float ligthIntesity;
 
+const float texCount = 256.0 / 16.0;
+
 out vec4 oFragColor;
 
 void main () {
-  float texCount = 256.0 / 16.0;
   vec4 color = texture(uTextureArray, vTexCoords / texCount);
 
-  oFragColor = vec4(color.rgb, 1);
+  // maybe fix some aliasing
+  vec4 randomSpot = texture(uTextureArray, vec2(0.7, 0.7) / texCount);
+  if(color.r > 0.95 && color.g > 0.95 && color.b > 0.95) {
+    color = randomSpot;
+  }
+
+  oFragColor = color;
 }
