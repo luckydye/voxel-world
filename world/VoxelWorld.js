@@ -5,7 +5,7 @@ import { Vec } from "../gl/Math.js";
 import { Camera } from "../gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "../gl/scene/Material.js";
-import { Resources } from "../gl/Resources.js";
+import { Resources } from "../lib/Resources.js";
 
 Resources.add({
     'materials': './resources/materials/materials.json',
