@@ -27,6 +27,11 @@ export class GLContext {
 
 		this.gl.clearColor(0.1, 0.1, 0.1, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
+		// this.gl.enable(this.gl.BLEND);
+		// this.gl.enable(this.gl.DITHER);
+		this.gl.enable(this.gl.STENCIL_TEST);
+
+		this.gl.stencilFunc(this.gl.LESS, 0, 1);
 	}
 
 	useShader(shader) {

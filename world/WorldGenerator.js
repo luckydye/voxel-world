@@ -105,13 +105,13 @@ export class WorldGenerator {
 					const dx = x;
 					const dz = z;
 
-					if (Math.random() < 0.035 &&
+					if (Math.random() < 0.05 &&
 						x+2 < tileSize && x-2 > 0 &&
 						z+2 < tileSize && z-2 > 0) {
 
 						if (tileData[x][y+1] && 
 							tileData[x][y+1][z] && 
-							tileData[x][y+1][z][0] == 1) {
+							tileData[x][y+1][z] == UV.GRASS) {
 								
 							if(x === dx && z === dz) {
 								this.makeTree(tileData, x, y, z, 3 + Math.random() * (7 - 3));
@@ -141,7 +141,7 @@ export class WorldGenerator {
 					}
 				}
 				// make crown
-				if(i >= 3 && i != height-1) {
+				if(i >= 2 && i < height-1) {
 					tileData[x][y-i][z+1] = UV.LEAVES;
 					tileData[x+1][y-i][z] = UV.LEAVES;
 
