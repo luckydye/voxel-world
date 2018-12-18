@@ -2,7 +2,6 @@ import { Scene } from './scene/Scene.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
 import { GLContext } from './GL.js';
-import DefaultShader from './shader/DefaultShader.js';
 import TestShader from './shader/TestShader.js';
 
 let nextFrame,
@@ -20,8 +19,8 @@ export class Renderer extends GLContext {
 		super(canvas);
 
 		this.shaders = [
-			new DefaultShader(),
 			new TestShader(),
+			// new DefaultShader(),
 		];
 
 		this.renderpasses = [
@@ -68,10 +67,9 @@ export class Renderer extends GLContext {
 		
 		this.clear();
 
-		this.useShader(this.shaders[1]);
-		this.drawScene(this.scene, this.shaders[1]);
-
 		this.useShader(this.shaders[0]);
+		this.drawScene(this.scene, this.shaders[0]);
+
 		this.drawGrid();
 		
 		lastFrame = this.time;
@@ -80,6 +78,8 @@ export class Renderer extends GLContext {
 	drawGrid() {
 		for(let obj of this.scene.objects) {
 			if(obj instanceof Grid) {
+				this.useShader(this.shaders[1]);
+
 				const gl = this.gl;
 				const shader = this.currentShader;
 				const camera = this.scene.camera;
