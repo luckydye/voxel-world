@@ -10,7 +10,7 @@ import { Resources } from "./Resources.js";
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'worldtextures': './resources/images/blocks_solid.png',
+    'worldtextures': './resources/textures/blocks_solid.png',
     'world': './resources/worlds/example.json',
 }, false);
 

@@ -1,4 +1,4 @@
-import VoxelWorld from './js/VoxelWorld.js';
+import VoxelWorld from './src/VoxelWorld.js';
 import { Toolbar, IconButton } from './components/Toolbar.js';
 
 window.addEventListener("load", () => onPageLod());

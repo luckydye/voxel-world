@@ -17,21 +17,18 @@ export class GLContext {
 	}
 
 	getContext(canvas) {
-		const ctxtOpts = {
-			premultipliedAlpha: false
-		}
+		const ctxtOpts = { alpha: false };
 		
 		this.canvas = canvas;
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
 
-		this.gl.clearColor(0.1, 0.1, 0.1, 1);
+		this.gl.clearColor(0.15, 0.15, 0.15, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
+		this.gl.enable(this.gl.DITHER);
 		// this.gl.enable(this.gl.BLEND);
-		// this.gl.enable(this.gl.DITHER);
-		this.gl.enable(this.gl.STENCIL_TEST);
-
-		this.gl.stencilFunc(this.gl.LESS, 0, 1);
+		// this.gl.enable(this.gl.STENCIL_TEST);
+		// this.gl.stencilFunc(this.gl.LESS, 0, 1);
 	}
 
 	useShader(shader) {
