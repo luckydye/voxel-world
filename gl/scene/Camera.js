@@ -20,7 +20,7 @@ export class Camera extends Transform {
 		const {
 			fov = 50,
 			scale = 0.004,
-			farplane = 200,
+			farplane = 350,
 			nearplane = 0.25,
 		} = args;
 		super(args);

@@ -7,7 +7,6 @@ import DefaultShader from './shader/DefaultShader.js';
 import TestShader from './shader/TestShader.js';
 
 let nextFrame,
-	currFrame,
 	lastFrame;
 
 const statistics = {
@@ -53,23 +52,20 @@ export class Renderer extends GLContext {
 		this.scene = scene;
 		this.scene.camera.controls(this.canvas);
 		this.scene.clear();
+		if(nextFrame) {
+			cancelAnimationFrame(nextFrame);
+		}
 		this.draw();
 	}
 
 	draw() {
 		if(!this.scene) return;
-
-		if(nextFrame) {
-			cancelAnimationFrame(nextFrame);
-		}
 		
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
+			statistics.fps = Math.floor(1000 / (this.time - lastFrame));
 			this.draw();
 		});
-
-		currFrame = this.time;
-		statistics.fps = Math.floor(1000 / (currFrame - lastFrame));
 		
 		this.clear();
 
@@ -79,7 +75,7 @@ export class Renderer extends GLContext {
 		this.useShader(this.shaders[0]);
 		this.drawGrid();
 		
-		lastFrame = currFrame;
+		lastFrame = this.time;
 	}
 
 	drawGrid() {
