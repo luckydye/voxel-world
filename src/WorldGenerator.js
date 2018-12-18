@@ -79,7 +79,7 @@ export class WorldGenerator {
 					})();
 
 
-					const yvalue = this.tileHeight + (noise.perlin2((x + tile.pos.x) / res, (x + tile.pos.y) / res) * 2);
+					const yvalue = this.tileHeight + noise.perlin2((x + tile.pos.x) / res, (z + tile.pos.y) / res) * 10;
 
 					if (y > this.tileSize - yvalue &&
 						x+1 < this.tileSize && x > 0 &&
@@ -114,6 +114,7 @@ export class WorldGenerator {
 
 						if (tileData[x][y+1] && 
 							tileData[x][y+1][z] && 
+							!tileData[x][y-1][z] &&
 							tileData[x][y+1][z] == UV.GRASS) {
 								
 							if(x === dx && z === dz) {
