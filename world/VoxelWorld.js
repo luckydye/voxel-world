@@ -9,7 +9,7 @@ import { Resources } from "../lib/Resources.js";
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'worldtextures': './resources/images/blocks.png',
+    'worldtextures': './resources/images/blocks_solid.png',
     'world': './resources/worlds/example.json',
 }, false);
 
