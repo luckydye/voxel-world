@@ -14,6 +14,18 @@ class Tile {
 	}
 }
 
+const UV = {
+	LOG: [0,0],
+	GRASS: [1,0],
+	LAVA: [2,0],
+	STONE: [3,0],
+
+	LEAVES: [0,1],
+	DIRT: [1,1],
+	WATER: [2,1],
+	SAND: [3,1],
+}
+
 export class WorldGenerator {
 
 	constructor({ 
@@ -50,18 +62,18 @@ export class WorldGenerator {
                 for(let z = 0; z < tileData[x][y].length; z++) {
 
 					const mat = (() => {
-						let mats = [ [3,0], [3,0], [0,0] ];
+						let mats = [ UV.STONE, UV.STONE, UV.DIRT ];
 						if(tileSize - y >= tileHeight - 3) {
-							mats = [ [0,0] ];
+							mats = [ UV.DIRT ];
 						}
 						if(tileSize - y >= tileHeight - 1) {
-							mats = [ [1,0] ];
+							mats = [ UV.GRASS ];
 						}
 						if(y > tileSize-2 && !tileData[x][y-1][z]) {
-							mats = [ [2,1] ];
+							mats = [ UV.WATER ];
 						}
 						if (y < tileSize-1 && y > tileSize-5) {
-							mats = [ [3,1] ];
+							mats = [ UV.SAND ];
 						}
 						return mats[Math.floor(Math.random() * mats.length)];
 					})();
@@ -93,7 +105,7 @@ export class WorldGenerator {
 					const dx = x;
 					const dz = z;
 
-					if (Math.random() < 0.095 &&
+					if (Math.random() < 0.035 &&
 						x+2 < tileSize && x-2 > 0 &&
 						z+2 < tileSize && z-2 > 0) {
 
@@ -123,18 +135,18 @@ export class WorldGenerator {
 				// make log
 				if(tileData[x][y-i]) {
 					if(i < height-1) {
-						tileData[x][y-i][z] = [1,1];
+						tileData[x][y-i][z] = UV.LOG;
 					} else {
-						tileData[x][y-i][z] = [0,1];
+						tileData[x][y-i][z] = UV.LEAVES;
 					}
 				}
 				// make crown
 				if(i >= 3 && i != height-1) {
-					tileData[x][y-i][z+1] = [0,1];
-					tileData[x+1][y-i][z] = [0,1];
+					tileData[x][y-i][z+1] = UV.LEAVES;
+					tileData[x+1][y-i][z] = UV.LEAVES;
 
-					tileData[x][y-i][z-1] = [0,1];
-					tileData[x-1][y-i][z] = [0,1];
+					tileData[x][y-i][z-1] = UV.LEAVES;
+					tileData[x-1][y-i][z] = UV.LEAVES;
 				}
 			}
 		}
