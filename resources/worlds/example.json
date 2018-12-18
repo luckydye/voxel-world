@@ -5,8 +5,8 @@
 		}
 	},
 	"world": {
-		"tileSize": 100,
-		"tileHeight": 12,
+		"tileSize": 75,
+		"tileHeight": 10,
 		"seed": 0.9216802954674626,
 		"threshold": 0.3,
 		"resolution": 20

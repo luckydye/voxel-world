@@ -58,7 +58,7 @@ export class WorldGenerator {
 							mats = [ [1,0] ];
 						}
 						if(y > tileSize-2 && !tileData[x][y-1][z]) {
-							mats = [ [0,1] ];
+							mats = [ [2,1] ];
 						}
 						if (y < tileSize-1 && y > tileSize-5) {
 							mats = [ [3,1] ];
@@ -125,16 +125,16 @@ export class WorldGenerator {
 					if(i < height-1) {
 						tileData[x][y-i][z] = [1,1];
 					} else {
-						tileData[x][y-i][z] = [2,1];
+						tileData[x][y-i][z] = [0,1];
 					}
 				}
 				// make crown
 				if(i >= 3 && i != height-1) {
-					tileData[x][y-i][z+1] = [2,1];
-					tileData[x+1][y-i][z] = [2,1];
+					tileData[x][y-i][z+1] = [0,1];
+					tileData[x+1][y-i][z] = [0,1];
 
-					tileData[x][y-i][z-1] = [2,1];
-					tileData[x-1][y-i][z] = [2,1];
+					tileData[x][y-i][z-1] = [0,1];
+					tileData[x-1][y-i][z] = [0,1];
 				}
 			}
 		}

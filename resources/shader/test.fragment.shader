@@ -11,7 +11,8 @@ uniform float ligthIntesity;
 out vec4 oFragColor;
 
 void main () {
-  vec4 color = texture(uTextureArray, vTexCoords / 8.0);
+  float texCount = 512.0 / 64.0;
+  vec4 color = texture(uTextureArray, vTexCoords / texCount);
 
-  oFragColor = vec4(color.rgb * 0.9, 1);
+  oFragColor = vec4(color.rgb, 1);
 }
