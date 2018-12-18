@@ -1,4 +1,3 @@
-import '../lib/gl-matrix.js';
 import { Scene } from './scene/Scene.js';
 import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';

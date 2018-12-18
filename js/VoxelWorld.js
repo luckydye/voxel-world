@@ -1,11 +1,12 @@
-import { Renderer } from "../gl/Renderer.js";
-import { Scene } from "../gl/scene/Scene.js";
-import { Cube } from "../gl/geo/Cube.js";
-import { Vec } from "../gl/Math.js";
-import { Camera } from "../gl/scene/Camera.js";
+import '../../lib/gl-matrix.js';
+import { Renderer } from "./gl/Renderer.js";
+import { Scene } from "./gl/scene/Scene.js";
+import { Cube } from "./gl/geo/Cube.js";
+import { Vec } from "./gl/Math.js";
+import { Camera } from "./gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
-import { Material } from "../gl/scene/Material.js";
-import { Resources } from "../lib/Resources.js";
+import { Material } from "./gl/scene/Material.js";
+import { Resources } from "./Resources.js";
 
 Resources.add({
     'materials': './resources/materials/materials.json',
