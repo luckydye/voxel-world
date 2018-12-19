@@ -31,7 +31,7 @@ export default class VoxelWorld {
         const sceneOpts = {
             camera: new Camera({ 
                 fov: settings.scene.camera.fov,
-                position: new Vec(0, 2000, -13000),
+                position: new Vec(0, 2000, -6000),
                 rotation: new Vec(19, 0, 0) 
             })
         }

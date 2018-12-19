@@ -1,22 +1,17 @@
-attribute vec4 aPosition;
-attribute vec2 aTextCords;
+#version 300 es
 
-varying vec2 vTexColor;
-varying vec4 vLightPos;
-varying vec4 vFPos;
+in vec4 aPosition;
+in vec2 aTextCords;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 
-uniform mat4 uLightModelMatrix;
-uniform mat4 uLightViewMatrix;
-uniform mat4 uLightProjMatrix;
+out vec2 vTextCords;
+out vec4 vPos;
 
 void main () {
-  vTexColor = aTextCords;
-  vLightPos = uLightModelMatrix * uLightViewMatrix * uLightProjMatrix * aPosition;
-  vFPos = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-  
   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+  vTextCords = aTextCords;
+  vPos = gl_Position;
 }

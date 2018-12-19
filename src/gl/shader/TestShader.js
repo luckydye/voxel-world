@@ -19,8 +19,7 @@ export default class TestShader extends GLShader {
 
     get uniform() {
         return {
-            ambient: 1.0,
-            ligthIntesity: 40.0
+            
         }
     }
 

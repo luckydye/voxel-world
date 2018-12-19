@@ -3,6 +3,7 @@ import { Grid } from './geo/Grid.js';
 import { Cube } from './geo/Cube.js';
 import { GLContext } from './GL.js';
 import TestShader from './shader/TestShader.js';
+import DepthShader from './shader/DepthShader.js';
 
 let nextFrame,
 	lastFrame;
@@ -19,13 +20,13 @@ export class Renderer extends GLContext {
 		super(canvas);
 
 		this.shaders = [
+			new DepthShader(),
 			new TestShader(),
-			// new DefaultShader(),
 		];
 
-		this.renderpasses = [
-			// new RenderPass("depth"),
-		];
+		this.renderTargets = [
+			'depth'
+		]
 
 		this.setScene(new Scene());
 		
@@ -47,12 +48,18 @@ export class Renderer extends GLContext {
 			this.prepareShader(shader);
 		}
 
+		for(let t in this.renderTargets) {
+			const target = this.renderTargets[t];
+			this.createFramebuffer(target);
+		}
+
 		this.scene = scene;
 		this.scene.camera.controls(this.canvas);
 		this.scene.clear();
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
 		}
+
 		this.draw();
 	}
 
@@ -62,17 +69,82 @@ export class Renderer extends GLContext {
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
 			statistics.fps = Math.floor(1000 / (this.time - lastFrame));
+			statistics.passes = 0;
 			this.draw();
 		});
+
+		for(let t in this.renderTargets) {
+			const target = this.renderTargets[t];
+			this.useFramebuffer(target);
+
+			this.clear();
+
+			this.useShader(this.shaders[t]);
+			this.drawScene(this.scene);
+
+			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+			this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+		}
 		
 		this.clear();
+		this.useShader(this.shaders[1]);
 
-		this.useShader(this.shaders[0]);
-		this.drawScene(this.scene, this.shaders[0]);
+		for(let t in this.renderTargets) {
+			const target = this.renderTargets[t];
+			const tex = this.getBufferTexture(target);
+			this.useTexture(tex, target + "Texture", 1);
+		}
 
-		this.drawGrid();
-		
+		this.drawScene(this.scene);
+
 		lastFrame = this.time;
+	}
+
+	drawScene(scene) {
+		const camera = scene.camera;
+		const objects = scene.objects;
+		const shader = this.currentShader;
+
+		const vertxBuffer = scene.vertexBuffer;
+		const vertArray = [];
+
+		statistics.vertecies = 0;
+
+		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+		for(let obj of objects) {
+			if(obj instanceof Cube) {
+				if(!scene.cached && !obj.invisible) {
+					vertArray.push(...obj.buffer.vertArray);
+					statistics.voxels += 1;
+				}
+			}
+
+			if(!scene.texturemap) {
+				if(obj && obj.mat) {
+					const img = obj.mat.texture;
+					scene.texturemap = this.createTexture(img);
+				}
+			}
+		}
+
+		if(!scene.cached && vertArray.length > 0) {
+			vertxBuffer.vertecies = new Float32Array(vertArray);
+			scene.cached = true;
+		}
+
+		if(scene.cached) {
+			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
+			this.setTransformUniforms(shader.uniforms);
+
+			this.useTexture(scene.texturemap, "uTexture", 0);
+
+			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
+			
+			statistics.passes++;
+			statistics.vertecies += vertxBuffer.vertecies.length;
+		}
 	}
 
 	drawGrid() {
@@ -96,102 +168,5 @@ export class Renderer extends GLContext {
 				statistics.vertecies += buffer.vertecies.length;
 			}
 		}
-	}
-
-	drawScene(scene, shader) {
-		const gl = this.gl;
-
-		const camera = scene.camera;
-		const objects = scene.objects;
-
-		const vertxBuffer = scene.vertexBuffer;
-		const vertArray = [];
-
-		statistics.vertecies = 0;
-
-		if(!camera.updated) {
-			camera.updated = true;
-
-			gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-			gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-		}
-
-		for(let obj of objects) {
-			if(obj instanceof Cube) {
-				if(shader.initialized && !scene.cached && !obj.invisible) {
-					vertArray.push(...obj.buffer.vertArray);
-					statistics.voxels += 1;
-				}
-			}
-		}
-
-		if(!scene.texturemap) {
-			const obj = [...objects].find(o => o instanceof Cube);
-			if(obj && obj.mat) {
-				const img = obj.mat.texture;
-				scene.texturemap = this.createTexture(img, 0);
-			}
-		}
-
-		if(!scene.cached && vertArray.length > 0) {
-			vertxBuffer.vertecies = new Float32Array(vertArray);
-			scene.cached = true;
-		}
-
-		if(scene.cached) {
-			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
-			this.setTransformUniforms(shader.uniforms);
-			
-			this.useTexture("uTextureArray", gl.TEXTURE_2D, 0);
-
-			gl.drawArrays(gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
-			statistics.vertecies += vertxBuffer.vertecies.length;
-		}
-
-	}
-}
-
-class RenderPass {
-
-	constructor(id) {
-		this.id = id;
-
-		// render passes
-		// 	gl.useProgram(shaders[1].program);
-		// 	shaders[1].setUniforms(gl);
-		// 	const bufferTexture = pass.colorBuffer(gl);
-		// 	this.drawScene(gl, this.scene, shaders[1]);
-		// 	pass.clear(gl);
-	}
-
-	depthBuffer(gl) {
-		
-	}
-
-	colorBuffer(gl) {
-		// create texture
-		const h = gl.canvas.height;
-		const w = gl.canvas.width;
-		const texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-		// assign to a framebuffer
-		const fb = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-
-		return texture;
-	}
-
-	clear(gl) {
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 }

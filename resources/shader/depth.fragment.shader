@@ -1,12 +1,10 @@
+#version 300 es
 precision mediump float;
 
-varying vec4 vLightPos;
-varying vec4 vFPos;
+in vec4 vPos;
+
+out vec4 oFragColor;
 
 void main () {
-  float ligthIntesity = 20.0;
-  float depth = vFPos.z;
-  depth = ligthIntesity / depth;
-
-  gl_FragColor = vec4(depth, depth, depth, 1.0);
+  oFragColor = vec4(vec3(1.0 / vPos.z), 1.0);
 }

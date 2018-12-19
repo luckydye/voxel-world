@@ -3,11 +3,10 @@ export class GLContext {
 	constructor(canvas) {
 		if(!canvas) throw "GLContext: Err: no canvas";
 
-		this.cache = {
-			textures: []
-		}
-
 		this.currentShader = null;
+
+		this.framebuffers = new Map();
+		this.bufferTextures = new Map();
 
 		this.getContext(canvas);
 	}
@@ -25,24 +24,35 @@ export class GLContext {
 
 		this.gl.clearColor(0.15, 0.15, 0.15, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
-		this.gl.enable(this.gl.DITHER);
-		// this.gl.enable(this.gl.BLEND);
-		// this.gl.enable(this.gl.STENCIL_TEST);
-		// this.gl.stencilFunc(this.gl.LESS, 0, 1);
 	}
 
 	useShader(shader) {
-		const gl = this.gl;
-		gl.useProgram(shader.program);
-		shader.setUniforms(gl);
+		this.gl.useProgram(shader.program);
+		shader.setUniforms(this.gl);
 		this.currentShader = shader;
 	}
 
-	useTexture(uniformStr, type, slot) {
-		this.gl.activeTexture(this.gl["TEXTURE" + slot]);
-		const texture = this.cache.textures[slot];
-		this.gl.bindTexture(type, texture);
-		this.gl.uniform1i(this.currentShader.uniforms[uniformStr], slot);
+	useTexture(texture, uniformStr, slot) {
+		if(uniformStr && slot != null) {
+			this.gl.activeTexture(this.gl["TEXTURE" + slot]);
+			this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+			statistics.xx = this.currentShader.uniforms;
+			this.gl.uniform1i(this.currentShader.uniforms[uniformStr], slot);
+		} else {
+			this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+		}
+	}
+
+	useFramebuffer(name) {
+		if(this.framebuffers.has(name)) {
+			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffers.get(name));
+		} else {
+			console.error("Err:", name, "framebuffer not found");
+		}
+	}
+
+	getBufferTexture(name) {
+		return this.bufferTextures.get(name);
 	}
 
 	prepareShader(shader) {
@@ -53,12 +63,11 @@ export class GLContext {
 				shader._vertShader = this.compileShader(shader.src[0], gl.VERTEX_SHADER);
 				shader._fragShader = this.compileShader(shader.src[1], gl.FRAGMENT_SHADER);
 				shader.program = this.createProgram(shader._vertShader, shader._fragShader);
-				shader.initialized = true;
 
-				if(shader.program) {
-					shader._uniforms = this.getUniforms(shader.program);
-					shader._attributes = this.getAttributes(shader.program);
-				}
+				shader._uniforms = this.getUniforms(shader.program);
+				shader._attributes = this.getAttributes(shader.program);
+				
+				shader.initialized = true;
 			}
 
 			return shader.program;
@@ -102,6 +111,25 @@ export class GLContext {
 		return shader;
 	}
 
+	createFramebuffer(name) {
+		const gl = this.gl;
+
+		const tex = this.createTexture(null, gl.canvas.height, gl.canvas.width);
+		this.useTexture(tex);
+
+		const fbo = this.gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+		const attachmentPoint = gl.COLOR_ATTACHMENT0;
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, tex, 0);
+		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+		this.bufferTextures.set(name, tex);
+		this.framebuffers.set(name, fbo);
+		return fbo;
+	}
+
 	createProgram(vertShader, fragShader) {
 		const gl = this.gl;
 		const program = gl.createProgram();
@@ -116,12 +144,11 @@ export class GLContext {
 		return program;
 	}
 
-	createTexture(image, slot) {
+	createTexture(image, w, h) {
 		const gl = this.gl;
 
 		const texture = gl.createTexture();
-		gl.activeTexture(gl["TEXTURE" + slot]);
-		this.cache.textures[slot] = texture;
+
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -129,32 +156,14 @@ export class GLContext {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		return texture;
-	}
+		if(image) {
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		} else {
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		}
 
-	createTextureArray(image, slot, w, h, textureCount) {
-		const gl = this.gl;
-		const texture = gl.createTexture();
-		gl.activeTexture(gl["TEXTURE" + slot]);
-		this.cache.textures[slot] = texture;
-		gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
-		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texImage3D(
-			gl.TEXTURE_2D_ARRAY,
-			0,
-			gl.RGBA,
-			w,
-			h,
-			textureCount,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			image
-		);
-		gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
 		return texture;
 	}
 
