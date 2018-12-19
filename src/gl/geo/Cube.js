@@ -49,7 +49,7 @@ export class Cube extends Geometry {
 		vertxBuffer.type = "TRIANGLES";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTextCords" }
+			{ size: 2, attribute: "aTexCoords" }
 		]
 
 		return vertxBuffer;

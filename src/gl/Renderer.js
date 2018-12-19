@@ -6,6 +6,8 @@ import ColorShader from './shader/ColorShader.js';
 import DepthShader from './shader/DepthShader.js';
 import NormalShader from './shader/NormalShader.js';
 import { VertexBuffer } from './scene/VertexBuffer.js';
+import { Grid } from './geo/Grid.js';
+import GridShader from './shader/GridShader.js';
 
 let nextFrame,
 	lastFrame;
@@ -69,10 +71,11 @@ export class Renderer extends GLContext {
 		this.setResolution(window.innerWidth, window.innerHeight);
 
 		this.shaders = [
-			new FinalShader(),
 			new ColorShader(),
-			new DepthShader(),
-			new NormalShader(),
+			new GridShader(),
+			// new FinalShader(),
+			// new DepthShader(),
+			// new NormalShader(),
 		];
 		
 		for(let shader of this.shaders) {
@@ -84,6 +87,8 @@ export class Renderer extends GLContext {
 			// new RenderPass(this, 'depth', this.shaders[2]),
 			// new RenderPass(this, 'normal', this.shaders[3]),
 		]
+
+		this.grid = new Grid(1000);
 
 		this.draw();
 	}
@@ -119,15 +124,15 @@ export class Renderer extends GLContext {
 			this.draw();
 		});
 
-		for(let pass of this.renderPasses) {
-			pass.use();
-			this.drawScene(this.scene, pass.shader);
-			pass.clear();
-		}
+		// for(let pass of this.renderPasses) {
+		// 	pass.use();
+		// 	this.drawScene(this.scene, pass.shader);
+		// 	pass.clear();
+		// }
+
+		// this.clear();
 
 		this.clear();
-
-		const finalShader = this.shaders[1];
 
 		// this.clearFramebuffer();
 
@@ -138,20 +143,24 @@ export class Renderer extends GLContext {
 
 		// statistics.passes = finalShader.uniforms;
 
-		this.useShader(finalShader);
+		this.useShader(this.shaders[0]);
 
 		// const vertexBuffer = this.screenVertexBuffer;
 		// this.setBuffersAndAttributes(finalShader.attributes, vertexBuffer);
 		// this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexBuffer.vertsPerElement);
 
-		this.drawScene(this.scene, finalShader);
+		this.drawScene(this.scene);
+
+		this.useShader(this.shaders[1]);
+		this.drawGrid();
 
 		lastFrame = this.time;
 	}
 
-	drawScene(scene, shader) {
+	drawScene(scene) {
 		const camera = scene.camera;
 		const objects = scene.objects;
+		const shader = this.currentShader;
 
 		const vertxBuffer = scene.vertexBuffer;
 		const vertArray = [];
@@ -188,6 +197,25 @@ export class Renderer extends GLContext {
 
 			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 		}
+	}
+
+	drawGrid() {
+		this.useShader(this.shaders[1]);
+
+		const gl = this.gl;
+		const shader = this.currentShader;
+		const camera = this.scene.camera;
+
+		const buffer = this.grid.buffer;
+		gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+		this.setBuffersAndAttributes(shader.attributes, buffer);
+		gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
+
+		statistics.gridVerts = buffer.vertecies.length;
+
+		statistics.vertecies += buffer.vertecies.length;
 	}
 
 }

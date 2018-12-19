@@ -5,6 +5,7 @@ export class GLContext {
 
 		this.currentShader = null;
 
+		this.vertexArrayObjects = new Map();
 		this.framebuffers = new Map();
 		this.bufferTextures = new Map();
 
@@ -114,6 +115,21 @@ export class GLContext {
 		}
 
 		return shader;
+	}
+
+	useVAO(name) {
+		const VAO = this.vertexArrayObjects.get(name);
+		if(VAO) {
+			this.gl.bindVertexArray(VAO);
+		} else {
+			console.log("Err", "VAO not found");
+		}
+	}
+
+	createVAO(name) {
+		const VAO = this.gl.createVertexArray();
+		this.vertexArrayObjects.set(name, VAO);
+		this.gl.bindVertexArray(VAO);
 	}
 
 	createFramebuffer(name) {
