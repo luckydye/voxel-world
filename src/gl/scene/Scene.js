@@ -1,5 +1,4 @@
 import { Camera } from './Camera.js';
-import { Grid } from '../geo/Grid.js';
 import { VertexBuffer } from './VertexBuffer.js';
 
 export class Scene {
@@ -27,7 +26,6 @@ export class Scene {
 			{ size: 2, attribute: "aTextCords" }
 		]
 		this.objects.clear();
-		// this.add(new Grid(800));
 	}
 
 }

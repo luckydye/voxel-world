@@ -36,7 +36,6 @@ export class GLContext {
 		if(uniformStr && slot != null) {
 			this.gl.activeTexture(this.gl["TEXTURE" + slot]);
 			this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-			statistics.xx = this.currentShader.uniforms;
 			this.gl.uniform1i(this.currentShader.uniforms[uniformStr], slot);
 		} else {
 			this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
@@ -49,6 +48,11 @@ export class GLContext {
 		} else {
 			console.error("Err:", name, "framebuffer not found");
 		}
+	}
+
+	clearFramebuffer() {
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+		this.gl.bindTexture(this.gl.TEXTURE_2D, null);
 	}
 
 	getBufferTexture(name) {
@@ -105,6 +109,7 @@ export class GLContext {
 		gl.compileShader(shader);
 
 		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			console.error(src);
 			throw new Error(gl.getShaderInfoLog(shader));
 		}
 
@@ -213,7 +218,7 @@ export class GLContext {
 			gl.bufferData(gl.ARRAY_BUFFER, bufferInfo.vertecies, gl.STATIC_DRAW);
 		}
 	
-		let lastElementSize = 0;
+		let lastAttrSize = 0;
 	
 		for(let i = 0; i < bufferInfo.attributes.length; i++) {
 
@@ -221,13 +226,13 @@ export class GLContext {
 				attributes[bufferInfo.attributes[i].attribute], 
 				bufferInfo.attributes[i].size, 
 				gl.FLOAT, 
-				false, 
+				gl.FALSE, 
 				elements * bpe, 
-				lastElementSize * bpe
+				lastAttrSize * bpe
 			);
 			gl.enableVertexAttribArray(attributes[bufferInfo.attributes[i].attribute]);
 	
-			lastElementSize = bufferInfo.attributes[i].size;
+			lastAttrSize += bufferInfo.attributes[i].size;
 		}
 	}
 	

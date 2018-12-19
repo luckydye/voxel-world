@@ -3,17 +3,17 @@ import { GLShader } from "../GL.js";
 
 Resources.add({
     'gbuffer.vs': './resources/shader/gbuffer.vertex.shader',
-    'depth.fs': './resources/shader/depth.fragment.shader',
+    'normal.fs': './resources/shader/normal.fragment.shader',
 }, false);
 
-export default class DepthShader extends GLShader {
-
+export default class NormalShader extends GLShader {
+    
     constructor() {
-        super({ name: "depth" });
+        super({ name: "normal" });
 
         this.src = [
             Resources.get('gbuffer.vs'),
-            Resources.get('depth.fs'),
+            Resources.get('normal.fs'),
         ];
     }
 
