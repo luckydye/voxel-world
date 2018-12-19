@@ -1,7 +1,6 @@
 #version 300 es
 precision mediump float;
 
-in vec3 vColor;
 in vec4 vPos;
 
 out vec4 oFragColor;
@@ -14,7 +13,7 @@ void main () {
   } else if(vPos.z == 0.0) {
     color.b = 0.5;
   } else {
-    color = vec4(vColor, 1.0);
+    color = vec4(0.2, 0.2, 0.2, 1.0);
   }
 
   oFragColor = color;

@@ -31,7 +31,7 @@ export default class VoxelWorld {
         const sceneOpts = {
             camera: new Camera({ 
                 fov: settings.scene.camera.fov,
-                position: new Vec(0, 2000, -6000),
+                position: new Vec(0, 200, -600),
                 rotation: new Vec(19, 0, 0) 
             })
         }
@@ -79,9 +79,9 @@ export default class VoxelWorld {
             material: Material.WORLD,
             uv: tileData[x][y][z],
             position: new Vec(
-                ((x * 200) + 100) - ((tileSize/2) * 200),
-                ((y * 200) + 100) - ((tileSize) * 200),
-                ((z * 200) + 100) - ((tileSize/2) * 200),
+                ((x * 20) + 10) - ((tileSize/2) * 20),
+                ((y * 20) + 10) - ((tileSize) * 20),
+                ((z * 20) + 10) - ((tileSize/2) * 20),
             )
         });
 

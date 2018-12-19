@@ -40,7 +40,7 @@ export class Camera extends Transform {
 	}
 
 	zoom(dir) {
-		this.position.z += 1200 * dir;
+		this.position.z += -100 * Math.sign(dir);
 		this.update();
 	}
 
@@ -121,7 +121,7 @@ export class Camera extends Transform {
 		});
 
 		element.addEventListener("wheel", e => {
-			this.position.z += -e.deltaY * 5;
+			this.zoom(e.deltaY);
 			this.update();
 		})
 	}

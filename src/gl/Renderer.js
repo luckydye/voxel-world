@@ -90,12 +90,7 @@ export class Renderer extends GLContext {
 			new RenderPass(this, 'normal', this.shaders[4]),
 		]
 
-		this.grid = new Grid(1000);
-		this.cube = new Cube({
-            material: Material.WORLD,
-            uv: [0, 0],
-            position: new Vec(-8000, -100, 0)
-		});
+		this.grid = new Grid(200);
 
 		this.draw();
 	}
@@ -156,8 +151,6 @@ export class Renderer extends GLContext {
 
 		this.useShader(this.shaders[2]);
 		this.drawScene(this.scene);
-
-		this.drawGeo(this.cube);
 
 		this.useShader(this.shaders[0]);
 		this.drawGeo(this.grid);

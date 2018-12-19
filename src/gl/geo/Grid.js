@@ -3,40 +3,37 @@ import { VertexBuffer } from "../scene/VertexBuffer.js";
 
 export class Grid extends Geometry {
 
-	constructor(size) {
+	constructor(size, count) {
 		super();
 		this.size = size;
+		this.count = count;
 	}
 
 	createBuffer() {
-		const vertArray = this.generate(this.size, this.size);
+		const vertArray = this.generate(this.size, this.count);
 		const vertxBuffer = VertexBuffer.create(vertArray);
 		vertxBuffer.type = "LINES";
 		vertxBuffer.attributes = [
-			{ size: 3, attribute: "aPosition" },
-			{ size: 3, attribute: "aColor" }
+			{ size: 3, attribute: "aPosition" }
 		]
 		return vertxBuffer;
 	}
 	
-	generate(w = 600, h = 600, s = 15) {
+	generate(w = 100, s = 14) {
 		const dataArray = [];
-
-		for(let x = 0; x < s-1; x++) {
-			for(let y = 0; y < s-1; y++) {
-				dataArray.push(...[
-					x * w, 0, y * h, 0.2, 0.2, 0.2,
-					x * w, 0, y * -h, 0.2, 0.2, 0.2,
-					x * w, 0, y * -h, 0.2, 0.2, 0.2,
-					x * -w, 0, y * -h, 0.2, 0.2, 0.2,
-					x * -w, 0, y * -h, 0.2, 0.2, 0.2,
-					x * -w, 0, y * h, 0.2, 0.2, 0.2,
-					x * -w, 0, y * h, 0.2, 0.2, 0.2,
-					x * w, 0, y * h, 0.2, 0.2, 0.2,
-				])
-			}
+		const size = w * s / 2;
+		for(let x = -s/2; x <= s/2; x++) {
+			dataArray.push(...[
+				w * x, 0, size,
+				w * x, 0, -size,
+			])
 		}
-
+		for(let z = -s/2; z <= s/2; z++) {
+			dataArray.push(...[
+				size, 0, w * z,
+				-size, 0, w * z,
+			])
+		}
 		return dataArray;
 	}
 }
