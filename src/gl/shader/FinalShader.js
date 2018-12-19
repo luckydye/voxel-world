@@ -7,14 +7,16 @@ Resources.add({
 }, false);
 
 export default class FinalShader extends GLShader {
-    
-    constructor() {
-        super({ name: "final" });
 
-        this.src = [
+    static get source() {
+        return [
             Resources.get('final.vs'),
             Resources.get('final.fs'),
         ];
+    }
+    
+    constructor() {
+        super({ name: "final" });
     }
 
 }

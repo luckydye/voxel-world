@@ -7,14 +7,16 @@ Resources.add({
 }, false);
 
 export default class NormalShader extends GLShader {
-    
-    constructor() {
-        super({ name: "normal" });
 
-        this.src = [
+    static get source() {
+        return [
             Resources.get('gbuffer.vs'),
             Resources.get('normal.fs'),
         ];
+    }
+    
+    constructor() {
+        super({ name: "normal" });
     }
 
 }

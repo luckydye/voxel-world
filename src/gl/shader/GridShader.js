@@ -7,13 +7,15 @@ Resources.add({
 }, false);
 
 export default class GridShader extends GLShader {
-    
-    constructor() {
-        super({ name: "grid" });
 
-        this.src = [
+    static get source() {
+        return [
             Resources.get('grid.vs'),
             Resources.get('grid.fs'),
         ];
+    }
+    
+    constructor() {
+        super({ name: "grid" });
     }
 }

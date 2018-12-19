@@ -8,13 +8,15 @@ Resources.add({
 
 export default class DepthShader extends GLShader {
 
-    constructor() {
-        super({ name: "depth" });
-
-        this.src = [
+    static get source() {
+        return [
             Resources.get('gbuffer.vs'),
             Resources.get('depth.fs'),
         ];
+    }
+
+    constructor() {
+        super({ name: "depth" });
     }
 
 }

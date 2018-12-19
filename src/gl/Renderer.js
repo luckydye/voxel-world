@@ -8,6 +8,8 @@ import NormalShader from './shader/NormalShader.js';
 import { VertexBuffer } from './scene/VertexBuffer.js';
 import { Grid } from './geo/Grid.js';
 import GridShader from './shader/GridShader.js';
+import { Material } from './scene/Material.js';
+import { Vec } from './Math.js';
 
 let nextFrame,
 	lastFrame;
@@ -71,11 +73,11 @@ export class Renderer extends GLContext {
 		this.setResolution(window.innerWidth, window.innerHeight);
 
 		this.shaders = [
-			new ColorShader(),
 			new GridShader(),
-			// new FinalShader(),
-			// new DepthShader(),
-			// new NormalShader(),
+			new FinalShader(),
+			new ColorShader(),
+			new DepthShader(),
+			new NormalShader(),
 		];
 		
 		for(let shader of this.shaders) {
@@ -83,12 +85,17 @@ export class Renderer extends GLContext {
 		}
 
 		this.renderPasses = [
-			// new RenderPass(this, 'color', this.shaders[1]),
-			// new RenderPass(this, 'depth', this.shaders[2]),
-			// new RenderPass(this, 'normal', this.shaders[3]),
+			new RenderPass(this, 'color', this.shaders[2]),
+			new RenderPass(this, 'depth', this.shaders[3]),
+			new RenderPass(this, 'normal', this.shaders[4]),
 		]
 
 		this.grid = new Grid(1000);
+		this.cube = new Cube({
+            material: Material.WORLD,
+            uv: [0, 0],
+            position: new Vec(-8000, -100, 0)
+		});
 
 		this.draw();
 	}
@@ -143,16 +150,17 @@ export class Renderer extends GLContext {
 
 		// statistics.passes = finalShader.uniforms;
 
-		this.useShader(this.shaders[0]);
-
 		// const vertexBuffer = this.screenVertexBuffer;
 		// this.setBuffersAndAttributes(finalShader.attributes, vertexBuffer);
 		// this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexBuffer.vertsPerElement);
 
+		this.useShader(this.shaders[2]);
 		this.drawScene(this.scene);
 
-		this.useShader(this.shaders[1]);
-		this.drawGrid();
+		this.drawGeo(this.cube);
+
+		this.useShader(this.shaders[0]);
+		this.drawGeo(this.grid);
 
 		lastFrame = this.time;
 	}
@@ -199,23 +207,24 @@ export class Renderer extends GLContext {
 		}
 	}
 
-	drawGrid() {
-		this.useShader(this.shaders[1]);
-
-		const gl = this.gl;
+	drawGeo(geo) {
 		const shader = this.currentShader;
+
 		const camera = this.scene.camera;
+		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
-		const buffer = this.grid.buffer;
-		gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-		gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+		if(geo.mat) {
+			if(!geo.mat.gltexture) {
+				const img = geo.mat.texture;
+				geo.mat.gltexture = this.createTexture(img);
+			}
+			this.useTexture(geo.mat.gltexture, "uTexture", 0);
+		}
 
+		const buffer = geo.buffer;
 		this.setBuffersAndAttributes(shader.attributes, buffer);
-		gl.drawArrays(gl.LINES, 0, buffer.vertecies.length / buffer.elements);
-
-		statistics.gridVerts = buffer.vertecies.length;
-
-		statistics.vertecies += buffer.vertecies.length;
+		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 	}
 
 }

@@ -23,7 +23,7 @@ export class Scene {
 		this.vertexBuffer.type = "TRIANGLES";
 		this.vertexBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTextCords" }
+			{ size: 2, attribute: "aTexCoords" }
 		]
 		this.objects.clear();
 	}

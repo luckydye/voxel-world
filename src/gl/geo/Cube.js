@@ -17,8 +17,6 @@ export class Cube extends Geometry {
 
 		this.vertsPerFace = 6;
 
-		this.cached = null;
-
 		this.visible = {
 			TOP: true,
 			BOTTOM: true,
@@ -66,7 +64,7 @@ export class Cube extends Geometry {
 		const x = this.position.x;
 		const y = -this.position.y;
 		const z = this.position.z;
-		
+
 		return {
 			TOP: [
 				s * w + x, s * w + y, s * h + z, 0.9375 + u, 0.9375 + v,

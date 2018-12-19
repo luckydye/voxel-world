@@ -7,14 +7,16 @@ Resources.add({
 }, false);
 
 export default class ColorShader extends GLShader {
+
+    static get source() {
+        return [
+            Resources.get('gbuffer.vs'),
+            Resources.get('color.fs'),
+        ]
+    }
     
     constructor() {
         super({ name: "color" });
-
-        this.src = [
-            Resources.get('gbuffer.vs'),
-            Resources.get('color.fs'),
-        ];
     }
 
 }

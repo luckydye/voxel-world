@@ -242,7 +242,7 @@ export class GLContext {
 				attributes[bufferInfo.attributes[i].attribute], 
 				bufferInfo.attributes[i].size, 
 				gl.FLOAT, 
-				gl.FALSE, 
+				false, 
 				elements * bpe, 
 				lastAttrSize * bpe
 			);
@@ -276,9 +276,12 @@ export class GLShader {
 		return {};
 	}
 
+	get src() {
+		return this.constructor.source;
+	}
+
 	constructor({ name } = {}) {
 		this.name = name;
-		this.src = [];
 		
 		this.program = null;
 		this.initialized = false;
