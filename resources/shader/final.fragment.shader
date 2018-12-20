@@ -17,5 +17,4 @@ void main() {
   vec4 normal = texture(normalBuffer, texCoords);
 
   oFragColor = color / vec4(max(depth.r, 0.4));
-  // oFragColor = normal;
 }
