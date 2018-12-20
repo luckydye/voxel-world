@@ -5,6 +5,8 @@ import { Statistics } from './src/Statistics.js';
 window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
 
+window.options = {};
+
 function onPageLod() {
 	const voxelWorld = new VoxelWorld();
 	voxelWorld.render(world);
@@ -36,6 +38,14 @@ function onPageLod() {
 			activeDefault: false,
 			onclick(btn) {
 				voxelWorld.turntable = btn.active;
+			}
+		}),
+		splitView: IconButton({
+			icon: "S",
+			activeIcon: "C",
+			activeDefault: false,
+			onclick(btn) {
+				window.options.splitView = btn.active;
 			}
 		})
 	});

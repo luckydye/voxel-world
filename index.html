@@ -33,7 +33,6 @@
             position: absolute;
             top: calc(50% - 25px);
             left: calc(50% - 25px);
-            pointer-events: none;
             color: white;
         }
         main::after {
@@ -62,7 +61,10 @@
             position: absolute;
             top: 0;
             left: 0;
-            margin: 10px;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
             color: white;
             pointer-events: none;
             opacity: 0.33;
@@ -72,6 +74,7 @@
             letter-spacing: 0.75px;
         }
         .credits {
+            pointer-events: none;
             position: absolute;
             left: 10px;
             bottom: 10px;
@@ -91,11 +94,13 @@
 </head>
 <body>
     <main>
-        <hud><div id="stats"></div></hud>
-        <canvas width="1080" height="1080" id="world"></canvas>
-        <div class="credits">
-            <p>Made by <a href="https://twitter.com/timh4v">luckydye</a></p>
-        </div>
+        <hud>
+            <div id="stats"></div>
+            <div class="credits">
+                <p>Made by <a href="https://twitter.com/timh4v">luckydye</a></p>
+            </div>
+        </hud>
+        <canvas id="world"></canvas>
     </main>
 </body>
 </html>

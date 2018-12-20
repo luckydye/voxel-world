@@ -90,7 +90,7 @@ export class Renderer extends GLContext {
 			
 			this.drawScene(this.scene);
 			
-			if(Statistics.data.passes === 0) {
+			if(pass.id == 'color') {
 				this.useShader(this.shaders[0]);
 				this.drawGeo(this.grid);
 			}

@@ -17,7 +17,7 @@ export default class FinalShader extends GLShader {
 
     get uniform() {
 		return {
-            aspectRatio: window.innerWidth / window.innerHeight
+            splitView: options.splitView ? true : false,
         };
 	}
     
