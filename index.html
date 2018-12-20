@@ -7,7 +7,7 @@
     <script type="module" src="./main.js"></script>
     <style>
         body {
-            background: black;
+            background: #1c1c1c;
         }
         main {
             position: absolute;
@@ -19,9 +19,40 @@
             justify-content: center;
             overflow: hidden;
         }
+        main::after,
+        main::before {
+            content: "";
+            z-index: -1;
+            border-radius: 50%;
+            border: 3px solid currentColor;
+            border-bottom-color: transparent;
+            border-left-color: transparent;
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            pointer-events: none;
+            color: white;
+        }
+        main::after {
+            animation: loading 1568.63ms ease infinite;
+            color: white;
+        }
+        main::before {
+            animation: loading 784.32ms ease infinite;
+            color: #e5172b;
+        }
+        @keyframes loading {
+            from { transform: rotate(0deg); opacity: 0; }
+            25% { opacity: 1; }
+            to { transform: rotate(360deg); opacity: 0; }
+        }
         tb-toolbar {
             position: fixed;
             right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         #world {
             width: 100%;
