@@ -71,12 +71,31 @@
             user-select: none;
             letter-spacing: 0.75px;
         }
+        .credits {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: #eee;
+            opacity: 0.5;
+            font-family: sans-serif;
+            font-weight: 100;
+            font-size: 12px;
+        }
+        .credits p {
+            margin: 0;
+        }
+        .credits a {
+            color: inherit;
+        }
     </style>
 </head>
 <body>
     <main>
         <hud><div id="stats"></div></hud>
         <canvas width="1080" height="1080" id="world"></canvas>
+        <div class="credits">
+            <p>Made by <a href="https://twitter.com/timh4v">luckydye</a></p>
+        </div>
     </main>
 </body>
 </html>
