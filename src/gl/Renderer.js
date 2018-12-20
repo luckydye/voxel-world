@@ -4,7 +4,6 @@ import { Plane } from './geo/Plane.js';
 import { Cube } from './geo/Cube.js';
 import FinalShader from './shader/FinalShader.js';
 import ColorShader from './shader/ColorShader.js';
-import DepthShader from './shader/DepthShader.js';
 import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
 
@@ -31,6 +30,9 @@ class RenderPass {
 
 	use() {
 		this.renderer.useFramebuffer(this.id);
+		this.renderer.updateViewport();
+		this.renderer.clear();
+		this.renderer.useShader(this.shader);
 	}
 }
 
@@ -41,10 +43,9 @@ export class Renderer extends GLContext {
 
 		this.shaders = [];
 		this.renderPasses = [];
-		this.screenVertexBuffer = null;
 		
 		window.addEventListener("resize", () => {
-			this.setResolution();
+			this.updateViewport();
 		});
 	}
 
@@ -57,7 +58,7 @@ export class Renderer extends GLContext {
 		this.scene.camera.controls(this.canvas);
 		this.scene.clear();
 
-		this.setResolution();
+		this.updateViewport();
 
 		this.shaders = [
 			new GridShader(),
@@ -81,18 +82,15 @@ export class Renderer extends GLContext {
 		this.draw();
 	}
 
-	setResolution(w) {
-		this.gl.canvas.width = 1080;
-		this.gl.canvas.height = 1080;
-		this.gl.viewport(0, 0, 1080, 1080);
+	updateViewport() {
+		this.setResolution();
 		this.scene.camera.update();
 	}
 
 	renderMultiPass(passes) {
 		for(let pass of passes) {
 			pass.use();
-			this.useShader(pass.shader);
-			this.clear();
+			
 			this.drawScene(this.scene);
 			
 			if(statistics.passes === 0) {
@@ -136,6 +134,28 @@ export class Renderer extends GLContext {
 		lastFrame = this.time;
 	}
 
+	drawGeo(geo) {
+		const shader = this.currentShader;
+
+		const camera = this.scene.camera;
+		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+		this.setTransformUniforms(shader.uniforms);
+
+		if(geo.mat) {
+			if(!geo.mat.gltexture) {
+				const img = geo.mat.texture;
+				geo.mat.gltexture = this.createTexture(img);
+			}
+			this.useTexture(geo.mat.gltexture, "uTexture", 0);
+		}
+
+		const buffer = geo.buffer;
+		this.setBuffersAndAttributes(shader.attributes, buffer);
+		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
+	}
+
 	drawScene(scene) {
 		const camera = scene.camera;
 		const objects = scene.objects;
@@ -176,28 +196,6 @@ export class Renderer extends GLContext {
 
 			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 		}
-	}
-
-	drawGeo(geo) {
-		const shader = this.currentShader;
-
-		const camera = this.scene.camera;
-		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-
-		this.setTransformUniforms(shader.uniforms);
-
-		if(geo.mat) {
-			if(!geo.mat.gltexture) {
-				const img = geo.mat.texture;
-				geo.mat.gltexture = this.createTexture(img);
-			}
-			this.useTexture(geo.mat.gltexture, "uTexture", 0);
-		}
-
-		const buffer = geo.buffer;
-		this.setBuffersAndAttributes(shader.attributes, buffer);
-		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 	}
 
 }

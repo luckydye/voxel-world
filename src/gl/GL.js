@@ -1,5 +1,15 @@
 export class GLContext {
 
+	get resolution() {
+		return {
+			width: this._reolution[0],
+			height: this._reolution[1]
+		};
+	}
+	set resolution(vecArr) {
+		this._reolution = [ w, h ] = vecArr;
+	}
+
 	constructor(canvas) {
 		if(!canvas) throw "GLContext: Err: no canvas";
 
@@ -12,16 +22,28 @@ export class GLContext {
 		this.getContext(canvas);
 	}
 
+	setResolution(res) {
+		res = res || this.resolution.width;
+		this._reolution = [res, res];
+
+		this.gl.canvas.width = res;
+		this.gl.canvas.height = res;
+		this.gl.viewport(0, 0, res, res);
+	}
+
 	clear() {
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	}
 
 	getContext(canvas) {
-		const ctxtOpts = { alpha: false };
-		
 		this.canvas = canvas;
+
+		const ctxtOpts = { alpha: false };
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
+
+		const nativeRes = Math.max(window.innerWidth, window.innerHeight);
+		this.setResolution(nativeRes);
 
 		this.gl.clearColor(0.09, 0.09, 0.09, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
@@ -138,11 +160,11 @@ export class GLContext {
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const renderTraget = this.createTexture(null, 1080, 1080);
+		const renderTraget = this.createTexture(null, this.resolution.width, this.resolution.height);
 		this.useTexture(renderTraget);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
 
-		const depthTexture = this.createDepthTexture(null, 1080, 1080);
+		const depthTexture = this.createDepthTexture(null, this.resolution.width, this.resolution.height);
 		this.useTexture(depthTexture);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		
