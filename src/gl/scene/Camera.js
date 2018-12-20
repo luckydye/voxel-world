@@ -21,7 +21,7 @@ export class Camera extends Transform {
 			fov = 50,
 			scale = 0.004,
 			farplane = 350,
-			nearplane = 0.15,
+			nearplane = 0.025,
 		} = args;
 		super(args);
 		

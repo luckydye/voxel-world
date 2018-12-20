@@ -19,6 +19,8 @@ export class GLContext {
 		this.framebuffers = new Map();
 		this.bufferTextures = new Map();
 
+		this.fBufferResFactor = 1.0;
+
 		this.getContext(canvas);
 	}
 
@@ -160,11 +162,11 @@ export class GLContext {
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const renderTraget = this.createTexture(null, this.resolution.width, this.resolution.height);
+		const renderTraget = this.createBufferTexture(this.resolution.width, this.resolution.height);
 		this.useTexture(renderTraget);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
 
-		const depthTexture = this.createDepthTexture(null, this.resolution.width, this.resolution.height);
+		const depthTexture = this.createDepthTexture(this.resolution.width, this.resolution.height);
 		this.useTexture(depthTexture);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		
@@ -190,8 +192,11 @@ export class GLContext {
 		return program;
 	}
 
-	createDepthTexture(image, w, h) {
+	createDepthTexture(w, h) {
 		const gl = this.gl;
+
+		w *= this.fBufferResFactor;
+		h *= this.fBufferResFactor;
 
 		const texture = gl.createTexture();
 
@@ -199,10 +204,28 @@ export class GLContext {
 
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, w, h, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		return texture;
+	}
+
+	createBufferTexture(w, h) {
+		const gl = this.gl;
+
+		w *= this.fBufferResFactor;
+		h *= this.fBufferResFactor;
+
+		const texture = gl.createTexture();
+
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
 		gl.bindTexture(gl.TEXTURE_2D, null);
 
