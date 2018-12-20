@@ -45,7 +45,7 @@ function displayHud() {
 	const hud = document.querySelector('hud #stats');
 	setInterval(() => {
 		hud.innerHTML = Statistics.toText();
-	}, 100);
+	}, 250);
 }
 
 function createToolbar(buttonConfig) {
