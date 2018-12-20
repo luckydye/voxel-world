@@ -1,4 +1,5 @@
 import noise from '../lib/perlin.js';
+import { Statistics } from './Statistics.js';
 
 class Tile {
 	constructor(x, y, size) {
@@ -45,7 +46,7 @@ export class WorldGenerator {
 	setSeed(n) {
 		this.seed = n;
 		noise.seed(n);
-		statistics.seed = n;
+		Statistics.data.seed = n;
 	}
 
 	generateTile(x, y) {

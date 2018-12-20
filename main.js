@@ -1,5 +1,6 @@
 import VoxelWorld from './src/VoxelWorld.js';
 import { Toolbar, IconButton } from './components/Toolbar.js';
+import { Statistics } from './src/Statistics.js';
 
 window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -41,9 +42,9 @@ function onPageLod() {
 }
 
 function displayHud() {
-	const hud = document.querySelector('hud #statistics');
+	const hud = document.querySelector('hud #stats');
 	setInterval(() => {
-		hud.innerText = JSON.stringify(statistics);
+		hud.innerHTML = Statistics.toText();
 	}, 100);
 }
 

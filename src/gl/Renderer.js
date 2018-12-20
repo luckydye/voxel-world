@@ -6,13 +6,10 @@ import FinalShader from './shader/FinalShader.js';
 import ColorShader from './shader/ColorShader.js';
 import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
+import { Statistics } from '../Statistics.js';
 
 let nextFrame,
 	lastFrame;
-
-window.statistics = {
-	voxels: 0,
-};
 
 class RenderPass {
 
@@ -93,12 +90,12 @@ export class Renderer extends GLContext {
 			
 			this.drawScene(this.scene);
 			
-			if(statistics.passes === 0) {
+			if(Statistics.data.passes === 0) {
 				this.useShader(this.shaders[0]);
 				this.drawGeo(this.grid);
 			}
 
-			statistics.passes++;
+			Statistics.data.passes++;
 		}
 
 		this.clearFramebuffer();
@@ -121,8 +118,8 @@ export class Renderer extends GLContext {
 		
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
-			statistics.fps = Math.floor(1000 / (this.time - lastFrame));
-			statistics.passes = 0;
+			Statistics.data.fps = Math.floor(1000 / (this.time - lastFrame));
+			Statistics.data.passes = 0;
 			this.draw();
 		});
 
@@ -167,11 +164,15 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
+		if(!scene.cached) {
+			Statistics.data.voxels = 0;
+		}
+
 		for(let obj of objects) {
 			if(obj instanceof Cube) {
 				if(!scene.cached && !obj.invisible) {
 					vertArray.push(...obj.buffer.vertArray);
-					statistics.voxels += 1;
+					Statistics.data.voxels++;
 				}
 			}
 

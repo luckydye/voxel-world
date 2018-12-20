@@ -1,3 +1,5 @@
+import { Statistics } from "../Statistics.js";
+
 export class GLContext {
 
 	get resolution() {
@@ -27,6 +29,8 @@ export class GLContext {
 	setResolution(res) {
 		res = res || this.resolution.width;
 		this._reolution = [res, res];
+
+		Statistics.data.resolution = this._reolution;
 
 		this.gl.canvas.width = res;
 		this.gl.canvas.height = res;
