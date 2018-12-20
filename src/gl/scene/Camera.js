@@ -95,7 +95,7 @@ export class Camera extends Transform {
 
 		const move = e => {
 			if(moving && lastEvent) {
-				if(isMouseButton(e) == 2|| e.touches.length > 1) {
+				if(isMouseButton(e) == 2 || e.touches && e.touches.length > 1) {
 					this.position.x += (e.x - lastEvent.x) / element.width * Math.abs(this.position.z);
 					this.position.y += (e.y - lastEvent.y) / element.width * Math.abs(this.position.z);
 					viewport.style.cursor = "move";
