@@ -11,11 +11,12 @@ export class Geometry extends Transform {
 	constructor(args = {}) {
 		const {
 			material = Material.DIRT,
-			uv = [0, 0]
+			uv = [0, 0],
+			size = 100
 		} = args;
 		super(args);
 		
-		this.size = 100;
+		this.size = size;
 		this.mat = material;
 		this.uv = uv;
 	}

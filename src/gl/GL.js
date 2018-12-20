@@ -23,7 +23,7 @@ export class GLContext {
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
 
-		this.gl.clearColor(0.15, 0.15, 0.15, 1);
+		this.gl.clearColor(0.09, 0.09, 0.09, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
 	}
 
@@ -135,18 +135,21 @@ export class GLContext {
 	createFramebuffer(name) {
 		const gl = this.gl;
 
-		const tex = this.createTexture(null, gl.canvas.height, gl.canvas.width);
-		this.useTexture(tex);
-
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const attachmentPoint = gl.COLOR_ATTACHMENT0;
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, tex, 0);
+		const renderTraget = this.createTexture(null, 1080, 1080);
+		this.useTexture(renderTraget);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
+
+		const depthTexture = this.createDepthTexture(null, 1080, 1080);
+		this.useTexture(depthTexture);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-		this.bufferTextures.set(name, tex);
+		this.bufferTextures.set('depth', depthTexture);
+		this.bufferTextures.set(name, renderTraget);
 		this.framebuffers.set(name, fbo);
 		return fbo;
 	}
@@ -163,6 +166,25 @@ export class GLContext {
 		}
 	
 		return program;
+	}
+
+	createDepthTexture(image, w, h) {
+		const gl = this.gl;
+
+		const texture = gl.createTexture();
+
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, w, h, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		return texture;
 	}
 
 	createTexture(image, w, h) {

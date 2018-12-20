@@ -14,6 +14,12 @@ export default class FinalShader extends GLShader {
             Resources.get('final.fs'),
         ];
     }
+
+    get uniform() {
+		return {
+            aspectRatio: window.innerWidth / window.innerHeight
+        };
+	}
     
     constructor() {
         super({ name: "final" });
