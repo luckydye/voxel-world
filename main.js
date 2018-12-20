@@ -14,13 +14,13 @@ function onPageLod() {
 		zoomIn: IconButton({
 			icon: "+",
 			onclick() {
-				voxelWorld.scene.camera.zoom(1);
+				voxelWorld.scene.camera.zoom(-1);
 			}
 		}),
 		zoomOut: IconButton({
 			icon: "-",
 			onclick() {
-				voxelWorld.scene.camera.zoom(-1);
+				voxelWorld.scene.camera.zoom(1);
 			}
 		}),
 		regen: IconButton({

@@ -89,6 +89,7 @@ export class Camera extends Transform {
 		const up = e => {
 			moving = false;
 			viewport.style.cursor = "default";
+			lastEvent = null;
 			this.update();
 		}
 
