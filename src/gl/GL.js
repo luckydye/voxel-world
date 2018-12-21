@@ -362,7 +362,17 @@ export class GLShader {
 		const uniforms = this.uniforms;
 		if(uniforms) {
 			for(let opt in this.uniform) {
-				gl.uniform1f(uniforms[opt], this.uniform[opt]);
+				const value = this.uniform[opt];
+				if(opt === "integer") {
+					for(let opt in this.uniform.integer) {
+						gl.uniform1i(uniforms[opt], this.uniform.integer[opt]);
+					}
+				}
+				if(Array.isArray(value)) {
+					gl.uniform3fv(uniforms[opt], value);
+				} else {
+					gl.uniform1f(uniforms[opt], value);
+				}
 			}
 		}
     }

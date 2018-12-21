@@ -15,9 +15,21 @@ export default class FinalShader extends GLShader {
         ];
     }
 
+    get lightPos() {
+        const t = performance.now() / 500;
+        const x = Math.sin(t) * 300;
+        const y = Math.sin(t) * 500 + 700;
+        const z = Math.cos(t) * 300;
+        return [x, y, z];
+    }
+
     get uniform() {
 		return {
-            splitView: options.splitView ? true : false,
+            integer: { samples: 64 },
+            radius: 4.0,
+            width: window.innerWidth,
+            height: window.innerWidth,
+            lightPos: this.lightPos,
         };
 	}
     

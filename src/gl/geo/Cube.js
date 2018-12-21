@@ -47,7 +47,8 @@ export class Cube extends Geometry {
 		vertxBuffer.type = "TRIANGLES";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTexCoords" }
+			{ size: 2, attribute: "aTexCoords" },
+			{ size: 3, attribute: "aNormal" },
 		]
 
 		return vertxBuffer;
@@ -67,52 +68,52 @@ export class Cube extends Geometry {
 
 		return {
 			TOP: [
-				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
-				-s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v,
-				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				-s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v,
-				-s * w + x, s * w + y, s * h + z, 0 + u, 1 + v,
+				s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 1, 0,
+				s * w + x, s * w + y, -s * h + z, 	1 + u, 0 + v,	0, 1, 0,
+				-s * w + x, s * w + y, -s * h + z, 	0 + u, 0 + v,	0, 1, 0,
+				s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 1, 0,
+				-s * w + x, s * w + y, -s * h + z, 	0 + u, 0 + v,	0, 1, 0,
+				-s * w + x, s * w + y, s * h + z, 	0 + u, 1 + v,	0, 1, 0,
 			],
 			BOTTOM: [
-				s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v,
-				s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v,
-				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v,
-				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				-s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
+				s * w + x, -s * w + y, s * h + z, 	1 + u, 1 + v,	0, -1, 0,
+				s * w + x, -s * w + y, -s * h + z, 	1 + u, 0 + v,	0, -1, 0,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,	0, -1, 0,
+				s * w + x, -s * w + y, s * h + z, 	1 + u, 1 + v,	0, -1, 0,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,	0, -1, 0,
+				-s * w + x, -s * w + y, s * h + z, 	0 + u, 1 + v,	0, -1, 0,
 			],
 			LEFT: [
-				s * w + x, s * h + y, s * w + z, 1 + u, 1 + v,
-				s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v,
-				-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v,
-				s * w + x, s * h + y, s * w + z, 1 + u, 1 + v,
-				-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v,
-				-s * w + x, s * h + y, s * w + z, 0 + u, 1 + v,
+				s * w + x, s * h + y, s * w + z, 	1 + u, 1 + v,	-1, 0, 0,
+				s * w + x, -s * h + y, s * w + z, 	1 + u, 0 + v,	-1, 0, 0,
+				-s * w + x, -s * h + y, s * w + z, 	0 + u, 0 + v,	-1, 0, 0,
+				s * w + x, s * h + y, s * w + z, 	1 + u, 1 + v,	-1, 0, 0,
+				-s * w + x, -s * h + y, s * w + z, 	0 + u, 0 + v,	-1, 0, 0,
+				-s * w + x, s * h + y, s * w + z, 	0 + u, 1 + v,	-1, 0, 0,
 			],
 			RIGHT: [
-				s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v,
-				s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v,
-				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,
-				s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v,
-				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,
-				-s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v,
+				s * w + x, s * h + y, -s * w + z, 	1 + u, 1 + v,	1, 0, 0,
+				s * w + x, -s * h + y, -s * w + z, 	1 + u, 0 + v,	1, 0, 0,
+				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,	1, 0, 0,
+				s * w + x, s * h + y, -s * w + z, 	1 + u, 1 + v,	1, 0, 0,
+				-s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v,	1, 0, 0,
+				-s * w + x, s * h + y, -s * w + z, 	0 + u, 1 + v,	1, 0, 0,
 			],
 			FRONT: [
-				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
-				s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
+				s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 0, 1,
+				s * w + x, s * w + y, -s * h + z, 	1 + u, 0 + v,	0, 0, 1,
+				s * w + x, -s * w + y, -s * h + z, 	0 + u, 0 + v,	0, 0, 1,
+				s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 0, 1,
+				s * w + x, -s * w + y, -s * h + z, 	0 + u, 0 + v,	0, 0, 1,
+				s * w + x, -s * w + y, s * h + z, 	0 + u, 1 + v,	0, 0, 1,
 			],
 			BACK: [
-				-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				-s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v,
-				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v,
-				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,
-				-s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v,
+				-s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 0, -1,
+				-s * w + x, s * w + y, -s * h + z, 	1 + u, 0 + v,	0, 0, -1,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,	0, 0, -1,
+				-s * w + x, s * w + y, s * h + z, 	1 + u, 1 + v,	0, 0, -1,
+				-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v,	0, 0, -1,
+				-s * w + x, -s * w + y, s * h + z, 	0 + u, 1 + v,	0, 0, -1,
 			]
 		}
 	}

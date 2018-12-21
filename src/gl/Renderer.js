@@ -1,3 +1,4 @@
+import { Statistics } from '../Statistics.js';
 import { GLContext } from './GL.js';
 import { Grid } from './geo/Grid.js';
 import { Plane } from './geo/Plane.js';
@@ -6,7 +7,7 @@ import FinalShader from './shader/FinalShader.js';
 import ColorShader from './shader/ColorShader.js';
 import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
-import { Statistics } from '../Statistics.js';
+import LightShader from './shader/LightShader.js';
 
 let nextFrame,
 	lastFrame;
@@ -61,6 +62,7 @@ export class Renderer extends GLContext {
 			new GridShader(),
 			new FinalShader(),
 			new ColorShader(),
+			// new LightShader(),
 			new NormalShader(),
 		];
 		

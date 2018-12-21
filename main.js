@@ -5,7 +5,10 @@ import { Statistics } from './src/Statistics.js';
 window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
 
-window.options = {};
+window.options = {
+	// turntable: true,
+	// splitView: true
+};
 
 function onPageLod() {
 	const voxelWorld = new VoxelWorld();
@@ -37,7 +40,7 @@ function onPageLod() {
 			activeIcon: "X",
 			activeDefault: false,
 			onclick(btn) {
-				voxelWorld.turntable = btn.active;
+				options.turntable = btn.active;
 			}
 		}),
 		splitView: IconButton({
@@ -45,7 +48,7 @@ function onPageLod() {
 			activeIcon: "C",
 			activeDefault: false,
 			onclick(btn) {
-				window.options.splitView = btn.active;
+				options.splitView = btn.active;
 			}
 		})
 	});

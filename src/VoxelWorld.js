@@ -11,6 +11,7 @@ import { Resources } from "./Resources.js";
 Resources.add({
     'materials': './resources/materials/materials.json',
     'worldtextures': './resources/textures/blocks_solid.png',
+    // 'worldtextures': './resources/textures/blocks.png',
     'world': './resources/worlds/example.json',
 }, false);
 
@@ -39,7 +40,7 @@ export default class VoxelWorld {
         
         let lastTick = 0;
         setInterval(() => {
-            if(this.turntable) {
+            if(options.turntable) {
                 this.scene.camera.rotation.y += 0.02 * (this.renderer.time - lastTick);
                 this.scene.camera.update();
             }
