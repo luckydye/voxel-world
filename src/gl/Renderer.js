@@ -51,14 +51,14 @@ export class Renderer extends GLContext {
 			new FinalShader(),
 			new ColorShader(),
 			new LightShader(),
-			new NormalShader(),
-			new AOShader(),
+			// new NormalShader(),
+			// new AOShader(),
 		];
 
 		this.renderPasses = [
 			new RenderPass(this, 'color', this.shaders[2]),
 			new RenderPass(this, 'light', this.shaders[3]),
-			new RenderPass(this, 'normal', this.shaders[4]),
+			// new RenderPass(this, 'normal', this.shaders[4]),
 		]
 		
 		for(let shader of this.shaders) {
