@@ -1,3 +1,4 @@
+import { Vec } from './Math.js';
 import { Statistics } from '../Statistics.js';
 import { GLContext } from './GL.js';
 import { Grid } from './geo/Grid.js';
@@ -8,7 +9,7 @@ import ColorShader from './shader/ColorShader.js';
 import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
 import LightShader from './shader/LightShader.js';
-import { Vec } from './Math.js';
+import AOShader from './shader/AOShader.js';
 
 let nextFrame,
 	lastFrame;
@@ -51,6 +52,7 @@ export class Renderer extends GLContext {
 			new ColorShader(),
 			new LightShader(),
 			new NormalShader(),
+			new AOShader(),
 		];
 
 		this.renderPasses = [

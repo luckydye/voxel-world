@@ -28,6 +28,8 @@ export class GLContext {
 		this.fBufferResFactor = 1.0;
 
 		this.getContext(canvas);
+
+		this.onCreate();
 	}
 
 	setResolution(res) {
@@ -57,8 +59,6 @@ export class GLContext {
 
 		this.gl.clearColor(0.09, 0.09, 0.09, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
-
-		this.onCreate();
 	}
 
 	useShader(shader) {

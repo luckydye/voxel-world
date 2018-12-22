@@ -43,7 +43,7 @@ export class Resources {
 		for(let key in obj) {
 			global.queue.add({ name: key, path: obj[key] });
 		}
-		if(startLoad !== false) {
+		if(startLoad === true) {
 			return Resources.load();
 		}
 	}
