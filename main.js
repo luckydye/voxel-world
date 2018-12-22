@@ -42,14 +42,6 @@ function onPageLod() {
 			onclick(btn) {
 				options.turntable = btn.active;
 			}
-		}),
-		splitView: IconButton({
-			icon: "S",
-			activeIcon: "C",
-			activeDefault: false,
-			onclick(btn) {
-				options.splitView = btn.active;
-			}
 		})
 	});
 }
