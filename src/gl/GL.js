@@ -12,6 +12,10 @@ export class GLContext {
 		this._reolution = [ w, h ] = vecArr;
 	}
 
+	onCreate() {
+		// on create method
+	}
+
 	constructor(canvas) {
 		if(!canvas) throw "GLContext: Err: no canvas";
 
@@ -54,7 +58,7 @@ export class GLContext {
 		this.gl.clearColor(0.09, 0.09, 0.09, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
 
-		// this.gl.enable(this.gl.CULL_FACE);
+		this.onCreate();
 	}
 
 	useShader(shader) {
