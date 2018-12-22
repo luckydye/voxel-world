@@ -79,11 +79,6 @@ export class Renderer extends GLContext {
 
 		this.grid = new Grid(200);
 		this.screen = new Plane();
-		this.cube = new Cube({
-			scale: 10,
-			position: new Vec(0, -300, 0),
-			rotation: new Vec(45, 45, 0)
-		});
 
 		this.draw();
 	}
@@ -98,7 +93,6 @@ export class Renderer extends GLContext {
 			pass.use();
 			
 			this.drawScene(this.scene);
-			this.drawGeo(this.cube);
 			
 			if(pass.id == 'color') {
 				this.useShader(this.shaders[0]);

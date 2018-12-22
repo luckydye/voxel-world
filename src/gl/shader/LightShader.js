@@ -20,7 +20,7 @@ export default class LightShader extends GLShader {
         const radius = 700;
 
         const x = Math.sin(t) * radius;
-        const y = 250;
+        const y = 500;
         const z = Math.cos(t) * radius;
         return [x, y, z];
     }
