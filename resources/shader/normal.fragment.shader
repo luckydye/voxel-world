@@ -1,12 +1,10 @@
 #version 300 es
 precision mediump float;
 
-in vec4 normalPos;
-in vec4 worldPos;
-in vec2 texCoords;
+in vec3 vNormal;
 
 out vec4 oFragColor;
 
 void main () {
-  oFragColor = vec4(normalPos.xyz, 1.0);
+    oFragColor = vec4(vNormal.xyz / 2.0 + 0.5, 1.0);
 }

@@ -262,6 +262,7 @@ export class GLContext {
 	setTransformUniforms(uniforms, geo, transform) {
 		const gl = this.gl;
 		let modelMatrix = mat4.create();
+		this.modelMatrix = modelMatrix;
 		if(transform) {
 			transform = {
 				position: transform.position || new Vec(),

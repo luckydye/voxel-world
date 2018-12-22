@@ -62,7 +62,7 @@ export class Renderer extends GLContext {
 			new GridShader(),
 			new FinalShader(),
 			new ColorShader(),
-			// new LightShader(),
+			new LightShader(),
 			new NormalShader(),
 		];
 		
@@ -72,7 +72,8 @@ export class Renderer extends GLContext {
 
 		this.renderPasses = [
 			new RenderPass(this, 'color', this.shaders[2]),
-			new RenderPass(this, 'normal', this.shaders[3]),
+			new RenderPass(this, 'light', this.shaders[3]),
+			new RenderPass(this, 'normal', this.shaders[4]),
 		]
 
 		this.grid = new Grid(200);
@@ -194,6 +195,21 @@ export class Renderer extends GLContext {
 		if(scene.cached) {
 			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
 			this.setTransformUniforms(shader.uniforms);
+
+			const viewProjectionMatrix  = mat4.create();
+			mat4.multiply(viewProjectionMatrix, camera.viewMatrix, camera.projMatrix);
+
+			const worldViewProjectionMatrix = mat4.create();
+			mat4.multiply(worldViewProjectionMatrix, viewProjectionMatrix, this.modelMatrix);
+
+			const worldInverseMatrix = mat4.create();
+			mat4.invert(worldInverseMatrix, this.modelMatrix);
+
+			const worldInverseTransposeMatrix = mat4.create();
+			mat4.transpose(worldInverseTransposeMatrix, worldInverseMatrix);
+
+			this.gl.uniformMatrix4fv(shader.uniforms.worldInverseTranspose, false, 
+				worldInverseTransposeMatrix);
 
 			this.useTexture(scene.texturemap, "uTexture", 0);
 

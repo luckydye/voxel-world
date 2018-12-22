@@ -1,15 +1,17 @@
 #version 300 es
 precision mediump float;
 
-in vec4 normalPos;
-in vec4 worldPos;
-in vec2 texCoords;
-
-uniform sampler2D uTexture;
+in vec4 vWorldPos;
+in vec3 vNormal;
+in vec3 vSurfaceToLight;
 
 out vec4 oFragColor;
 
-void main() {
-  vec4 textureColor = texture(uTexture, vec2(texCoords) / (256.0 / 16.0));
-  oFragColor = textureColor;
+void main () {
+
+  vec3 surfaceToLightDirection = normalize(vSurfaceToLight);
+
+  float light = dot(vNormal, surfaceToLightDirection);
+
+  oFragColor = vec4(0.2) + pow(light, 50.0);
 }
