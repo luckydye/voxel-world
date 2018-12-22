@@ -14,6 +14,12 @@ export default class NormalShader extends GLShader {
             Resources.get('normal.fs'),
         ];
     }
+
+    get uniform() {
+        return {
+            uTime: performance.now(),
+        }
+    }
     
     constructor() {
         super({ name: "normal" });

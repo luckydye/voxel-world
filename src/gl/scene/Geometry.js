@@ -15,7 +15,7 @@ export class Geometry extends Transform {
 			size = 100
 		} = args;
 		super(args);
-		
+
 		this.size = size;
 		this.mat = material;
 		this.uv = uv;

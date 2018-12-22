@@ -7,22 +7,24 @@ layout(location = 2) in vec3 aNormal;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
-uniform mat4 worldInverseTranspose;
+uniform mat4 uNormalMatrix;
 
-uniform vec3 pointLightPos;
+uniform float uTime;
 
 out vec4 vWorldPos;
 out vec3 vNormal;
-out vec3 vSurfaceToLight;
-out vec2 texCoords;
+out vec2 vTexCoords;
+
+vec3 warp(vec3 p) {
+  return p + 0.5 * abs(cos((uTime * 0.002)) * 40.0) * aNormal;
+}
 
 void main() {
-  gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
+  vec4 pos = uModelMatrix * vec4(aPosition, 1.0);
 
-  texCoords = aTexCoords;
+  vWorldPos = pos;
+  vNormal = vec4(aNormal, 1.0).xyz;
+  vTexCoords = aTexCoords;
 
-  vNormal = mat3(worldInverseTranspose) * aNormal;
-
-  vWorldPos = uModelMatrix * vec4(aPosition, 1.0);
-  vSurfaceToLight = pointLightPos - vWorldPos.xyz;
+  gl_Position = uProjMatrix * uViewMatrix * vec4(pos.xyz, 1.0);
 }

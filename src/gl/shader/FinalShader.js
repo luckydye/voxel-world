@@ -35,7 +35,7 @@ export default class FinalShader extends GLShader {
                     vec4 light = texture(lightBuffer, texCoord);
                 
                     oFragColor = color * light;
-                    oFragColor = light;
+                    // oFragColor = color;
                 }
             `
         ];

@@ -3,15 +3,26 @@ precision mediump float;
 
 in vec4 vWorldPos;
 in vec3 vNormal;
-in vec3 vSurfaceToLight;
+
+uniform vec3 pointLightPos;
 
 out vec4 oFragColor;
 
 void main () {
 
-  vec3 surfaceToLightDirection = normalize(vSurfaceToLight);
+  vec4 cBase = vec4(1.0, 1.0, 1.0, 1.0);
+  vec3 cLight = vec3(1.0, 1.0, 1.0);
 
-  float light = dot(vNormal, surfaceToLightDirection);
+  float ambient = 0.1;
+  
+  vec3 cAmbient = ambient * cLight;
 
-  oFragColor = vec4(0.2) + pow(light, 50.0);
+  vec3 lightDir = normalize(pointLightPos - vWorldPos.xyz);
+  float diffAngle = max(dot(vNormal, lightDir), 0.0);
+  float diffuse = 0.3;
+
+  vec3 cDiffuse = diffAngle * cLight * diffuse * 2.0;
+
+  vec3 color = (cAmbient + cDiffuse) * cBase.rgb;
+  oFragColor = vec4(color, 1.0);
 }

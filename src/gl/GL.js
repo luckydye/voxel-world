@@ -53,6 +53,8 @@ export class GLContext {
 
 		this.gl.clearColor(0.09, 0.09, 0.09, 1);
 		this.gl.enable(this.gl.DEPTH_TEST);
+
+		// this.gl.enable(this.gl.CULL_FACE);
 	}
 
 	useShader(shader) {
@@ -262,13 +264,12 @@ export class GLContext {
 	setTransformUniforms(uniforms, geo, transform) {
 		const gl = this.gl;
 		let modelMatrix = mat4.create();
-		this.modelMatrix = modelMatrix;
-		if(transform) {
-			transform = {
+		if(transform || geo) {
+			transform = geo || {
 				position: transform.position || new Vec(),
 				rotation: transform.rotation || new Vec()
 			}
-			
+
 			mat4.identity(modelMatrix);
 			
 			mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
@@ -280,6 +281,17 @@ export class GLContext {
 			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
 			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 		}
+
+		const modelView = mat4.create();
+		mat4.multiply(modelView, this.scene.camera.viewMatrix, modelMatrix);
+
+		const worldInverseMatrix = mat4.create();
+		mat4.invert(worldInverseMatrix, modelView);
+
+		const uNormalMatrix = mat4.create();
+		mat4.transpose(uNormalMatrix, worldInverseMatrix);
+		
+		gl.uniformMatrix4fv(uniforms["uNormalMatrix"], false, uNormalMatrix);
 		gl.uniformMatrix4fv(uniforms["uModelMatrix"], false, modelMatrix);
 	}
 

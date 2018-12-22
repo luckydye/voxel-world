@@ -8,6 +8,7 @@ import ColorShader from './shader/ColorShader.js';
 import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
 import LightShader from './shader/LightShader.js';
+import { Vec } from './Math.js';
 
 let nextFrame,
 	lastFrame;
@@ -63,7 +64,7 @@ export class Renderer extends GLContext {
 			new FinalShader(),
 			new ColorShader(),
 			new LightShader(),
-			// new NormalShader(),
+			new NormalShader(),
 		];
 		
 		for(let shader of this.shaders) {
@@ -73,11 +74,16 @@ export class Renderer extends GLContext {
 		this.renderPasses = [
 			new RenderPass(this, 'color', this.shaders[2]),
 			new RenderPass(this, 'light', this.shaders[3]),
-			// new RenderPass(this, 'normal', this.shaders[4]),
+			new RenderPass(this, 'normal', this.shaders[4]),
 		]
 
 		this.grid = new Grid(200);
 		this.screen = new Plane();
+		this.cube = new Cube({
+			scale: 10,
+			position: new Vec(0, -300, 0),
+			rotation: new Vec(45, 45, 0)
+		});
 
 		this.draw();
 	}
@@ -92,6 +98,7 @@ export class Renderer extends GLContext {
 			pass.use();
 			
 			this.drawScene(this.scene);
+			this.drawGeo(this.cube);
 			
 			if(pass.id == 'color') {
 				this.useShader(this.shaders[0]);
@@ -141,7 +148,10 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
-		this.setTransformUniforms(shader.uniforms);
+		const uNormalMatrix  = mat4.create();
+		this.gl.uniformMatrix4fv(shader.uniforms.uNormalMatrix, false, uNormalMatrix);
+
+		this.setTransformUniforms(shader.uniforms, geo);
 
 		if(geo.mat) {
 			if(!geo.mat.gltexture) {
@@ -149,6 +159,8 @@ export class Renderer extends GLContext {
 				geo.mat.gltexture = this.createTexture(img);
 			}
 			this.useTexture(geo.mat.gltexture, "uTexture", 0);
+		} else {
+			// this.useTexture(null, "uTexture", 0);
 		}
 
 		const buffer = geo.buffer;
@@ -195,21 +207,6 @@ export class Renderer extends GLContext {
 		if(scene.cached) {
 			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
 			this.setTransformUniforms(shader.uniforms);
-
-			const viewProjectionMatrix  = mat4.create();
-			mat4.multiply(viewProjectionMatrix, camera.viewMatrix, camera.projMatrix);
-
-			const worldViewProjectionMatrix = mat4.create();
-			mat4.multiply(worldViewProjectionMatrix, viewProjectionMatrix, this.modelMatrix);
-
-			const worldInverseMatrix = mat4.create();
-			mat4.invert(worldInverseMatrix, this.modelMatrix);
-
-			const worldInverseTransposeMatrix = mat4.create();
-			mat4.transpose(worldInverseTransposeMatrix, worldInverseMatrix);
-
-			this.gl.uniformMatrix4fv(shader.uniforms.worldInverseTranspose, false, 
-				worldInverseTransposeMatrix);
 
 			this.useTexture(scene.texturemap, "uTexture", 0);
 
