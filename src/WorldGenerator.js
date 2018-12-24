@@ -83,8 +83,8 @@ export class WorldGenerator {
 					const yvalue = this.tileHeight + noise.perlin2((x + tile.pos.x) / res, (z + tile.pos.y) / res) * 10;
 
 					if (y > this.tileSize - yvalue &&
-						x+1 < this.tileSize && x > 0 &&
-						z+1 < this.tileSize && z > 0) {
+						x < this.tileSize && x >= 0 &&
+						z < this.tileSize && z >= 0) {
 
 						const value = noise.perlin3((x + tile.pos.x) / res, y / res, (z + tile.pos.y) / res);
 						let threshold = this.threshold;

@@ -89,7 +89,9 @@ export class Resources {
 
 		switch(type) {
 			case Resources.Types.JSON:
-				return fetch(path).then(res => res.json());
+				return fetch(path).then(res => res.json().catch(err => {
+					console.error("File failed parsing:", path);
+				}));
 
 			case Resources.Types.IMAGE:
 				return new Promise((resolve, reject) => {

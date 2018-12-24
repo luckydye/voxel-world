@@ -8,11 +8,17 @@ import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "./gl/scene/Material.js";
 import { Resources } from "./Resources.js";
 
+let exampleFile = 'example1';
+
+if(document.location.search) {
+    exampleFile = document.location.search.substr(1);
+}
+
 Resources.add({
     'materials': './resources/materials/materials.json',
     'worldtextures': './resources/textures/blocks_solid.png',
     // 'worldtextures': './resources/textures/blocks.png',
-    'world': './resources/worlds/example.json',
+    'world': './resources/worlds/' + exampleFile + '.json',
 }, false);
 
 export default class VoxelWorld {
@@ -29,11 +35,14 @@ export default class VoxelWorld {
 
         const settings = Resources.get('world');
 
+        const settingsCamPos = settings.scene.camera.position;
+        const settingsCamRot = settings.scene.camera.rotation;
+
         const sceneOpts = {
             camera: new Camera({ 
                 fov: settings.scene.camera.fov,
-                position: new Vec(0, 200, -600),
-                rotation: new Vec(19, 0, 0) 
+                position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0, 200, -600),
+                rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19, 0, 0) 
             })
         }
         this.scene = new Scene(sceneOpts);

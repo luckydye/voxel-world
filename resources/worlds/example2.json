@@ -1,0 +1,13 @@
+{
+	"scene": {
+		"camera": {
+			"fov": 75
+		}
+	},
+	"world": {
+		"tileSize": 350,
+		"tileHeight": 4,
+		"threshold": 0.5,
+		"resolution": 50
+	}
+}
