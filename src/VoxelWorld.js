@@ -14,10 +14,15 @@ if(document.location.search) {
     exampleFile = document.location.search.substr(1);
 }
 
+let texture = './resources/textures/blocks_solid.png';
+
+if(document.location.hash == "#mc") {
+    texture = './resources/textures/blocks.png';
+}
+
 Resources.add({
     'materials': './resources/materials/materials.json',
-    // 'worldtextures': './resources/textures/blocks_solid.png',
-    'worldtextures': './resources/textures/blocks.png',
+    'worldtextures': texture,
     'world': './resources/worlds/' + exampleFile + '.json',
 }, false);
 
