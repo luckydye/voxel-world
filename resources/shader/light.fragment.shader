@@ -13,13 +13,13 @@ void main () {
   vec4 cBase = vec4(1.0, 1.0, 1.0, 1.0);
   vec3 cLight = vec3(1.0, 1.0, 1.0);
 
-  float ambient = 0.1;
+  float ambient = 0.7;
   
   vec3 cAmbient = ambient * cLight;
 
   vec3 lightDir = normalize(pointLightPos - vWorldPos.xyz);
   float diffAngle = max(dot(vNormal, lightDir), 0.0);
-  float diffuse = 0.3;
+  float diffuse = 0.15;
 
   vec3 cDiffuse = diffAngle * cLight * diffuse * 2.0;
 

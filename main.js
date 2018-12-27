@@ -6,7 +6,7 @@ window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
 
 window.options = {
-	// turntable: true,
+	turntable: true,
 	// splitView: true
 };
 

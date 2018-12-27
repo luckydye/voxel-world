@@ -16,8 +16,8 @@ if(document.location.search) {
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'worldtextures': './resources/textures/blocks_solid.png',
-    // 'worldtextures': './resources/textures/blocks.png',
+    // 'worldtextures': './resources/textures/blocks_solid.png',
+    'worldtextures': './resources/textures/blocks.png',
     'world': './resources/worlds/' + exampleFile + '.json',
 }, false);
 

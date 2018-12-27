@@ -12,10 +12,11 @@ out vec4 oFragColor;
 
 void main(void)
 {
-	vec4 normal = texture(normalBuffer, texCoord);
 	vec4 color = texture(colorBuffer, texCoord);
 	vec4 light = texture(lightBuffer, texCoord);
-	vec4 ao = texture(aoBuffer, texCoord);
+	// vec4 normal = texture(normalBuffer, texCoord);
+	// vec4 ao = texture(aoBuffer, texCoord);
 
 	oFragColor = color * light;
+	// oFragColor = color;
 }
