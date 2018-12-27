@@ -1,18 +1,5 @@
 import { Vec, Transform } from '../Math.js';
-
-function isMouseButton(e) {
-	let mbutton;
-	if(e.button != null) {
-		if(e.buttons == 4) {
-			mbutton = 2;
-		} else {
-			mbutton = e.buttons;
-		}
-	} else {
-		mbutton = e.which;
-	}
-	return mbutton;
-}
+import { EntityController } from './EntityController.js';
 
 export class Camera extends Transform {
 
@@ -35,6 +22,8 @@ export class Camera extends Transform {
 		this.viewMatrix = mat4.create();
 
 		this.updated = false;
+
+		this.controller = new EntityController(this);
 
 		this.update();
 	}
@@ -74,56 +63,7 @@ export class Camera extends Transform {
 		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
 
 		this.updated = false;
-	}
 
-	controls(element) {
-		let moving = false;
-		let lastEvent = null;
-		const viewport = document.body;
-
-		const down = e => {
-			moving = true;
-			this.update();
-		}
-
-		const up = e => {
-			moving = false;
-			viewport.style.cursor = "default";
-			lastEvent = null;
-			this.update();
-		}
-
-		const move = e => {
-			if(moving && lastEvent) {
-				if(isMouseButton(e) == 2 || e.touches && e.touches.length > 1) {
-					this.position.x += (e.x - lastEvent.x) / element.width * Math.abs(this.position.z);
-					this.position.y += (e.y - lastEvent.y) / element.width * Math.abs(this.position.z);
-					viewport.style.cursor = "move";
-				} else if(isMouseButton(e) == 1 || e.type == "touchmove") {
-					this.rotation.y += (e.x - lastEvent.x) / element.width * 100;
-					this.rotation.x += (e.y - lastEvent.y) / element.width * 100;
-					viewport.style.cursor = "grabbing";
-				}
-				this.update();
-			}
-			lastEvent = e;
-		}
-
-		element.addEventListener("mousedown", down);
-		window.addEventListener("mouseup", up);
-		window.addEventListener("mousemove", move);
-
-		window.addEventListener("touchstart", down);
-		window.addEventListener("touchend", up);
-		window.addEventListener("touchmove", e => {
-			e.x = e.touches[0].clientX;
-			e.y = e.touches[0].clientY;
-			move(e);
-		});
-
-		element.addEventListener("wheel", e => {
-			this.zoom(e.deltaY);
-			this.update();
-		})
+		this.controller.update();
 	}
 }

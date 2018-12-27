@@ -72,7 +72,6 @@ export class Renderer extends GLContext {
 		}
 
 		this.scene = scene;
-		this.scene.camera.controls(this.canvas);
 		this.scene.clear();
 
 		this.updateViewport();
