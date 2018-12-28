@@ -172,15 +172,10 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
-		if(!scene.cached) {
-			Statistics.data.voxels = 0;
-		}
-
 		for(let obj of objects) {
 			if(obj instanceof Cube) {
-				if(!scene.cached && !obj.invisible) {
+				if(!scene.cached) {
 					vertArray.push(...obj.buffer.vertArray);
-					Statistics.data.voxels++;
 				}
 			}
 

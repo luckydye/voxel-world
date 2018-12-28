@@ -7,6 +7,7 @@ import { Camera } from "./gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "./gl/scene/Material.js";
 import { Resources } from "./Resources.js";
+import { Statistics } from './Statistics.js';
 
 let exampleFile = 'example1';
 
@@ -90,20 +91,21 @@ export default class VoxelWorld {
 
     voxel(tileData, x, y, z) {
         const tileSize = this.worldgen.tileSize;
+        const tileHeight = this.worldgen.tileHeight;
         const cube = new Cube({
             material: Material.WORLD,
             uv: tileData[x][y][z],
             position: new Vec(
                 ((x * 20) + 10) - ((tileSize/2) * 20),
-                ((y * 20) + 10) - ((tileSize) * 20),
+                ((y * 20) + 10) - ((tileHeight) * 20),
                 ((z * 20) + 10) - ((tileSize/2) * 20),
             )
         });
 
-        if((y-1 > 0 && y-1 < tileSize) && tileData[x][y-1][z]) {
+        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
             cube.visible.TOP = false;
         }
-        if((y+1 > 0 && y+1 < tileSize) && tileData[x][y+1][z]) {
+        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
             cube.visible.BOTTOM = false;
         }
         if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {
@@ -119,10 +121,15 @@ export default class VoxelWorld {
             cube.visible.FRONT = false;
         }
 
-        this.scene.add(cube);
+        if(!cube.invisible) {
+            Statistics.data.voxels++;
+            this.scene.add(cube);
+        }
     }
 
     buildTiles(tiles) {
+        Statistics.data.voxels = 0;
+
         for(let tile of tiles) {
             const tileData = tile.tileData;
             for(let x = 0; x < tileData.length; x++) {
