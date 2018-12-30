@@ -6,9 +6,9 @@
 		}
 	},
 	"world": {
-		"tileSize": 250,
+		"tileSize": 300,
 		"tileHeight": 29,
-		"threshold": 0.33,
+		"threshold": 0.4,
 		"resolution": 50
 	}
 }

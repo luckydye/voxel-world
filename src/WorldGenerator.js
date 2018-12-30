@@ -43,6 +43,7 @@ export class WorldGenerator {
 		this.resolution = resolution;
 		this.threshold = threshold;
 		this.terrainheight = terrainheight;
+		this.treeDensity = 0.65;
 		this.setSeed(seed);
 	}
 	
@@ -122,17 +123,17 @@ export class WorldGenerator {
 		// generate features
 		// return tile;
 
-		const treeDensity = 0.7;
+		const treeDensity = this.treeDensity;
 
 		for(let x = 0; x < tileData.length; x++) {
             for(let y = 0; y < tileData[x].length; y++) {
                 for(let z = 0; z < tileData[x][y].length; z++) {
 					// decide if destination is valid for a tree
 
-					const treeHeight = Math.random() * 10 + 10;
+					const treeHeight = Math.floor(Math.random() * 10 + 10);
 
 					if (x+10 < tileSize && x-10 > 0 &&
-						y-treeHeight > 0 &&
+						y > treeHeight &&
 						z+10 < tileSize && z-10 > 0) {
 
 						if (tileData[x][y+1] && 
@@ -162,41 +163,44 @@ export class WorldGenerator {
 		const width = 5;
 		const bevel = 0.2;
 
-		if(y + height < tileHeight)
+		if(y - height < tileHeight) {
 
-		for(let i = 0; i < height; i++) {
-			// make log
-			if(tileData[x][y-i]) {
-				if(i < height-1)
-				
-				tileData[x][y-i][z] = UV.LOG;
-			}
+			if(tileData[x][y - height] && !tileData[x][y - height][z])
 
-			// make crown
-			if(i >= 2) {
-				let diff = -i * 0.22;
-
-				if(i % 2 == 0) {
-					diff -= 2;
+			for(let i = 0; i < height; i++) {
+				// make log
+				if(tileData[x][y-i]) {
+					if(i < height-1) {
+						tileData[x][y-i][z] = UV.LOG;
+					}
 				}
 
-				for(let tx = -width; tx <= width; tx++) {
-					for(let ty = -width; ty <= width; ty++) {
+				// make crown
+				if(i >= 2) {
+					let diff = -i * 0.22;
 
-						if(x - tx != x || y - ty != y || i > height-2) {
+					if(i % 2 == 0) {
+						diff -= 2;
+					}
 
-							const p1 = [ x, y ];
-							const p2 = [ x - tx, y - ty ];
+					for(let tx = -width; tx <= width; tx++) {
+						for(let ty = -width; ty <= width; ty++) {
 
-							const a = p1[0] - p2[0];
-							const b = p1[1] - p2[1];
+							if(x - tx != x || y - ty != y || i > height-2) {
 
-							const dist = Math.sqrt( a*a + b*b );
+								const p1 = [ x, y ];
+								const p2 = [ x - tx, y - ty ];
 
-							if(dist <= width + bevel + diff) {
-								tileData[x - tx][y-i][z - ty] = UV.LEAVES;
+								const a = p1[0] - p2[0];
+								const b = p1[1] - p2[1];
+
+								const dist = Math.sqrt( a*a + b*b );
+
+								if(dist <= width + bevel + diff) {
+									tileData[x - tx][y-i][z - ty] = UV.LEAVES;
+								}
+									
 							}
-								
 						}
 					}
 				}
