@@ -6,6 +6,7 @@ global.resourceTypes = {
 	JSON: [".json"],
 	TEXT: [".txt"],
 	IMAGE: [".png", ".jpg"],
+	VIDEO: [".mp4"],
 	SHADER: [".shader", ".fs", ".vs"],
 };
 
@@ -100,6 +101,26 @@ export class Resources {
 						resolve(img);
 					}
 					img.src = path;
+				});
+
+			case Resources.Types.IMAGE:
+				return new Promise((resolve, reject) => {
+					const img = new Image();
+					img.onload = () => {
+						resolve(img);
+					}
+					img.src = path;
+				});
+
+			case Resources.Types.VIDEO:
+				return new Promise((resolve, reject) => {
+					const vid = document.createElement('video');
+					vid.oncanplay = () => {
+						resolve(vid);
+						vid.loop = true;
+						vid.play();
+					}
+					vid.src = path;
 				});
 				
 			case Resources.Types.TEXT:

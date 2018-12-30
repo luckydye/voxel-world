@@ -5,10 +5,12 @@ export class Material {
         return Material[name];
     }
 
-    constructor() {
+    constructor({ texture } = {}) {
         this.texture = null;
         this.gltexture = null;
         this.defuseColor = [1, 1, 1, 1];
+        
+        this.setTexture(texture);
     }
 
     setTexture(img) {

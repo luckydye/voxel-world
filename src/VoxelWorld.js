@@ -10,23 +10,23 @@ import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
 import { Voxel } from './gl/geo/Voxel.js';
 
-let exampleFile = 'example1';
+let world = 'example1';
 
 if(document.location.search) {
-    exampleFile = document.location.search.substr(1);
+    world = document.location.search.substr(1);
 }
 
-let texture = './resources/textures/blocks_solid.png';
+let wtexture = './resources/textures/blocks_solid.png';
 
 if(document.location.hash == "#mc") {
-    texture = './resources/textures/blocks.png';
+    wtexture = './resources/textures/blocks.png';
 }
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'worldtextures': texture,
+    'worldtextures': wtexture,
     'cubetexture': './resources/textures/cube.png',
-    'world': './resources/worlds/' + exampleFile + '.json',
+    'world': './resources/worlds/' + world + '.json',
 }, false);
 
 export default class VoxelWorld {
@@ -70,16 +70,18 @@ export default class VoxelWorld {
             }
             lastTick = this.renderer.time;
 
-            this.scene.cube.rotation.x += 0.33;
-            this.scene.cube.rotation.z += 0.5;
+            this.scene.cube.rotation.x += 0.1;
+            this.scene.cube.rotation.z += 0.05;
         }
     }
 
     initMaterials() {
         const mats = Resources.get('materials');
         for(let name in mats) {
-            const mat = Material.create({ name });
-            mat.texture = Resources.get(mats[name].texture);
+            const mat = Material.create({ 
+                name: name,
+                texture: Resources.get(mats[name].texture),
+            });
             mat.defuseColor = mats[name].defuseColor;
             mat.textureSize = mats[name].textureSize;
         }
