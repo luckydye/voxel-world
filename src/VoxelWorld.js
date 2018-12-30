@@ -56,11 +56,10 @@ export default class VoxelWorld {
             })
         }
         this.scene = new Scene(sceneOpts);
-
         this.renderer = new Renderer(canvas);
-        this.renderer.setScene(this.scene);
-
         this.worldgen = new WorldGenerator(settings.world);
+
+        this.renderer.setScene(this.scene);
 
         this.regen(settings.world.seed);
 
@@ -99,9 +98,6 @@ export default class VoxelWorld {
                 name: name,
                 texture: Resources.get(mats[name].texture),
             });
-            if(mats[name].texture == "SCREENCAPTURE") {
-                mat.texture = Resources.getScreenCapture();
-            }
             if(mat.texture && mat.texture.localName === "video") {
                 mat.animated = true;
             }

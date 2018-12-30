@@ -136,26 +136,4 @@ export class Resources {
 		}
 	}
 
-	static getScreenCapture() {
-		const screenVid = document.createElement("video");
-	
-		navigator.mediaDevices.getDisplayMedia({
-			frameRate: 15,
-		})
-		.then(mediaStream => {
-			screenVid.srcObject = mediaStream;
-			screenVid.onloadedmetadata = function(e) {
-				screenVid.play();
-			};
-		})
-		.catch(err => {
-			console.error(err);
-		})
-
-		screenVid.width = 640;
-		screenVid.height = 640;
-
-		return screenVid;
-	}
-
 }

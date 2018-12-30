@@ -8,9 +8,6 @@ import GridShader from './shader/GridShader.js';
 import LightShader from './shader/LightShader.js';
 import { Voxel } from './geo/Voxel.js';
 
-let nextFrame,
-	lastFrame;
-
 class RenderPass {
 
 	get buffer() {
