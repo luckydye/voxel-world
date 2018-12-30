@@ -27,8 +27,10 @@ export class GLContext {
 
 		this.fBufferResFactor = 1.0;
 
+		// default options set
 		this.options = {
 			DEPTH_TEST: true,
+			CULL_FACE: true,
 		}
 
 		this.getContext(canvas);
@@ -52,6 +54,8 @@ export class GLContext {
 		this.gl.canvas.width = res;
 		this.gl.canvas.height = res;
 		this.gl.viewport(0, 0, res, res);
+
+		this.gl.cullFace(this.gl.BACK);
 	}
 
 	clear() {

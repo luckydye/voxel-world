@@ -45,11 +45,6 @@ export class Renderer extends GLContext {
 			this.updateViewport();
 		});
 
-		this.options = {
-			DEPTH_TEST: true,
-			// CULLING: true
-		}
-
 		this.shaders = [
 			new GridShader(),
 			new FinalShader(),
@@ -122,6 +117,13 @@ export class Renderer extends GLContext {
 
 	draw() {
 		if(!this.scene) return;
+
+		// calc draw time
+		if(Statistics.lastFrame) {
+			Statistics.data.frameTime = Math.round((performance.now() - Statistics.lastFrame) * 10) / 10;
+		}
+
+		Statistics.lastFrame = performance.now();
 		
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
@@ -130,19 +132,12 @@ export class Renderer extends GLContext {
 			this.draw();
 		});
 
-		// calc draw time
-		if(Statistics.lastFrame) {
-			Statistics.data.frameTime = Math.round((performance.now() - Statistics.lastFrame) * 10) / 10;
-		}
-
 		this.clear();
 
 		this.renderMultiPass(this.renderPasses);
 		this.compositePasses(this.renderPasses);
 
 		lastFrame = this.time;
-
-		Statistics.lastFrame = performance.now();
 	}
 
 	drawGeo(geo) {
