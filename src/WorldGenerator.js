@@ -167,7 +167,7 @@ export class WorldGenerator {
 
 			if(tileData[x][y - height] && !tileData[x][y - height][z])
 
-			for(let i = 0; i < height; i++) {
+			for(let i = height; i > 0; i--) {
 				// make log
 				if(tileData[x][y-i]) {
 					if(i < height-1) {

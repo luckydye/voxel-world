@@ -65,42 +65,38 @@ export default class VoxelWorld {
 
         this.showcase = new Cube({
             scale: 10,
-            position: new Vec(0,-400,0),
+            position: new Vec(0,-600,0),
             material: Material.WORLD,
             uv: [2, 0]
         });
 
         this.scene.add(this.showcase)
 
+		if(nextFrame) {
+			cancelAnimationFrame(nextFrame);
+        }
+
         this.renderLoop();
     }
 
     renderLoop() {
-		if(nextFrame) {
-			cancelAnimationFrame(nextFrame);
-        }
-        
-        const loop = () => {
-            const currentFrame = performance.now();
-            Statistics.data.fps = Math.floor(1000 / (currentFrame - lastFrame));
-            Statistics.data.passes = 0;
+        const currentFrame = performance.now();
+        Statistics.data.fps = Math.floor(1000 / (currentFrame - lastFrame));
+        Statistics.data.passes = 0;
 
-            this.showcase.rotation.x += 0.05;
-            this.showcase.rotation.z += 0.05;
+        this.showcase.rotation.x += 0.05;
+        this.showcase.rotation.z += 0.05;
 
-            this.scene.update();
-            this.renderer.draw();
+        this.scene.update();
+        this.renderer.draw();
 
-            if(lastFrame) {
-                Statistics.data.drawTime = Math.round((performance.now() - lastFrame) * 10) / 10;
-            }
-
-            lastFrame = currentFrame;
-        
-            nextFrame = requestAnimationFrame(loop);
+        if(lastFrame) {
+            Statistics.data.drawTime = Math.round((performance.now() - lastFrame) * 10) / 10;
         }
 
-        loop();
+        lastFrame = currentFrame;
+    
+        nextFrame = requestAnimationFrame(() => this.renderLoop());
     }
 
     initMaterials() {
