@@ -27,9 +27,20 @@ export class GLContext {
 
 		this.fBufferResFactor = 1.0;
 
+		this.options = {
+			DEPTH_TEST: true,
+		}
+
 		this.getContext(canvas);
 
 		this.onCreate();
+
+		// enable gl options
+		for(let opt in this.options) {
+			if(this.options[opt] === true) {
+				this.gl.enable(this.gl[opt]);
+			}
+		}
 	}
 
 	setResolution(res) {
@@ -58,7 +69,6 @@ export class GLContext {
 		this.setResolution(nativeRes);
 
 		this.gl.clearColor(0.09, 0.09, 0.09, 1);
-		this.gl.enable(this.gl.DEPTH_TEST);
 	}
 
 	useShader(shader) {

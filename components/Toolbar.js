@@ -10,21 +10,23 @@ export class Toolbar extends HTMLElement {
 				.toolbar {
 					position: relative;
 					background: white;
-					border-radius: 40px;
+					border-radius: 5px;
 					overflow: hidden;
 					width: 40px;
 					box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.15);
 				}
 				
 				.selection {
-					border-radius: 20px;
+					border-radius: 5px;
 					width: 100%;
 					height: 100%;
 					background: #f7f7f7;
 					position: absolute;
-					top: 2px;
+					top: 3px;
 					opacity: 0;
+					z-index: 1000;
 					transform: scale(1.2);
+					pointer-events: none;
 					transition: opacity .2s ease-out,
 								height .4s ease-out,
 								transform .3s ease-out;
@@ -32,12 +34,11 @@ export class Toolbar extends HTMLElement {
 				
 				.toolbar:hover .selection {
 					height: 40px;
-					opacity: 0.5;
-					z-index: 10;
-					transform: translateY(calc(var(--my) * 1px)) scale(1.2);
+					opacity: 0.1;
+					transform: translateY(calc(var(--my) * 1px)) scale(0.95);
 					transition: opacity .1s ease-out,
-								height .15s ease-out,
-								transform .15s ease;
+								height .12s ease-out,
+								transform .05s ease-out;
 				}
 				
 				.tools {
@@ -46,16 +47,11 @@ export class Toolbar extends HTMLElement {
 				}
 				
 				:host([theme="dark"]) .toolbar {
-					background: #333;
+					background: transparent;
 				}
 				
 				:host([theme="dark"]) .selection {
-					background: #3e3e3e;
-				}
-				
-				:host([theme="dark"]) .tool[active],
-				:host([theme="dark"]) .tool:active {
-					background: rgba(255, 255, 255, 0.02);
+					background: rgb(255, 255, 255);
 				}
 			</style>
 			<span class="selection"></span>
@@ -113,18 +109,19 @@ export class Tool extends HTMLElement {
 				}
 				
 				.tool {
+					margin-top: 1px;
 					user-select: none;
-					border-radius: 50%;
 					width: 40px;
 					height: 40px;
 					display: flex;
 					justify-content: center;
 					align-items: center;
 					font-family: sans-serif;
-					color: grey;
+					color: white;
 					font-size: 20px;
 					cursor: pointer;
 					transition: background .1s ease-out;
+					background: rgba(28, 28, 28, 0.75);
 				}
 
 				:host([active]),

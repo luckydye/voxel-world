@@ -1,4 +1,3 @@
-import { Vec } from './Math.js';
 import { Statistics } from '../Statistics.js';
 import { GLContext } from './GL.js';
 import { Grid } from './geo/Grid.js';
@@ -45,6 +44,11 @@ export class Renderer extends GLContext {
 		window.addEventListener("resize", () => {
 			this.updateViewport();
 		});
+
+		this.options = {
+			DEPTH_TEST: true,
+			// CULLING: true
+		}
 
 		this.shaders = [
 			new GridShader(),
@@ -126,12 +130,19 @@ export class Renderer extends GLContext {
 			this.draw();
 		});
 
+		// calc draw time
+		if(Statistics.lastFrame) {
+			Statistics.data.frameTime = Math.round((performance.now() - Statistics.lastFrame) * 10) / 10;
+		}
+
 		this.clear();
 
 		this.renderMultiPass(this.renderPasses);
 		this.compositePasses(this.renderPasses);
 
 		lastFrame = this.time;
+
+		Statistics.lastFrame = performance.now();
 	}
 
 	drawGeo(geo) {
