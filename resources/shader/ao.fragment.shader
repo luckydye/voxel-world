@@ -3,12 +3,6 @@ precision mediump float;
 
 in vec2 texCoord;
 
-uniform sampler2D colorBuffer;
-uniform sampler2D depthBuffer;
-uniform sampler2D normalBuffer;
-
-uniform vec3 lightPos;
-
 uniform float width;
 uniform float height;
 
@@ -32,7 +26,7 @@ const float noiseamount = 0.0002; //dithering amount
 const float diffarea = 0.3; //self-shadowing reduction
 const float gdisplace = 0.5; //gauss bell center //0.4
 
-const bool mist = false; //use mist?
+const bool mist = true; //use mist?
 const float miststart = 0.0; //mist start
 const float mistend = zFar; //mist end
 
@@ -176,18 +170,5 @@ void main(void)
         final = vec3(mix(vec3(ao),vec3(1.0),luminance*lumInfluence)); //ambient occlusion only
     }
 
-    // point light
-    vec3 surfaceWorldPosition = texture(normalBuffer, texCoord).xyz;
-    vec3 surfaceToLight = lightPos - surfaceWorldPosition;
-
-    vec3 surfaceToLightDirection = normalize(surfaceToLight);
-
-    float light = dot(surfaceWorldPosition, surfaceToLightDirection);
-
-    final *= (light / 2.0) + vec3(0.66);
-
-    oFragColor = texture(colorBuffer, texCoord) * vec4(final, 1.0);
-    // oFragColor = light;
-    oFragColor = texture(normalBuffer, texCoord);
-    // oFragColor = oFragColor / vec4(max(depth * 2.0, 0.4));
+    oFragColor = vec4(final, 1.0);
 }

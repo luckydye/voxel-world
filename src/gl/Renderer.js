@@ -50,13 +50,14 @@ export class Renderer extends GLContext {
 			new FinalShader(),
 			new ColorShader(),
 			new LightShader(),
-			// new NormalShader(),
 			// new AOShader(),
+			// new NormalShader(),
 		];
 
 		this.renderPasses = [
 			new RenderPass(this, 'color', this.shaders[2]),
 			new RenderPass(this, 'light', this.shaders[3]),
+			// new RenderPass(this, 'ao', this.shaders[4]),
 			// new RenderPass(this, 'normal', this.shaders[4]),
 		]
 		
@@ -86,7 +87,7 @@ export class Renderer extends GLContext {
 		this.scene.camera.update();
 	}
 
-	renderMultiPass(passes) {
+	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
 			
@@ -118,13 +119,6 @@ export class Renderer extends GLContext {
 	draw() {
 		if(!this.scene) return;
 
-		// calc draw time
-		if(Statistics.lastFrame) {
-			Statistics.data.frameTime = Math.round((performance.now() - Statistics.lastFrame) * 10) / 10;
-		}
-
-		Statistics.lastFrame = performance.now();
-		
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
 			Statistics.data.fps = Math.floor(1000 / (this.time - lastFrame));
@@ -132,12 +126,16 @@ export class Renderer extends GLContext {
 			this.draw();
 		});
 
+		lastFrame = this.time;
+
 		this.clear();
 
-		this.renderMultiPass(this.renderPasses);
+		this.renderMultiPasses(this.renderPasses);
 		this.compositePasses(this.renderPasses);
 
-		lastFrame = this.time;
+		if(lastFrame) {
+			Statistics.data.drawTime = Math.round((performance.now() - lastFrame) * 10) / 10;
+		}
 	}
 
 	drawGeo(geo) {

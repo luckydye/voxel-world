@@ -1,7 +1,7 @@
 {
 	"scene": {
 		"camera": {
-			"fov": 75
+			"fov": 90
 		}
 	},
 	"world": {
