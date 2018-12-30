@@ -61,16 +61,14 @@ export default class VoxelWorld {
 
         this.renderer.setScene(this.scene);
 
-        this.regen(settings.world.seed);
-
         this.showcase = new Cube({
             scale: 10,
             position: new Vec(0,-600,0),
-            material: Material.WORLD,
+            material: Material.CUBE,
             uv: [2, 0]
         });
 
-        this.scene.add(this.showcase)
+        this.regen(settings.world.seed);
 
 		if(nextFrame) {
 			cancelAnimationFrame(nextFrame);
@@ -109,6 +107,7 @@ export default class VoxelWorld {
             if(mat.texture && mat.texture.localName === "video") {
                 mat.animated = true;
             }
+            mat.emission = mats[name].emission || 0;
             mat.defuseColor = mats[name].defuseColor;
             mat.textureSize = mats[name].textureSize;
         }
@@ -122,6 +121,7 @@ export default class VoxelWorld {
             this.worldgen.generateTile(0, 0),
         ]
         this.buildTiles(this.tiles);
+        this.scene.add(this.showcase);
     }
 
     voxel(tileData, x, y, z) {

@@ -2,5 +2,9 @@
     "WORLD": {
         "texture": "worldtextures",
         "textureSize": 16
+    },
+    "CUBE": {
+        "texture": "worldtextures",
+        "textureSize": 16
     }
 }

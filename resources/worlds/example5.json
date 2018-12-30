@@ -6,10 +6,11 @@
 		}
 	},
 	"world": {
-		"seed": 0.7014197932522066,
-		"tileSize": 200,
-		"tileHeight": 29,
+		"seed": 0.6692894426733049,
+		"tileSize": 500,
+		"tileHeight": 25,
 		"threshold": 0.4,
-		"resolution": 50
+		"resolution": 50,
+		"terrainHeight": 50
 	}
 }

@@ -28,6 +28,7 @@ export default class LightShader extends GLShader {
     get uniform() {
 		return {
             pointLightPos: this.lightPos,
+            ambient: 0.45,
         };
 	}
     

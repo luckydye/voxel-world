@@ -132,9 +132,9 @@ export class WorldGenerator {
 
 					const treeHeight = Math.floor(Math.random() * 10 + 10);
 
-					if (x+10 < tileSize && x-10 > 0 &&
+					if (x+5 < tileSize && x-5 > 0 &&
 						y > treeHeight &&
-						z+10 < tileSize && z-10 > 0) {
+						z+5 < tileSize && z-5 > 0) {
 
 						if (tileData[x][y+1] && 
 							tileData[x][y-1] && 
@@ -143,6 +143,10 @@ export class WorldGenerator {
 							tileData[x][y+1][z] == UV.GRASS) {
 
 							let yvalue = noise.perlin2(x * treeDensity, z * treeDensity) + 0.1;
+							
+							if(yvalue < 0.5 && yvalue > 0.45) {
+								this.makeThing(tileData, x, y, z);
+							} else
 
 							if(yvalue >= treeDensity) {
 								this.makeTree(tileData, x, y, z, treeHeight);
@@ -167,10 +171,10 @@ export class WorldGenerator {
 
 			if(tileData[x][y - height] && !tileData[x][y - height][z])
 
-			for(let i = height; i > 0; i--) {
+			for(let i = 0; i < height; i++) {
 				// make log
 				if(tileData[x][y-i]) {
-					if(i < height-1) {
+					if(i <= height-1) {
 						tileData[x][y-i][z] = UV.LOG;
 					}
 				}
@@ -207,6 +211,10 @@ export class WorldGenerator {
 			}
 		}
 
+	}
+
+	makeThing(tileData, x, y, z) {
+		// tileData[x][y][z] = UV.LAVA;
 	}
 
 }
