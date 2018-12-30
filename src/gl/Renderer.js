@@ -129,6 +129,12 @@ export class Renderer extends GLContext {
 
 		this.clear();
 
+		for(let geo of this.scene.objects) {
+			if(geo.mat.animated) {
+				this.updateTexture(geo.mat.gltexture, geo.mat.texture);
+			}
+		}
+
 		this.renderMultiPasses(this.renderPasses);
 
 		this.compositePasses(this.renderPasses);

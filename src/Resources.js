@@ -116,9 +116,11 @@ export class Resources {
 				return new Promise((resolve, reject) => {
 					const vid = document.createElement('video');
 					vid.oncanplay = () => {
-						resolve(vid);
+						vid.width = 1024;
+						vid.height = 1024;
 						vid.loop = true;
 						vid.play();
+						resolve(vid);
 					}
 					vid.src = path;
 				});
@@ -132,6 +134,28 @@ export class Resources {
 			default:
 				throw `Err: not a valid resource type: "${path}"`;
 		}
+	}
+
+	static getScreenCapture() {
+		const screenVid = document.createElement("video");
+	
+		navigator.mediaDevices.getDisplayMedia({
+			frameRate: 15,
+		})
+		.then(mediaStream => {
+			screenVid.srcObject = mediaStream;
+			screenVid.onloadedmetadata = function(e) {
+				screenVid.play();
+			};
+		})
+		.catch(err => {
+			console.error(err);
+		})
+
+		screenVid.width = 640;
+		screenVid.height = 640;
+
+		return screenVid;
 	}
 
 }

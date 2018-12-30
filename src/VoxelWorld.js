@@ -9,6 +9,7 @@ import { Material } from "./gl/scene/Material.js";
 import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
 import { Voxel } from './gl/geo/Voxel.js';
+import { Plane } from './gl/geo/Plane.js';
 
 let world = 'example1';
 
@@ -26,6 +27,7 @@ Resources.add({
     'materials': './resources/materials/materials.json',
     'worldtextures': wtexture,
     'cubetexture': './resources/textures/cube.png',
+    'video': './resources/textures/vogel_1024.mp4',
     'world': './resources/worlds/' + world + '.json',
 }, false);
 
@@ -70,8 +72,9 @@ export default class VoxelWorld {
             }
             lastTick = this.renderer.time;
 
-            this.scene.cube.rotation.z += 0.25;
-            this.scene.cube.scale = Math.sin(performance.now() / 500) * 2 + 15;
+            // this.scene.cube.rotation.z += 0.25;
+            // this.scene.cube.rotation.y += 0.25;
+            // this.scene.cube.scale = Math.sin(performance.now() / 1000) * 2000 + 1000 * -1;
         }
     }
 
@@ -82,6 +85,12 @@ export default class VoxelWorld {
                 name: name,
                 texture: Resources.get(mats[name].texture),
             });
+            if(mats[name].texture == "SCREENCAPTURE") {
+                mat.texture = Resources.getScreenCapture();
+            }
+            if(mat.texture && mat.texture.localName === "video") {
+                mat.animated = true;
+            }
             mat.defuseColor = mats[name].defuseColor;
             mat.textureSize = mats[name].textureSize;
         }
@@ -151,13 +160,11 @@ export default class VoxelWorld {
             }
         }
 
-        this.scene.cube = new Cube({
-			scale: 10,
-			material: Material.CUBE,
-			uv: [2, 0],
-            position: new Vec(0, -500, 0),
-            rotation: new Vec()
-        });
-        this.scene.add(this.scene.cube);
+        // this.scene.cube = new Plane({
+		// 	scale: -3000,
+		// 	material: Material.SCREENGRAP,
+        //     position: new Vec(0, -3000, -3000)
+        // });
+        // this.scene.add(this.scene.cube);
     }
 }

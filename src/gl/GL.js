@@ -257,6 +257,13 @@ export class GLContext {
 		return texture;
 	}
 
+	updateTexture(texture, image) {
+		const gl = this.gl;
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+	}
+
 	createTexture(image, w, h) {
 		const gl = this.gl;
 

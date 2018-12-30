@@ -5,6 +5,6 @@
     },
     "CUBE": {
         "texture": "cubetexture",
-        "textureSize": 1040
+        "textureSize": 1024
     }
 }

@@ -7,7 +7,7 @@
 	},
 	"world": {
 		"tileSize": 250,
-		"tileHeight": 25,
+		"tileHeight": 29,
 		"threshold": 0.33,
 		"resolution": 50
 	}
