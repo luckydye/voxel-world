@@ -1,6 +1,8 @@
 import { Camera } from './Camera.js';
 import { VertexBuffer } from './VertexBuffer.js';
 
+let lastTick = 0;
+
 export class Scene {
 
 	constructor({ camera } = {}) {
@@ -30,7 +32,12 @@ export class Scene {
 	}
 
 	update() {
-		// implement updateing object in scnene and camera and stuff you know
+		const time = performance.now();
+		if(options.turntable) {
+			this.camera.rotation.y += 0.02 * (time - lastTick);
+			this.camera.update();
+		}
+		lastTick = time;
 	}
 
 }

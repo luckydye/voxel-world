@@ -35,10 +35,6 @@ class RenderPass {
 
 export class Renderer extends GLContext {
 
-	onRender() {
-		
-	}
-
     onCreate() {
 		this.shaders = [];
 		this.renderPasses = [];
@@ -65,17 +61,11 @@ export class Renderer extends GLContext {
 	}
 
 	setScene(scene) {
-		if(nextFrame) {
-			cancelAnimationFrame(nextFrame);
-		}
-
 		this.scene = scene;
 		this.scene.clear();
 
 		this.grid = new Grid(200);
 		this.screen = new Plane();
-
-		this.draw();
 	}
 
 	updateViewport() {
@@ -116,17 +106,6 @@ export class Renderer extends GLContext {
 	draw() {
 		if(!this.scene) return;
 
-		this.onRender();
-
-		nextFrame = requestAnimationFrame((ms) => {
-			this.time = ms;
-			Statistics.data.fps = Math.floor(1000 / (this.time - lastFrame));
-			Statistics.data.passes = 0;
-			this.draw();
-		});
-
-		lastFrame = this.time;
-
 		this.clear();
 
 		for(let geo of this.scene.objects) {
@@ -136,12 +115,7 @@ export class Renderer extends GLContext {
 		}
 
 		this.renderMultiPasses(this.renderPasses);
-
 		this.compositePasses(this.renderPasses);
-
-		if(lastFrame) {
-			Statistics.data.drawTime = Math.round((performance.now() - lastFrame) * 10) / 10;
-		}
 	}
 
 	drawGeo(geo) {
