@@ -70,8 +70,8 @@ export default class VoxelWorld {
             }
             lastTick = this.renderer.time;
 
-            this.scene.cube.rotation.x += 0.1;
-            this.scene.cube.rotation.z += 0.05;
+            this.scene.cube.rotation.z += 0.25;
+            this.scene.cube.scale = Math.sin(performance.now() / 500) * 2 + 15;
         }
     }
 

@@ -297,6 +297,10 @@ export class GLContext {
 		mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
 		mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 
+		mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(
+			transform.scale, transform.scale, transform.scale
+		));
+
 		const modelView = mat4.create();
 		mat4.multiply(modelView, this.scene.camera.viewMatrix, modelMatrix);
 

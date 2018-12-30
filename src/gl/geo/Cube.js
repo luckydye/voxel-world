@@ -55,7 +55,7 @@ export class Cube extends Geometry {
 	}
 
 	get faces() {
-		const s = this.scale;
+		const s = 1;
 		const w = 10;
 		const h = 10;
 
