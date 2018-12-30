@@ -2,10 +2,11 @@
 	"scene": {
 		"camera": {
 			"fov": 90,
-			"position": [ 0, 500.5, -500.5 ]
+			"position": [ 0, 400.5, -600.5 ]
 		}
 	},
 	"world": {
+		"seed": 0.7014197932522066,
 		"tileSize": 300,
 		"tileHeight": 29,
 		"threshold": 0.4,
