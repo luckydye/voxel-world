@@ -2,7 +2,6 @@ import { Statistics } from '../Statistics.js';
 import { GLContext } from './GL.js';
 import { Grid } from './geo/Grid.js';
 import { Plane } from './geo/Plane.js';
-import { Cube } from './geo/Cube.js';
 import FinalShader from './shader/FinalShader.js';
 import ColorShader from './shader/ColorShader.js';
 import GridShader from './shader/GridShader.js';
@@ -35,6 +34,10 @@ class RenderPass {
 }
 
 export class Renderer extends GLContext {
+
+	onRender() {
+		
+	}
 
     onCreate() {
 		this.shaders = [];
@@ -83,10 +86,9 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
-			
 			this.drawScene(this.scene);
-			
-			if(pass.id == 'color') {
+
+			if(pass.id === 'color') {
 				this.useShader(this.shaders[0]);
 				this.drawGeo(this.grid);
 			}
@@ -98,19 +100,23 @@ export class Renderer extends GLContext {
 	}
 
 	compositePasses(passes) {
-		this.useShader(this.shaders[1]);
+		this.gl.disable(this.gl.DEPTH_TEST);
 
+		this.useShader(this.shaders[1]);
 		for(let i in passes) {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
 		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", 4);
-		
 		this.drawGeo(this.screen);
+
+		this.gl.enable(this.gl.DEPTH_TEST);
 	}
 
 	draw() {
 		if(!this.scene) return;
+
+		this.onRender();
 
 		nextFrame = requestAnimationFrame((ms) => {
 			this.time = ms;
@@ -124,6 +130,7 @@ export class Renderer extends GLContext {
 		this.clear();
 
 		this.renderMultiPasses(this.renderPasses);
+
 		this.compositePasses(this.renderPasses);
 
 		if(lastFrame) {
@@ -148,6 +155,7 @@ export class Renderer extends GLContext {
 				const img = geo.mat.texture;
 				geo.mat.gltexture = this.createTexture(img);
 			}
+			this.gl.uniform1f(shader.uniforms.uTextureSize, geo.mat.textureSize);
 			this.useTexture(geo.mat.gltexture, "uTexture", 0);
 		}
 
@@ -176,10 +184,11 @@ export class Renderer extends GLContext {
 				this.drawGeo(obj);
 			}
 
-			if(!scene.texturemap) {
+			if(!scene.defaultMaterial) {
 				if(obj && obj.mat) {
+					scene.defaultMaterial = obj.mat;
 					const img = obj.mat.texture;
-					scene.texturemap = this.createTexture(img);
+					scene.defaultMaterial.gltexture = this.createTexture(img);
 				}
 			}
 		}
@@ -193,7 +202,8 @@ export class Renderer extends GLContext {
 			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
 			this.setTransformUniforms(shader.uniforms);
 
-			this.useTexture(scene.texturemap, "uTexture", 0);
+			this.useTexture(scene.defaultMaterial.gltexture, "uTexture", 0);
+			this.gl.uniform1f(shader.uniforms.uTextureSize, scene.defaultMaterial.textureSize);
 
 			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 		}

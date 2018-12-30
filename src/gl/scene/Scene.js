@@ -29,4 +29,8 @@ export class Scene {
 		this.objects.clear();
 	}
 
+	update() {
+		// implement updateing object in scnene and camera and stuff you know
+	}
+
 }

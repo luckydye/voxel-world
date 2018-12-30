@@ -25,6 +25,7 @@ if(document.location.hash == "#mc") {
 Resources.add({
     'materials': './resources/materials/materials.json',
     'worldtextures': texture,
+    'cubetexture': './resources/textures/cube.png',
     'world': './resources/worlds/' + exampleFile + '.json',
 }, false);
 
@@ -53,15 +54,6 @@ export default class VoxelWorld {
             })
         }
         this.scene = new Scene(sceneOpts);
-        
-        let lastTick = 0;
-        setInterval(() => {
-            if(options.turntable) {
-                this.scene.camera.rotation.y += 0.02 * (this.renderer.time - lastTick);
-                this.scene.camera.update();
-            }
-            lastTick = this.renderer.time;
-        }, 14);
 
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
@@ -69,6 +61,18 @@ export default class VoxelWorld {
         this.worldgen = new WorldGenerator(settings.world);
 
         this.regen(settings.world.seed);
+        
+        let lastTick = 0;
+        this.renderer.onRender = () => {
+            if(options.turntable) {
+                this.scene.camera.rotation.y += 0.02 * (this.renderer.time - lastTick);
+                this.scene.camera.update();
+            }
+            lastTick = this.renderer.time;
+
+            this.scene.cube.rotation.x += 0.33;
+            this.scene.cube.rotation.z += 0.5;
+        }
     }
 
     initMaterials() {
@@ -77,6 +81,7 @@ export default class VoxelWorld {
             const mat = Material.create({ name });
             mat.texture = Resources.get(mats[name].texture);
             mat.defuseColor = mats[name].defuseColor;
+            mat.textureSize = mats[name].textureSize;
         }
     }
 
@@ -144,18 +149,13 @@ export default class VoxelWorld {
             }
         }
 
-        const cube = new Cube({
+        this.scene.cube = new Cube({
 			scale: 10,
 			material: Material.CUBE,
 			uv: [2, 0],
             position: new Vec(0, -500, 0),
             rotation: new Vec()
         });
-        this.scene.add(cube);
-
-        setInterval(() => {
-            cube.rotation.x += 0.33;
-            cube.rotation.z += 0.5;
-        }, 16)
+        this.scene.add(this.scene.cube);
     }
 }
