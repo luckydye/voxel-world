@@ -1,59 +1,7 @@
-import { Geometry } from "../scene/Geometry.js";
-import { VertexBuffer } from "../scene/VertexBuffer.js";
+import { Cube } from "./Cube.js";
 
-export class Cube extends Geometry {
-
-	get invisible() {
-		return  !this.visible.TOP && 
-				!this.visible.BOTTOM &&
-				!this.visible.LEFT &&
-				!this.visible.RIGHT &&
-				!this.visible.FRONT &&
-				!this.visible.BACK;
-	}
-
-	constructor(...args) {
-		super(...args);
-
-		this.vertsPerFace = 6;
-
-		this.visible = {
-			TOP: true,
-			BOTTOM: true,
-			LEFT: true,
-			RIGHT: true,
-			FRONT: true,
-			BACK: true,
-		}
-	}
-
-	createBuffer() {
-		let vertArray = [];
-		const faces = this.faces;
-
-		let visibleFaces = [];
-
-		for(let key in this.visible) {
-			if(this.visible[key]) {
-				visibleFaces.push(key);
-			}
-		}
-
-		visibleFaces.forEach(face => {
-			vertArray = vertArray.concat(faces[face]);
-		})
-
-		const vertxBuffer = VertexBuffer.create(vertArray);
-		vertxBuffer.type = "TRIANGLES";
-		vertxBuffer.attributes = [
-			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTexCoords" },
-			{ size: 3, attribute: "aNormal" },
-		]
-
-		return vertxBuffer;
-	}
-
+export class Voxel extends Cube {
+	
 	get faces() {
 		const s = this.scale;
 		const w = 10;
@@ -62,9 +10,9 @@ export class Cube extends Geometry {
 		const u = this.uv[0];
 		const v = this.uv[1];
 
-		const x = 0;
-		const y = 0;
-		const z = 0;
+		const x = this.position.x;
+		const y = -this.position.y;
+		const z = this.position.z;
 
 		return {
 			TOP: [

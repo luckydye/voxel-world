@@ -1,5 +1,8 @@
 {
     "WORLD": {
         "texture": "worldtextures"
+    },
+    "CUBE": {
+        "texture": "worldtextures"
     }
 }

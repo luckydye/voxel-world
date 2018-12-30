@@ -8,6 +8,7 @@ import { WorldGenerator } from "./WorldGenerator.js";
 import { Material } from "./gl/scene/Material.js";
 import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
+import { Voxel } from './gl/geo/Voxel.js';
 
 let exampleFile = 'example1';
 
@@ -92,7 +93,7 @@ export default class VoxelWorld {
     voxel(tileData, x, y, z) {
         const tileSize = this.worldgen.tileSize;
         const tileHeight = this.worldgen.tileHeight;
-        const cube = new Cube({
+        const cube = new Voxel({
             material: Material.WORLD,
             uv: tileData[x][y][z],
             position: new Vec(
@@ -142,5 +143,19 @@ export default class VoxelWorld {
                 }
             }
         }
+
+        const cube = new Cube({
+			scale: 10,
+			material: Material.CUBE,
+			uv: [2, 0],
+            position: new Vec(0, -500, 0),
+            rotation: new Vec()
+        });
+        this.scene.add(cube);
+
+        setInterval(() => {
+            cube.rotation.x += 0.33;
+            cube.rotation.z += 0.5;
+        }, 16)
     }
 }

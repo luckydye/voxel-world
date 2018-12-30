@@ -1,4 +1,5 @@
 import { Statistics } from "../Statistics.js";
+import { Transform } from "./Math.js";
 
 export class GLContext {
 
@@ -279,26 +280,22 @@ export class GLContext {
 		return texture;
 	}
 
-	setTransformUniforms(uniforms, geo, transform) {
+	setTransformUniforms(uniforms, geo) {
 		const gl = this.gl;
-		let modelMatrix = mat4.create();
-		if(transform || geo) {
-			transform = geo || {
-				position: transform.position || new Vec(),
-				rotation: transform.rotation || new Vec()
-			}
+		const modelMatrix = mat4.create();
+		const transform = geo || new Transform();
 
-			mat4.identity(modelMatrix);
-			
-			mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
-				transform.position.x,
-				- transform.position.y,
-				transform.position.z,
-			));
-			mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.x);
-			mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
-			mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
-		}
+		mat4.identity(modelMatrix);
+
+		mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(
+			transform.position.x,
+			-transform.position.y,
+			transform.position.z,
+		));
+
+		mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.x);
+		mat4.rotateY(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.y);
+		mat4.rotateZ(modelMatrix, modelMatrix, Math.PI / 180 * transform.rotation.z);
 
 		const modelView = mat4.create();
 		mat4.multiply(modelView, this.scene.camera.viewMatrix, modelMatrix);

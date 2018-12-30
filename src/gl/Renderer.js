@@ -5,10 +5,9 @@ import { Plane } from './geo/Plane.js';
 import { Cube } from './geo/Cube.js';
 import FinalShader from './shader/FinalShader.js';
 import ColorShader from './shader/ColorShader.js';
-import NormalShader from './shader/NormalShader.js';
 import GridShader from './shader/GridShader.js';
 import LightShader from './shader/LightShader.js';
-import AOShader from './shader/AOShader.js';
+import { Voxel } from './geo/Voxel.js';
 
 let nextFrame,
 	lastFrame;
@@ -50,15 +49,11 @@ export class Renderer extends GLContext {
 			new FinalShader(),
 			new ColorShader(),
 			new LightShader(),
-			// new AOShader(),
-			// new NormalShader(),
 		];
 
 		this.renderPasses = [
 			new RenderPass(this, 'color', this.shaders[2]),
 			new RenderPass(this, 'light', this.shaders[3]),
-			// new RenderPass(this, 'ao', this.shaders[4]),
-			// new RenderPass(this, 'normal', this.shaders[4]),
 		]
 		
 		for(let shader of this.shaders) {
@@ -73,8 +68,6 @@ export class Renderer extends GLContext {
 
 		this.scene = scene;
 		this.scene.clear();
-
-		this.updateViewport();
 
 		this.grid = new Grid(200);
 		this.screen = new Plane();
@@ -156,8 +149,6 @@ export class Renderer extends GLContext {
 				geo.mat.gltexture = this.createTexture(img);
 			}
 			this.useTexture(geo.mat.gltexture, "uTexture", 0);
-		} else {
-			// this.useTexture(null, "uTexture", 0);
 		}
 
 		const buffer = geo.buffer;
@@ -177,10 +168,12 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		for(let obj of objects) {
-			if(obj instanceof Cube) {
+			if(obj instanceof Voxel) {
 				if(!scene.cached) {
 					vertArray.push(...obj.buffer.vertArray);
 				}
+			} else {
+				this.drawGeo(obj);
 			}
 
 			if(!scene.texturemap) {
