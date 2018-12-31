@@ -10,7 +10,7 @@ import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
 import { Voxel } from './gl/geo/Voxel.js';
 
-let world = 'example1';
+let world = 'example5';
 
 if(document.location.search) {
     world = document.location.search.substr(1);
