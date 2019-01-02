@@ -4,7 +4,7 @@ import { Scene } from "./gl/scene/Scene.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
-import { Material } from "./gl/scene/Material.js";
+import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
 import { Voxel } from './gl/geo/Voxel.js';

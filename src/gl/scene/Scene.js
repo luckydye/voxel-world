@@ -1,5 +1,5 @@
 import { Camera } from './Camera.js';
-import { VertexBuffer } from './VertexBuffer.js';
+import { VertexBuffer } from '../graphics/VertexBuffer.js';
 
 let lastTick = 0;
 

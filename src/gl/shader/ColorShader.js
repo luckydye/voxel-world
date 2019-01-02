@@ -1,5 +1,5 @@
 import { Resources } from '../../Resources.js';
-import { GLShader } from "../GL.js";
+import { GLShader } from "../graphics/GL.js";
 
 Resources.add({
     'gbuffer.vs': './resources/shader/gbuffer.vertex.shader',

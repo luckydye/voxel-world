@@ -1,4 +1,4 @@
-import { GLShader } from "../GL.js";
+import { GLShader } from "../graphics/GL.js";
 
 export default class GridShader extends GLShader {
 

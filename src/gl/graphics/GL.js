@@ -1,4 +1,4 @@
-import { Transform } from "./Math.js";
+import { Transform } from "../Math.js";
 
 export class GLContext {
 

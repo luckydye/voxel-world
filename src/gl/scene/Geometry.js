@@ -1,4 +1,4 @@
-import { Material } from "./Material.js";
+import { Material } from "../graphics/Material.js";
 import { Transform } from "../Math.js";
 
 export class Geometry extends Transform {
