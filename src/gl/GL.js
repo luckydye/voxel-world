@@ -1,4 +1,3 @@
-import { Statistics } from "../Statistics.js";
 import { Transform } from "./Math.js";
 
 export class GLContext {
@@ -56,7 +55,7 @@ export class GLContext {
 		this.gl.canvas.height = res;
 		this.gl.viewport(0, 0, res, res);
 
-		this.gl.clearColor(0.15, 0.15, 0.15, 1);
+		this.gl.clearColor(0.2, 0.2, 0.2, 1.0);
 		this.gl.cullFace(this.gl.BACK);
 	}
 
@@ -68,7 +67,7 @@ export class GLContext {
 		this.canvas = canvas;
 
 		const ctxtOpts = { 
-			// alpha: false
+			alpha: false
 		};
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
