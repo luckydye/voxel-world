@@ -1,4 +1,4 @@
-import { Resources } from '../../Resources.js';
+import { Resources } from '../Resources.js';
 import { GLShader } from "../graphics/GL.js";
 
 Resources.add({

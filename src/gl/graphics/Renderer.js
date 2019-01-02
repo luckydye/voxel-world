@@ -1,12 +1,12 @@
 import { Statistics } from '../Statistics.js';
-import { Grid } from './geo/Grid.js';
-import { Plane } from './geo/Plane.js';
-import { GLContext } from './graphics/GL.js';
-import FinalShader from './shader/FinalShader.js';
-import ColorShader from './shader/ColorShader.js';
-import GridShader from './shader/GridShader.js';
-import LightShader from './shader/LightShader.js';
-import { Voxel } from './geo/Voxel.js';
+import { Grid } from '../geo/Grid.js';
+import { Plane } from '../geo/Plane.js';
+import { GLContext } from './GL.js';
+import FinalShader from '../shader/FinalShader.js';
+import ColorShader from '../shader/ColorShader.js';
+import GridShader from '../shader/GridShader.js';
+import LightShader from '../shader/LightShader.js';
+import { Voxel } from '../geo/Voxel.js';
 
 class RenderPass {
 

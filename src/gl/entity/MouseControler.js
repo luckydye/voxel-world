@@ -1,3 +1,4 @@
+import { EntityController } from "./EntityController.js";
 
 function isMouseButton(e) {
 	let mbutton;
@@ -13,14 +14,10 @@ function isMouseButton(e) {
 	return mbutton;
 }
 
-export class EntityController {
-
-	static get sensivity() {
-		return 200;
-	}
+export class MouseControler extends EntityController {
 
 	constructor(entity) {
-		if(!entity) throw "No controllable entity";
+		super(entity);
 
 		let moving = false;
 		let lastEvent = null;
@@ -70,10 +67,6 @@ export class EntityController {
 			entity.zoom(e.deltaY);
 			entity.update();
 		})
-	}
-
-	update() {
-		// interface update method
 	}
 
 }

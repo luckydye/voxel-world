@@ -1,5 +1,5 @@
 import { Vec, Transform } from '../Math.js';
-import { EntityController } from './EntityController.js';
+import { MouseControler } from '../entity/MouseControler.js';
 
 export class Camera extends Transform {
 
@@ -23,7 +23,7 @@ export class Camera extends Transform {
 
 		this.updated = false;
 
-		this.controller = new EntityController(this);
+		this.controller = new MouseControler(this);
 
 		this.update();
 	}

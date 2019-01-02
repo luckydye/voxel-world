@@ -1,5 +1,26 @@
 import noise from '../lib/perlin.js';
-import { Statistics } from './Statistics.js';
+import { Statistics } from './gl/Statistics.js';
+import { Material } from './gl/graphics/Material.js';
+import { Voxel } from './gl/geo/Voxel.js';
+import { Vec } from './gl/Math.js';
+import { Resources } from './gl/Resources.js';
+
+let world = 'default';
+
+if(document.location.search) {
+    world = document.location.search.substr(1);
+}
+
+let wtexture = './resources/textures/blocks_solid.png';
+
+if(document.location.hash == "#mc") {
+    wtexture = './resources/textures/blocks.png';
+}
+
+Resources.add({
+    'worldtextures': wtexture,
+    'world': './resources/worlds/' + world + '.json',
+}, false);
 
 class Tile {
 	constructor(x, y, size, height) {
@@ -28,7 +49,7 @@ const UV = {
 	SAND: [3,1],
 }
 
-export class WorldGenerator {
+export class VoxelWorldGenerator {
 
 	constructor({ 
 		tileSize = 16, 
@@ -44,6 +65,10 @@ export class WorldGenerator {
 		this.threshold = threshold;
 		this.terrainheight = terrainheight;
 		this.treeDensity = 0.65;
+		this.tiles = [];
+
+		this.scene = null;
+
 		this.setSeed(seed);
 	}
 	
@@ -52,6 +77,70 @@ export class WorldGenerator {
 		noise.seed(n);
 		Statistics.data.seed = n;
 	}
+
+    voxel(tileData, x, y, z) {
+        const tileSize = this.tileSize;
+        const tileHeight = this.tileHeight;
+        const cube = new Voxel({
+            material: Material.WORLD,
+            uv: tileData[x][y][z],
+            position: new Vec(
+                ((x * 20) + 10) - ((tileSize/2) * 20),
+                ((y * 20) + 10) - ((tileHeight) * 20) - 0.5,
+                ((z * 20) + 10) - ((tileSize/2) * 20),
+            )
+        });
+
+        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
+            cube.visible.TOP = false;
+        }
+        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
+            cube.visible.BOTTOM = false;
+        }
+        if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {
+            cube.visible.RIGHT = false;
+        }
+        if((z+1 > 0 && z+1 < tileSize) && tileData[x][y][z+1]) {
+            cube.visible.LEFT = false;
+        }
+        if((x-1 > 0 && x-1 < tileSize) && tileData[x-1][y][z]) {
+            cube.visible.BACK = false;
+        }
+        if((x+1 > 0 && x+1 < tileSize) && tileData[x+1][y][z]) {
+            cube.visible.FRONT = false;
+        }
+
+        if(!cube.invisible) {
+            Statistics.data.voxels++;
+            this.scene.add(cube);
+        }
+    }
+
+    regen(seed) {
+        seed = seed || Math.random();
+        this.setSeed(seed);
+        this.tiles = [
+            this.generateTile(0, 0),
+        ]
+        this.buildTiles(this.tiles);
+    }
+
+    buildTiles(tiles) {
+        Statistics.data.voxels = 0;
+
+        for(let tile of tiles) {
+            const tileData = tile.tileData;
+            for(let x = 0; x < tileData.length; x++) {
+                for(let y = 0; y < tileData[x].length; y++) {
+                    for(let z = 0; z < tileData[x][y].length; z++) {
+                        if(tileData[x][y][z]) {
+                            this.voxel(tileData, x + tile.pos.x, y, z + tile.pos.y);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	generateTile(x, y) {
         const tileHeight = this.tileHeight;

@@ -1,6 +1,6 @@
-import VoxelWorld from './src/VoxelWorld.js';
+import World from './src/World.js';
 import { Toolbar, IconButton } from './components/Toolbar.js';
-import { Statistics } from './src/Statistics.js';
+import { Statistics } from './src/gl/Statistics.js';
 
 window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -11,10 +11,10 @@ window.options = {
 };
 
 function onPageLod() {
-	const voxelWorld = new VoxelWorld();
-	voxelWorld.render(world);
+	const world = new World();
+	world.render(document.querySelector("#world"));
 
-	voxelWorld.onReady = () => {
+	world.onloaded = () => {
 		const hud = document.querySelector('hud #stats');
 		hud.innerHTML = Statistics.toText();
 	}
@@ -23,19 +23,20 @@ function onPageLod() {
 		zoomIn: IconButton({
 			icon: "+",
 			onclick() {
-				voxelWorld.scene.camera.zoom(-1);
+				world.scene.camera.zoom(-1);
 			}
 		}),
 		zoomOut: IconButton({
 			icon: "-",
 			onclick() {
-				voxelWorld.scene.camera.zoom(1);
+				world.scene.camera.zoom(1);
 			}
 		}),
 		regen: IconButton({
 			icon: "?",
 			onclick() {
-				voxelWorld.regen();
+				world.scene.clear();
+				world.worldgen.regen();
 			}
 		}),
 		turntable: IconButton({
