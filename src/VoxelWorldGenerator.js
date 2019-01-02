@@ -156,6 +156,13 @@ export class VoxelWorldGenerator {
 			if(tileData[x][y-1] && tileData[x][y-1][z] == null) {
 				mats = [ UV.GRASS ];
 			}
+
+			const dirtLayer = Math.floor(Math.random() * 2 + 2);
+
+			if (tileData[x][y-1] && tileData[x][y-1][z] == UV.GRASS ||
+				tileData[x][y-dirtLayer] && tileData[x][y-dirtLayer][z] == UV.GRASS) {
+				mats = [ UV.DIRT ];
+			}
 			
 			if(y > tileHeight-2 && !tileData[x][y-1][z]) {
 				mats = [ UV.WATER ];
