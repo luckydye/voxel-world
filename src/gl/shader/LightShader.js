@@ -15,16 +15,6 @@ export default class LightShader extends GLShader {
         ]
     }
 
-    get lightPos() {
-        const t = performance.now() / 1000;
-        const radius = 700;
-
-        const x = Math.sin(t) * radius;
-        const y = 1000;
-        const z = Math.cos(t) * radius;
-        return [x, y, z];
-    }
-
     get uniform() {
 		return {
             pointLightPos: this.lightPos,
@@ -34,6 +24,8 @@ export default class LightShader extends GLShader {
     
     constructor() {
         super({ name: "light" });
+
+        this.lightPos = [0, 1500, 0];
     }
 
 }
