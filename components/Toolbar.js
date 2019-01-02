@@ -16,31 +16,6 @@ export class Toolbar extends HTMLElement {
 					box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.15);
 				}
 				
-				.selection {
-					border-radius: 5px;
-					width: 100%;
-					height: 100%;
-					background: #f7f7f7;
-					position: absolute;
-					top: 3px;
-					opacity: 0;
-					z-index: 1000;
-					transform: scale(1.2);
-					pointer-events: none;
-					transition: opacity .2s ease-out,
-								height .4s ease-out,
-								transform .3s ease-out;
-				}
-				
-				.toolbar:hover .selection {
-					height: 40px;
-					opacity: 0.1;
-					transform: translateY(calc(var(--my) * 1px)) scale(0.95);
-					transition: opacity .1s ease-out,
-								height .12s ease-out,
-								transform .05s ease-out;
-				}
-				
 				.tools {
 					z-index: 100;
 					position: relative;
@@ -49,12 +24,7 @@ export class Toolbar extends HTMLElement {
 				:host([theme="dark"]) .toolbar {
 					background: transparent;
 				}
-				
-				:host([theme="dark"]) .selection {
-					background: rgb(255, 255, 255);
-				}
 			</style>
-			<span class="selection"></span>
 			<div class="tools">
 				<slot></slot>
 			</div>
@@ -84,18 +54,6 @@ export class Toolbar extends HTMLElement {
 
 	connectedCallback() {
 		this.applyTemplate();
-		
-		this.selector = this.shadowRoot.querySelector(".selection");
-		this.itemHeight = this.clientWidth;
-
-		const toolsWrapper = this.shadowRoot.querySelector(".tools");
-		toolsWrapper.addEventListener("mousemove", e => this.handleMouse(e));
-	}
-
-	handleMouse(e) {
-		const bounds = this.getClientRects()[0];
-		const i = Math.floor((e.clientY - bounds.y) / this.itemHeight);
-		this.selector.style.setProperty("--my", i * this.itemHeight);
 	}
 }
 
@@ -122,6 +80,10 @@ export class Tool extends HTMLElement {
 					cursor: pointer;
 					transition: background .1s ease-out;
 					background: rgba(28, 28, 28, 0.75);
+				}
+
+				:host(:hover) {
+					background: rgba(255, 255, 255, 0.1);
 				}
 
 				:host([active]),

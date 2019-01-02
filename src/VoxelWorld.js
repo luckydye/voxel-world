@@ -31,7 +31,7 @@ Resources.add({
 let nextFrame = 0, 
     lastFrame = 0, 
     accumulator = 0, 
-    tickrate = 32;
+    tickrate = 128;
 
 export default class VoxelWorld {
 
@@ -80,7 +80,7 @@ export default class VoxelWorld {
         const delta = currentFrame - lastFrame;
 
         accumulator += delta;
-        if(accumulator >= tickrate) {
+        if(accumulator >= (1000 / tickrate)) {
             this.scene.update(delta);
 
             accumulator = 0;
