@@ -1,7 +1,6 @@
 import '../lib/gl-matrix.js';
 import { Renderer } from "./gl/Renderer.js";
 import { Scene } from "./gl/scene/Scene.js";
-import { Cube } from "./gl/geo/Cube.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/scene/Camera.js";
 import { WorldGenerator } from "./WorldGenerator.js";
@@ -10,7 +9,7 @@ import { Resources } from "./Resources.js";
 import { Statistics } from './Statistics.js';
 import { Voxel } from './gl/geo/Voxel.js';
 
-let world = 'example5';
+let world = 'default';
 
 if(document.location.search) {
     world = document.location.search.substr(1);
@@ -29,14 +28,26 @@ Resources.add({
     'world': './resources/worlds/' + world + '.json',
 }, false);
 
-let nextFrame, lastFrame;
+let nextFrame = 0, 
+    lastFrame = 0, 
+    accumulator = 0, 
+    tickrate = 32;
 
 export default class VoxelWorld {
+
+    onReady() {
+
+    }
 
     render(canvas) {
         Resources.load().then(() => {
             console.log("resources loaded");
             this.init(canvas);
+
+            console.log("resources initialized");
+            this.renderLoop();
+
+            this.onReady();
         });
     }
 
@@ -61,40 +72,23 @@ export default class VoxelWorld {
 
         this.renderer.setScene(this.scene);
 
-        this.showcase = new Cube({
-            scale: 10,
-            position: new Vec(0,-600,0),
-            material: Material.CUBE,
-            uv: [2, 0]
-        });
-
         this.regen(settings.world.seed);
-
-		if(nextFrame) {
-			cancelAnimationFrame(nextFrame);
-        }
-
-        this.renderLoop();
     }
 
     renderLoop() {
         const currentFrame = performance.now();
-        Statistics.data.fps = Math.floor(1000 / (currentFrame - lastFrame));
-        Statistics.data.passes = 0;
+        const delta = currentFrame - lastFrame;
 
-        this.showcase.rotation.x += 0.05;
-        this.showcase.rotation.z += 0.05;
+        accumulator += delta;
+        if(accumulator >= tickrate) {
+            this.scene.update(delta);
 
-        this.scene.update();
-        this.renderer.draw();
-
-        if(lastFrame) {
-            Statistics.data.drawTime = Math.round((performance.now() - lastFrame) * 10) / 10;
+            accumulator = 0;
         }
-
+        this.renderer.draw();
+        
         lastFrame = currentFrame;
-    
-        nextFrame = requestAnimationFrame(() => this.renderLoop());
+        nextFrame = requestAnimationFrame(this.renderLoop.bind(this));
     }
 
     initMaterials() {
@@ -121,7 +115,6 @@ export default class VoxelWorld {
             this.worldgen.generateTile(0, 0),
         ]
         this.buildTiles(this.tiles);
-        this.scene.add(this.showcase);
     }
 
     voxel(tileData, x, y, z) {

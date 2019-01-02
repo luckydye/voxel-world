@@ -1,0 +1,14 @@
+{
+	"scene": {
+		"camera": {
+			"fov": 90,
+			"position": [ 0, 400.5, -600.5 ]
+		}
+	},
+	"world": {
+		"tileSize": 200,
+		"tileHeight": 25,
+		"threshold": 0.2,
+		"resolution": 42
+	}
+}

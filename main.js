@@ -14,7 +14,10 @@ function onPageLod() {
 	const voxelWorld = new VoxelWorld();
 	voxelWorld.render(world);
 
-	displayHud();
+	voxelWorld.onReady = () => {
+		const hud = document.querySelector('hud #stats');
+		hud.innerHTML = Statistics.toText();
+	}
 
 	createToolbar({
 		zoomIn: IconButton({
@@ -44,13 +47,6 @@ function onPageLod() {
 			}
 		})
 	});
-}
-
-function displayHud() {
-	const hud = document.querySelector('hud #stats');
-	setInterval(() => {
-		hud.innerHTML = Statistics.toText();
-	}, 250);
 }
 
 function createToolbar(buttonConfig) {

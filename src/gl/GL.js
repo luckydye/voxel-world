@@ -5,12 +5,12 @@ export class GLContext {
 
 	get resolution() {
 		return {
-			width: this._reolution[0],
-			height: this._reolution[1]
+			width: this._resolution[0],
+			height: this._resolution[1]
 		};
 	}
 	set resolution(vecArr) {
-		this._reolution = [ w, h ] = vecArr;
+		this._resolution = [ w, h ] = vecArr;
 	}
 
 	onCreate() {
@@ -27,6 +27,8 @@ export class GLContext {
 		this.bufferTextures = new Map();
 
 		this.fBufferResFactor = 1.0;
+
+		this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
 
 		// default options set
 		this.options = {
@@ -48,14 +50,13 @@ export class GLContext {
 
 	setResolution(res) {
 		res = res || this.resolution.width;
-		this._reolution = [res, res];
-
-		Statistics.data.resolution = this._reolution;
+		this._resolution = [res, res];
 
 		this.gl.canvas.width = res;
 		this.gl.canvas.height = res;
 		this.gl.viewport(0, 0, res, res);
 
+		this.gl.clearColor(0.15, 0.15, 0.15, 1);
 		this.gl.cullFace(this.gl.BACK);
 	}
 
@@ -66,14 +67,13 @@ export class GLContext {
 	getContext(canvas) {
 		this.canvas = canvas;
 
-		const ctxtOpts = { alpha: false };
+		const ctxtOpts = { 
+			// alpha: false
+		};
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
 
-		const nativeRes = Math.max(window.innerWidth, window.innerHeight);
-		this.setResolution(nativeRes);
-
-		this.gl.clearColor(0.09, 0.09, 0.09, 1);
+		this.setResolution(this.nativeResolution);
 	}
 
 	useShader(shader) {

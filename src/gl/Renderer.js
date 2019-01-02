@@ -25,8 +25,8 @@ class RenderPass {
 	use() {
 		this.renderer.useFramebuffer(this.id);
 		this.renderer.updateViewport();
-		this.renderer.clear();
 		this.renderer.useShader(this.shader);
+		this.renderer.clear();
 	}
 }
 
@@ -39,7 +39,7 @@ export class Renderer extends GLContext {
 		window.addEventListener("resize", () => {
 			this.updateViewport();
 		});
-
+		
 		this.shaders = [
 			new GridShader(),
 			new FinalShader(),
@@ -55,6 +55,9 @@ export class Renderer extends GLContext {
 		for(let shader of this.shaders) {
 			this.prepareShader(shader);
 		}
+
+        Statistics.data.passes = this.renderPasses.length;
+		Statistics.data.resolution = this._resolution;
 	}
 
 	setScene(scene) {
@@ -73,22 +76,19 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
+			
 			this.drawScene(this.scene);
-
-			if(pass.id === 'color') {
+			
+			if(pass.id == 'color') {
 				this.useShader(this.shaders[0]);
 				this.drawGeo(this.grid);
 			}
-
-			Statistics.data.passes++;
 		}
 
 		this.clearFramebuffer();
 	}
 
 	compositePasses(passes) {
-		this.gl.disable(this.gl.DEPTH_TEST);
-
 		this.useShader(this.shaders[1]);
 		for(let i in passes) {
 			const pass = passes[i];
@@ -96,14 +96,10 @@ export class Renderer extends GLContext {
 		}
 		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", 4);
 		this.drawGeo(this.screen);
-
-		this.gl.enable(this.gl.DEPTH_TEST);
 	}
 
 	draw() {
 		if(!this.scene) return;
-
-		this.clear();
 
 		for(let geo of this.scene.objects) {
 			if(geo.mat.animated) {
