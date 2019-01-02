@@ -4,16 +4,7 @@ import { VertexBuffer } from "../graphics/VertexBuffer.js";
 export class Terrain extends Geometry {
 
 	createBuffer() {
-		const s = 1;
-		const vertArray = [
-			-s, 0, -s, 	0, 0,
-			s, 0, -s, 	1, 0, 
-			s, 0, s, 	1, 1,
-
-			s, 0, s, 	1, 1,
-			-s, 0, s, 	0, 1, 
-			-s, 0, -s, 	0, 0,
-		]
+		const vertArray = this.generate();
 		const vertxBuffer = VertexBuffer.create(vertArray);
 		vertxBuffer.type = "TRIANGLES";
 		vertxBuffer.attributes = [
@@ -21,6 +12,20 @@ export class Terrain extends Geometry {
 			{ size: 2, attribute: "aTexCoords" }
 		]
 		return vertxBuffer;
+	}
+
+	generate() {
+		const s = 100;
+		const vertArray = [
+			s, 0, s, 	1, 1,
+			s, 0, -s, 	1, 0, 
+			-s, 0, -s, 	0, 0,
+
+			-s, 0, -s, 	0, 0,
+			-s, 0, s, 	0, 1, 
+			s, 0, s, 	1, 1,
+		]
+		return vertArray;
 	}
 
 }

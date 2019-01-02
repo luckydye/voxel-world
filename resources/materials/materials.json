@@ -3,8 +3,7 @@
         "texture": "worldtextures",
         "textureSize": 16
     },
-    "CUBE": {
-        "texture": "worldtextures",
-        "textureSize": 16
+    "DEFAULT": {
+        "diffuseColor": [1, 1, 1]
     }
 }

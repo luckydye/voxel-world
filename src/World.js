@@ -6,10 +6,11 @@ import { Camera } from "./gl/scene/Camera.js";
 import { VoxelWorldGenerator } from "./VoxelWorldGenerator.js";
 import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
+import { Terrain } from './gl/geo/Terrain.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'cubetexture': './resources/textures/cube.png',
+    'defaulttexture': './resources/textures/placeholder.png',
 }, false);
 
 let nextFrame = 0, 
@@ -50,12 +51,18 @@ export default class World {
         }
         this.scene = new Scene(sceneOpts);
         this.renderer = new Renderer(canvas);
-        this.worldgen = new VoxelWorldGenerator(settings.world);
-
         this.renderer.setScene(this.scene);
+
+        // this.terrain = new Terrain({
+        //     material: Material.TERRAIN,
+        // });
+
+        // this.scene.add(this.terrain);
+        
+        this.worldgen = new VoxelWorldGenerator(settings.world);
         this.worldgen.scene = this.scene;
 
-        // voxel world generation
+        //voxel world generation
         this.scene.clear();
         this.worldgen.regen(settings.world.seed);
     }
@@ -63,16 +70,11 @@ export default class World {
     initMaterials() {
         const mats = Resources.get('materials');
         for(let name in mats) {
-            const mat = Material.create({ 
-                name: name,
-                texture: Resources.get(mats[name].texture),
-            });
-            if(mat.texture && mat.texture.localName === "video") {
-                mat.animated = true;
-            }
-            mat.emission = mats[name].emission || 0;
-            mat.defuseColor = mats[name].defuseColor;
-            mat.textureSize = mats[name].textureSize;
+            const mat = Material.create(name);
+            mat.texture = Resources.get(mats[name].texture) || Resources.get("defaulttexture");
+            mat.animated = mat.texture.localName === "video";
+            mat.diffuseColor = mats[name].diffuseColor || [1, 1, 1];
+            mat.textureSize = mats[name].textureSize || 0;
         }
     }
 

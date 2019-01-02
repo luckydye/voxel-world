@@ -1,20 +1,16 @@
 export class Material {
 
-    static create({ name, texture }) {
-        Material[name] = new Material({ texture });
+    static create(name) {
+        Material[name] = new Material();
         return Material[name];
     }
 
     constructor({ texture } = {}) {
-        this.texture = null;
+        this.texture = texture;
         this.gltexture = null;
-        this.defuseColor = [1, 1, 1, 1];
-        
-        this.setTexture(texture);
-    }
-
-    setTexture(img) {
-        this.texture = img;
+        this.textureSize = 0;
+        this.diffuseColor = [1, 1, 1];
+        this.animated = false;
     }
 
 }

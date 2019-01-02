@@ -24,9 +24,9 @@ class RenderPass {
 
 	use() {
 		this.renderer.useFramebuffer(this.id);
+		this.renderer.clear();
 		this.renderer.updateViewport();
 		this.renderer.useShader(this.shader);
-		this.renderer.clear();
 	}
 }
 
@@ -123,14 +123,15 @@ export class Renderer extends GLContext {
 
 		this.setTransformUniforms(shader.uniforms, geo);
 
-		if(geo.mat) {
-			if(!geo.mat.gltexture) {
-				const img = geo.mat.texture;
-				geo.mat.gltexture = this.createTexture(img);
-			}
-			this.gl.uniform1f(shader.uniforms.uTextureSize, geo.mat.textureSize);
-			this.useTexture(geo.mat.gltexture, "uTexture", 0);
+		const material = geo.mat;
+		// give material attributes to shader
+		if(!material.gltexture && material.texture) {
+			const img = material.texture;
+			material.gltexture = this.createTexture(img);
 		}
+		this.useTexture(material.gltexture, "uTexture", 5);
+		this.gl.uniform1f(shader.uniforms.uTextureSize, material.textureSize);
+		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
 
 		const buffer = geo.buffer;
 		this.setBuffersAndAttributes(shader.attributes, buffer);
@@ -177,6 +178,7 @@ export class Renderer extends GLContext {
 
 			this.useTexture(scene.defaultMaterial.gltexture, "uTexture", 0);
 			this.gl.uniform1f(shader.uniforms.uTextureSize, scene.defaultMaterial.textureSize);
+			this.gl.uniform3fv(shader.uniforms.uDiffuseColor, scene.defaultMaterial.diffuseColor);
 
 			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 		}
