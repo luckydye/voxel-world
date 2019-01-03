@@ -1,3 +1,4 @@
+import noise from '../../../lib/perlin.js';
 import { Geometry } from "../scene/Geometry.js";
 import { VertexBuffer } from "../graphics/VertexBuffer.js";
 
@@ -6,7 +7,7 @@ export class Terrain extends Geometry {
 	createBuffer() {
 		const vertArray = this.generate();
 		const vertxBuffer = VertexBuffer.create(vertArray);
-		vertxBuffer.type = "TRIANGLES";
+		vertxBuffer.type = "POINTS";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
 			{ size: 2, attribute: "aTexCoords" }
@@ -15,17 +16,36 @@ export class Terrain extends Geometry {
 	}
 
 	generate() {
-		const s = 100;
-		const vertArray = [
-			s, 0, s, 	1, 1,
-			s, 0, -s, 	1, 0, 
-			-s, 0, -s, 	0, 0,
+		const size = 50;
+		const vertArray = [];
 
-			-s, 0, -s, 	0, 0,
-			-s, 0, s, 	0, 1, 
-			s, 0, s, 	1, 1,
-		]
+		const heightmap = this.heightMap(size, size);
+
+		for(let x = 0; x < heightmap.length; x++) {
+			for(let y = 0; y < heightmap[x].length; y++) {
+				let yvalue = heightmap[x][y];
+				 vertArray.push(size * (x - (size/2)), yvalue, size * (y - (size/2)), 1, 1);
+			}
+		}
+
 		return vertArray;
+	}
+
+	heightMap(width, height) {
+		const verts = new Array(width);
+		const res = 0.025;
+		const terrainheight = 1000;
+		
+		for(let x = 0; x <= width; x++) {
+			if(!verts[x]) {
+				verts[x] = new Array(height);
+			}
+			for(let y = 0; y <= height; y++) {
+				const noiseValue = noise.perlin2(x * res, y * res) * terrainheight;
+				verts[x][y] = -noiseValue;
+			}
+		}
+		return verts;
 	}
 
 }

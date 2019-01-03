@@ -26,5 +26,6 @@ void main() {
   vNormal = vec4(aNormal, 1.0).xyz;
   vTexCoords = aTexCoords;
 
+  gl_PointSize = 4.0;
   gl_Position = uProjMatrix * uViewMatrix * vec4(pos.xyz, 1.0);
 }

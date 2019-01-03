@@ -53,18 +53,18 @@ export default class World {
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        // this.terrain = new Terrain({
-        //     material: Material.TERRAIN,
-        // });
+        this.terrain = new Terrain({
+            material: Material.TERRAIN,
+        });
 
-        // this.scene.add(this.terrain);
+        this.scene.add(this.terrain);
         
-        this.worldgen = new VoxelWorldGenerator(settings.world);
-        this.worldgen.scene = this.scene;
+        // this.worldgen = new VoxelWorldGenerator(settings.world);
+        // this.worldgen.scene = this.scene;
 
-        //voxel world generation
-        this.scene.clear();
-        this.worldgen.regen(settings.world.seed);
+        // //voxel world generation
+        // this.scene.clear();
+        // this.worldgen.regen(settings.world.seed);
     }
 
     initMaterials() {
