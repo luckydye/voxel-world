@@ -49,22 +49,29 @@ export default class World {
             rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5) 
         });
 
-        this.createScene();
+        this.createVoxelScene();
     }
 
-    createScene() {
+    createTerrainScene() {
         this.scene = new Scene({
             camera: this.camera,
         });
         this.renderer.setScene(this.scene);
 
-        // this.terrain = new Terrain({
-        //     material: Material.TERRAIN,
-        //     height: 2000,
-        //     size: 200,
-        // });
+        this.terrain = new Terrain({
+            material: Material.TERRAIN,
+            height: 2000,
+            size: 200,
+        });
 
-        // this.scene.add(this.terrain);
+        this.scene.add(this.terrain);
+    }
+
+    createVoxelScene() {
+        this.scene = new Scene({
+            camera: this.camera,
+        });
+        this.renderer.setScene(this.scene);
         
         const settings = Resources.get('world');
         this.worldgen = new VoxelWorldGenerator(settings.world);

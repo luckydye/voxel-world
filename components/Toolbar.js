@@ -86,9 +86,12 @@ export class Tool extends HTMLElement {
 					background: rgba(255, 255, 255, 0.1);
 				}
 
-				:host([active]),
-				:host(:active) {
+				:host .tool:active {
 					background: rgba(0, 0, 0, 0.1);
+				}
+
+				:host([active]) .tool {
+					background: #424242;
 				}
 			</style>
 			<slot></slot>
