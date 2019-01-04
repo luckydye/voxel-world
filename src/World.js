@@ -58,21 +58,21 @@ export default class World {
         });
         this.renderer.setScene(this.scene);
 
-        this.terrain = new Terrain({
-            material: Material.TERRAIN,
-            height: 2000,
-            size: 200,
-        });
+        // this.terrain = new Terrain({
+        //     material: Material.TERRAIN,
+        //     height: 2000,
+        //     size: 200,
+        // });
 
-        this.scene.add(this.terrain);
+        // this.scene.add(this.terrain);
         
-        // const settings = Resources.get('world');
-        // this.worldgen = new VoxelWorldGenerator(settings.world);
-        // this.worldgen.scene = this.scene;
+        const settings = Resources.get('world');
+        this.worldgen = new VoxelWorldGenerator(settings.world);
+        this.worldgen.scene = this.scene;
 
-        // //voxel world generation
-        // this.scene.clear();
-        // this.worldgen.regen(settings.world.seed);
+        //voxel world generation
+        this.scene.clear();
+        this.worldgen.regen(settings.world.seed);
     }
 
     initMaterials() {
