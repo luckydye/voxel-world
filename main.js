@@ -35,8 +35,7 @@ function onPageLod() {
 		regen: IconButton({
 			icon: "?",
 			onclick() {
-				world.scene.clear();
-				world.worldgen.regen();
+				world.createScene();
 			}
 		}),
 		turntable: IconButton({

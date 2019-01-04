@@ -32,7 +32,7 @@ export class GLContext {
 		// default options set
 		this.options = {
 			DEPTH_TEST: true,
-			// CULL_FACE: true,
+			CULL_FACE: true,
 		}
 
 		this.getContext(canvas);

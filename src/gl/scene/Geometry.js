@@ -17,7 +17,11 @@ export class Geometry extends Transform {
 
 		this.mat = material;
 		this.uv = uv;
+
+		this.onCreate(args);
 	}
+
+	onCreate(arsg) { }
 
 	createBuffer() { }
 }

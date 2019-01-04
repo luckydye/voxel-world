@@ -4,16 +4,22 @@ import { VertexBuffer } from "../graphics/VertexBuffer.js";
 
 export class Terrain extends Geometry {
 
-	constructor({ drawtype }) {
-		super();
-
-		this.drawtype = drawtype;
+	onCreate({ 
+		smoothness = 0.025,
+		resolution = 50,
+		height = 1000,
+		size = 100,
+	} = {}) {
+		this.smoothness = smoothness;
+		this.resolution = resolution;
+		this.height = height;
+		this.size = size;
 	}
 
 	createBuffer() {
 		const vertArray = this.generate();
 		const vertxBuffer = VertexBuffer.create(vertArray);
-		vertxBuffer.type = this.drawtype || "TRIANGLES";
+		vertxBuffer.type = "TRIANGLES";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
 			{ size: 2, attribute: "aTexCoords" }
@@ -22,62 +28,68 @@ export class Terrain extends Geometry {
 	}
 
 	generate() {
-		const size = 32;
+		const size = this.size;
 		const vertArray = [];
 
-		const heightmap = this.heightMap(size, size);
+		const heightmap1 = this.heightMap(size, size, this.smoothness, this.height);
+		const heightmap2 = this.heightMap(size, size, this.smoothness * 8, this.height / 10);
+
+		const heightmap = this.mergeMap(heightmap1, heightmap2);
 
 		for(let x = 0; x < heightmap.length; x++) {
 			for(let z = 0; z < heightmap[x].length; z++) {
-				if(this.drawtype == "TRIANGLES") {
-					try {
-						const s = 25;
-						const dz = 25 + (50 * z) - (50 * heightmap.length / 2);
-						const dx = 25 + (50 * x) - (50 * heightmap[x].length / 2);
-						const yval = heightmap[x][z];
-						const topl = yval + ((yval - heightmap[x+1][z+1]) / 2);
-						const topr = yval - ((yval - heightmap[x+1][z+1]) / 2);
-						const botr = yval - ((yval - heightmap[x-1][z-1]) / 2);
-						const botl = yval;
-						const verts = [
-							s + dx, botr, s + dz, 1, 1, // bot r
-							s + dx, topr, -s + dz, 1, 0, // top r
-							-s + dx, topl, -s + dz, 0, 0, // top l
-		
-							// -s + dx, heightmap[x][z], -s + dz, 0, 0,
-							// -s + dx, heightmap[x-1][z], s + dz, 0, 1, 
-							// s + dx, heightmap[x][z] - 100, s + dz, 1, 1,
-						]
-						vertArray.push(...verts);
-					} catch(err) {}
-				} else {
-					const s = 25;
-					const dz = (50 * z) - (50 * heightmap.length / 2);
-					const dx = (50 * x) - (50 * heightmap[x].length / 2);
-					const yval = heightmap[x][z];
+				try {
+					const res = this.resolution;
+					const s = res / 2;
+					const dz = (res * z) - (res * heightmap.length / 2);
+					const dx = (res * x) - (res * heightmap[x].length / 2);
+					const topl = heightmap[x-1][z-1];
+					const topr = heightmap[x][z-1];
+					const botr = heightmap[x][z];
+					const botl = heightmap[x-1][z];
 					const verts = [
-						s + dx, yval, s + dz, 1, 1
+						s + dx, botr, s + dz, (1 / size) * x, (1 / size) * z,
+						s + dx, topr, -s + dz, (1 / size) * x, (1 / size) * z,
+						-s + dx, topl, -s + dz, (1 / size) * x, (1 / size) * z,
+	
+						-s + dx, topl, -s + dz, (1 / size) * x, (1 / size) * z,
+						-s + dx, botl, s + dz, (1 / size) * x, (1 / size) * z,
+						s + dx, botr, s + dz, (1 / size) * x, (1 / size) * z,
 					]
 					vertArray.push(...verts);
-				}
+				} catch(err) {}
 			}
 		}
 
 		return vertArray;
 	}
 
-	heightMap(width, height) {
+	heightMap(width, height, freq, terrainheight) {
 		const verts = new Array(width);
-		const res = 0.025;
-		const terrainheight = 1000;
+		
+		noise.seed(Math.random());
 		
 		for(let x = 0; x <= width; x++) {
 			if(!verts[x]) {
 				verts[x] = new Array(height);
 			}
 			for(let y = 0; y <= height; y++) {
-				const noiseValue = noise.perlin2(x * res, y * res) * terrainheight;
+				const noiseValue = noise.perlin2(x * freq, y * freq) * terrainheight;
 				verts[x][y] = -noiseValue;
+			}
+		}
+		return verts;
+	}
+
+	mergeMap(map1, map2) {
+		const verts = new Array(map1.length);
+		for(let x = 0; x < map1.length; x++) {
+			if(!verts[x]) {
+				verts[x] = new Array(map1[x].length);
+			}
+			for(let y = 0; y < verts[x].length; y++) {
+				const noiseValue = map1[x][y] + map2[x][y];
+				verts[x][y] = noiseValue;
 			}
 		}
 		return verts;

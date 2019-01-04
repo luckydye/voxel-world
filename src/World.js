@@ -37,36 +37,36 @@ export default class World {
     init(canvas) {
         this.initMaterials();
 
-        const settings = Resources.get('world');
+        this.renderer = new Renderer(canvas);
 
+        const settings = Resources.get('world');
         const settingsCamPos = settings.scene.camera.position;
         const settingsCamRot = settings.scene.camera.rotation;
 
-        const sceneOpts = {
-            camera: new Camera({ 
-                fov: settings.scene.camera.fov,
-                position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0.5, 200.5, -600.5),
-                rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5) 
-            })
-        }
-        this.scene = new Scene(sceneOpts);
-        this.renderer = new Renderer(canvas);
+        this.camera = new Camera({ 
+            fov: settings.scene.camera.fov,
+            position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0.5, 200.5, -600.5),
+            rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5) 
+        });
+
+        this.createScene();
+    }
+
+    createScene() {
+        this.scene = new Scene({
+            camera: this.camera,
+        });
         this.renderer.setScene(this.scene);
 
-        this.terrain1 = new Terrain({
+        this.terrain = new Terrain({
             material: Material.TERRAIN,
-            drawtype: "TRIANGLES",
+            height: 2000,
+            size: 200,
         });
 
-        this.scene.add(this.terrain1);
-
-        this.terrain2 = new Terrain({
-            material: Material.TERRAIN,
-            drawtype: "POINTS",
-        });
-
-        this.scene.add(this.terrain2);
+        this.scene.add(this.terrain);
         
+        // const settings = Resources.get('world');
         // this.worldgen = new VoxelWorldGenerator(settings.world);
         // this.worldgen.scene = this.scene;
 

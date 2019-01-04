@@ -6,6 +6,7 @@ import FinalShader from '../shader/FinalShader.js';
 import ColorShader from '../shader/ColorShader.js';
 import GridShader from '../shader/GridShader.js';
 import LightShader from '../shader/LightShader.js';
+import NormalShader from '../shader/NormalShader.js';
 import { Voxel } from '../geo/Voxel.js';
 
 class RenderPass {
@@ -45,11 +46,13 @@ export class Renderer extends GLContext {
 			new FinalShader(),
 			new ColorShader(),
 			new LightShader(),
+			new NormalShader(),
 		];
 
 		this.renderPasses = [
-			new RenderPass(this, 'color', this.shaders[2]),
+			new RenderPass(this, 'normal', this.shaders[4]),
 			new RenderPass(this, 'light', this.shaders[3]),
+			new RenderPass(this, 'color', this.shaders[2]),
 		]
 		
 		for(let shader of this.shaders) {
@@ -76,6 +79,11 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
+
+			for(let i in passes) {
+				const pass = passes[i];
+				this.useTexture(pass.buffer, pass.id + "Buffer", i);
+			}
 			
 			this.drawScene(this.scene);
 			
