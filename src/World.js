@@ -53,11 +53,19 @@ export default class World {
         this.renderer = new Renderer(canvas);
         this.renderer.setScene(this.scene);
 
-        this.terrain = new Terrain({
+        this.terrain1 = new Terrain({
             material: Material.TERRAIN,
+            drawtype: "TRIANGLES",
         });
 
-        this.scene.add(this.terrain);
+        this.scene.add(this.terrain1);
+
+        this.terrain2 = new Terrain({
+            material: Material.TERRAIN,
+            drawtype: "POINTS",
+        });
+
+        this.scene.add(this.terrain2);
         
         // this.worldgen = new VoxelWorldGenerator(settings.world);
         // this.worldgen.scene = this.scene;

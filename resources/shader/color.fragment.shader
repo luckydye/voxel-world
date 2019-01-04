@@ -17,4 +17,6 @@ void main() {
   } else {
     oFragColor = vec4(uDiffuseColor, 1.0);
   }
+
+  oFragColor = vec4(vTexCoords.x, 1.0, vTexCoords.y, 1.0);
 }

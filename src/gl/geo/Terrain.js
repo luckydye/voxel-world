@@ -4,10 +4,16 @@ import { VertexBuffer } from "../graphics/VertexBuffer.js";
 
 export class Terrain extends Geometry {
 
+	constructor({ drawtype }) {
+		super();
+
+		this.drawtype = drawtype;
+	}
+
 	createBuffer() {
 		const vertArray = this.generate();
 		const vertxBuffer = VertexBuffer.create(vertArray);
-		vertxBuffer.type = "POINTS";
+		vertxBuffer.type = this.drawtype || "TRIANGLES";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
 			{ size: 2, attribute: "aTexCoords" }
@@ -16,15 +22,44 @@ export class Terrain extends Geometry {
 	}
 
 	generate() {
-		const size = 50;
+		const size = 32;
 		const vertArray = [];
 
 		const heightmap = this.heightMap(size, size);
 
 		for(let x = 0; x < heightmap.length; x++) {
-			for(let y = 0; y < heightmap[x].length; y++) {
-				let yvalue = heightmap[x][y];
-				 vertArray.push(size * (x - (size/2)), yvalue, size * (y - (size/2)), 1, 1);
+			for(let z = 0; z < heightmap[x].length; z++) {
+				if(this.drawtype == "TRIANGLES") {
+					try {
+						const s = 25;
+						const dz = 25 + (50 * z) - (50 * heightmap.length / 2);
+						const dx = 25 + (50 * x) - (50 * heightmap[x].length / 2);
+						const yval = heightmap[x][z];
+						const topl = yval + ((yval - heightmap[x+1][z+1]) / 2);
+						const topr = yval - ((yval - heightmap[x+1][z+1]) / 2);
+						const botr = yval - ((yval - heightmap[x-1][z-1]) / 2);
+						const botl = yval;
+						const verts = [
+							s + dx, botr, s + dz, 1, 1, // bot r
+							s + dx, topr, -s + dz, 1, 0, // top r
+							-s + dx, topl, -s + dz, 0, 0, // top l
+		
+							// -s + dx, heightmap[x][z], -s + dz, 0, 0,
+							// -s + dx, heightmap[x-1][z], s + dz, 0, 1, 
+							// s + dx, heightmap[x][z] - 100, s + dz, 1, 1,
+						]
+						vertArray.push(...verts);
+					} catch(err) {}
+				} else {
+					const s = 25;
+					const dz = (50 * z) - (50 * heightmap.length / 2);
+					const dx = (50 * x) - (50 * heightmap[x].length / 2);
+					const yval = heightmap[x][z];
+					const verts = [
+						s + dx, yval, s + dz, 1, 1
+					]
+					vertArray.push(...verts);
+				}
 			}
 		}
 
