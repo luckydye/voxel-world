@@ -68,14 +68,14 @@ export default class World {
         this.scene.add(this.terrain);
     }
 
-    createVoxelScene() {
+    createVoxelScene(args) {
         this.scene = new Scene({
             camera: this.camera,
         });
         this.renderer.setScene(this.scene);
         
         const settings = Resources.get('world');
-        this.worldgen = new VoxelWorldGenerator(settings.world);
+        this.worldgen = new VoxelWorldGenerator(args || settings.world);
         this.worldgen.scene = this.scene;
 
         //voxel world generation

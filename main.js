@@ -50,40 +50,63 @@ function onPageLod() {
 		voxel: IconButton({
 			icon: Icons.voxel,
 			onclick() {
-				world.createVoxelScene();
+				openVoxelDialog(world);
 			}
 		}),
 		
 		terrain: IconButton({
 			icon: Icons.terrain,
 			onclick() {
-				const dialog = new DialogBox('Terrain');
-
-				[
-					{ name: "Smoothness", id: "smoothness", default: 0.025, steps: 0.001, type: "number" },
-					{ name: "Resolution", id: "resolution", default: 50, steps: 5, type: "number" },
-					{ name: "Height", id: "height", default: 1000, steps: 100, type: "number" },
-					{ name: "Size", id: "size", default: 100, steps: 1, type: "number" }
-				].forEach(row => {
-					dialog.addField(row);
-				})
-
-				dialog.addEventListener('submit', e => {
-					world.createTerrainScene(e.detail);
-				});
-				dialog.addEventListener('change', e => {
-					const data = e.detail;
-					if(world.terrain) {
-						data.seed = world.terrain.seed;
-					}
-					if(data.size > 0) {
-						world.createTerrainScene(data);
-					}
-				});
-				document.body.appendChild(dialog);
+				openTerrainDialog(world);
 			}
 		}),
 	});
+}
+
+function openTerrainDialog(world) {
+	const dialog = new DialogBox('Terrain');
+
+	[
+		{ name: "Smoothness", id: "smoothness", default: 0.025, steps: 0.001, type: "number" },
+		{ name: "Resolution", id: "resolution", default: 50, steps: 5, type: "number" },
+		{ name: "Height", id: "height", default: 1000, steps: 100, type: "number" },
+		{ name: "Size", id: "size", default: 100, steps: 1, type: "number" }
+	].forEach(row => {
+		dialog.addField(row);
+	})
+
+	dialog.addEventListener('submit', e => {
+		world.createTerrainScene(e.detail);
+	});
+	dialog.addEventListener('change', e => {
+		const data = e.detail;
+		if(world.terrain) {
+			data.seed = world.terrain.seed;
+		}
+		if(data.size > 0) {
+			world.createTerrainScene(data);
+		}
+	});
+	document.body.appendChild(dialog);
+}
+
+function openVoxelDialog(world) {
+	const dialog = new DialogBox('Voxel');
+	[
+		{ name: "tileSize", id: "tileSize", default: 120, steps: 5, type: "number" },
+		{ name: "tileHeight", id: "tileHeight", default: 20, steps: 1, type: "number" },
+		{ name: "threshold", id: "threshold", default: 0.2, steps: 0.05, type: "number" },
+		{ name: "resolution", id: "resolution", default: 42, steps: 1, type: "number" },
+		{ name: "terrainheight", id: "terrainheight", default: 50, steps: 1, type: "number" },
+	].forEach(row => {
+		dialog.addField(row);
+	})
+
+	dialog.addEventListener('submit', e => {
+		const data = e.detail;
+		world.createVoxelScene(data);
+	});
+	document.body.appendChild(dialog);
 }
 
 function createToolbar(buttonConfig) {
