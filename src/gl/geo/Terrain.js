@@ -9,11 +9,13 @@ export class Terrain extends Geometry {
 		resolution = 50,
 		height = 1000,
 		size = 100,
+		seed = Math.random(),
 	} = {}) {
 		this.smoothness = smoothness;
 		this.resolution = resolution;
 		this.height = height;
-		this.size = size;
+		this.size = parseInt(size);
+		this.seed = seed;
 	}
 
 	createBuffer() {
@@ -67,7 +69,7 @@ export class Terrain extends Geometry {
 	heightMap(width, height, freq, terrainheight) {
 		const verts = new Array(width);
 		
-		noise.seed(Math.random());
+		noise.seed(this.seed);
 		
 		for(let x = 0; x <= width; x++) {
 			if(!verts[x]) {

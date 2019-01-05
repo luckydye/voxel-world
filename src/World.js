@@ -52,7 +52,7 @@ export default class World {
         this.createVoxelScene();
     }
 
-    createTerrainScene() {
+    createTerrainScene(args) {
         this.scene = new Scene({
             camera: this.camera,
         });
@@ -60,8 +60,7 @@ export default class World {
 
         this.terrain = new Terrain({
             material: Material.TERRAIN,
-            height: 2000,
-            size: 200,
+            ...args
         });
 
         this.scene.add(this.terrain);

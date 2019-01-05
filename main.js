@@ -2,6 +2,7 @@ import World from './src/World.js';
 import { Toolbar, IconButton } from './components/Toolbar.js';
 import { Statistics } from './src/gl/Statistics.js';
 import Icons from './Icons.js';
+import { DialogBox } from './components/Dialog.js';
 
 window.addEventListener("load", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
@@ -19,6 +20,8 @@ function onPageLod() {
 		const hud = document.querySelector('hud #stats');
 		hud.innerHTML = Statistics.toText();
 	}
+
+	let lastTerrainSettings = {};
 
 	createToolbar({
 		zoomIn: IconButton({
@@ -54,7 +57,26 @@ function onPageLod() {
 		terrain: IconButton({
 			icon: Icons.terrain,
 			onclick() {
-				world.createTerrainScene();
+				const dialog = new DialogBox('Dialog Box');
+
+				dialog.addField({ name: "Smoothness", id: "smoothness", default: 0.025, steps: 0.001, type: "number" });
+				dialog.addField({ name: "Resolution", id: "resolution", default: 50, steps: 5, type: "number" });
+				dialog.addField({ name: "Height", id: "height", default: 1000, steps: 100, type: "number" });
+				dialog.addField({ name: "Size", id: "size", default: 100, steps: 1, type: "number" });
+
+				dialog.addEventListener('submit', e => {
+					world.createTerrainScene(e.detail);
+				});
+				dialog.addEventListener('change', e => {
+					const data = e.detail;
+					if(world.terrain) {
+						data.seed = world.terrain.seed;
+					}
+					if(data.size > 0) {
+						world.createTerrainScene(data);
+					}
+				});
+				document.body.appendChild(dialog);
 			}
 		}),
 	});

@@ -19,9 +19,14 @@ export class MouseControler extends EntityController {
 	constructor(entity) {
 		super(entity);
 
+		this.initalSettings = {
+			pos: [ entity.position.x, entity.position.y, entity.position.z ],
+			rot: [ entity.rotation.x, entity.rotation.y, entity.rotation.z ],
+		}
+
 		let moving = false;
 		let lastEvent = null;
-		const viewport = document.body;
+		const viewport = document.querySelector('canvas');
 
 		const down = e => {
 			moving = true;
@@ -51,11 +56,23 @@ export class MouseControler extends EntityController {
 			lastEvent = e;
 		}
 
-		window.addEventListener("mousedown", down);
+		viewport.addEventListener("mousedown", down);
 		window.addEventListener("mouseup", up);
 		window.addEventListener("mousemove", move);
 
-		window.addEventListener("touchstart", down);
+		window.addEventListener("keydown", e => {
+			if(e.key == "f") {
+				entity.position.x = this.initalSettings.pos[0];
+				entity.position.y = this.initalSettings.pos[1];
+				entity.position.z = this.initalSettings.pos[2];
+				
+				entity.rotation.x = this.initalSettings.rot[0];
+				entity.rotation.y = this.initalSettings.rot[1];
+				entity.rotation.z = this.initalSettings.rot[2];
+			}
+		});
+
+		viewport.addEventListener("touchstart", down);
 		window.addEventListener("touchend", up);
 		window.addEventListener("touchmove", e => {
 			e.x = e.touches[0].clientX;
@@ -63,7 +80,7 @@ export class MouseControler extends EntityController {
 			move(e);
 		});
 
-		window.addEventListener("wheel", e => {
+		viewport.addEventListener("wheel", e => {
 			entity.zoom(e.deltaY);
 			entity.update();
 		})
