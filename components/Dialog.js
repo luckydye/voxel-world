@@ -1,6 +1,6 @@
 export class DialogBox extends HTMLElement {
 
-	static get template() {
+	static template(args) {
 		return `
 			<style>
 				:host {
@@ -14,7 +14,7 @@ export class DialogBox extends HTMLElement {
 					flex-direction: column;
 					background: rgba(28, 28, 28, 0.98);
 					border: 1px solid rgba(60, 60, 60, 0.9);
-					border-radius: 5px;
+					border-radius: 3px;
 					padding: 10px;
 					min-width: 350px;
 					position: absolute;
@@ -108,7 +108,7 @@ export class DialogBox extends HTMLElement {
 				}
 			</style>
 			<div class="title">
-				<a>${this.name}</a>
+				<a>${args.name}</a>
 			</div>
 			<div class="content"></div>
 			<div class="footer">
@@ -133,7 +133,7 @@ export class DialogBox extends HTMLElement {
 		if(instance) instance.cancel();
 
 		this.attachShadow({ mode: "open" });
-		this.shadowRoot.innerHTML = this.constructor.template;
+		this.shadowRoot.innerHTML = this.constructor.template({ name: this.name });
 
 		this.shadowRoot.querySelector('button.submit')
 			.onclick = () => this.submit();

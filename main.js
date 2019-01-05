@@ -57,12 +57,16 @@ function onPageLod() {
 		terrain: IconButton({
 			icon: Icons.terrain,
 			onclick() {
-				const dialog = new DialogBox('Dialog Box');
+				const dialog = new DialogBox('Terrain');
 
-				dialog.addField({ name: "Smoothness", id: "smoothness", default: 0.025, steps: 0.001, type: "number" });
-				dialog.addField({ name: "Resolution", id: "resolution", default: 50, steps: 5, type: "number" });
-				dialog.addField({ name: "Height", id: "height", default: 1000, steps: 100, type: "number" });
-				dialog.addField({ name: "Size", id: "size", default: 100, steps: 1, type: "number" });
+				[
+					{ name: "Smoothness", id: "smoothness", default: 0.025, steps: 0.001, type: "number" },
+					{ name: "Resolution", id: "resolution", default: 50, steps: 5, type: "number" },
+					{ name: "Height", id: "height", default: 1000, steps: 100, type: "number" },
+					{ name: "Size", id: "size", default: 100, steps: 1, type: "number" }
+				].forEach(row => {
+					dialog.addField(row);
+				})
 
 				dialog.addEventListener('submit', e => {
 					world.createTerrainScene(e.detail);
