@@ -20,6 +20,10 @@ class RenderPass {
 		this.shader = shader;
 		this.renderer = renderer;
 
+		if(!shader.initialized) {
+			this.renderer.prepareShader(shader);
+		}
+
 		this.renderer.createFramebuffer(this.id);
 	}
 
@@ -40,21 +44,17 @@ export class Renderer extends GLContext {
 		window.addEventListener("resize", () => {
 			this.updateViewport();
 		});
+
+		this.renderPasses = [
+			new RenderPass(this, 'light', new LightShader()),
+			new RenderPass(this, 'color', new ColorShader()),
+		]
 		
 		this.shaders = [
 			new GridShader(),
 			new FinalShader(),
-			new ColorShader(),
-			new LightShader(),
-			// new NormalShader(),
 		];
 
-		this.renderPasses = [
-			// new RenderPass(this, 'normal', this.shaders[4]),
-			new RenderPass(this, 'light', this.shaders[3]),
-			new RenderPass(this, 'color', this.shaders[2]),
-		]
-		
 		for(let shader of this.shaders) {
 			this.prepareShader(shader);
 		}
@@ -86,24 +86,28 @@ export class Renderer extends GLContext {
 			}
 			
 			this.drawScene(this.scene);
-			
-			if(pass.id == 'color') {
-				this.useShader(this.shaders[0]);
-				this.drawGeo(this.grid);
-			}
+		
+			this.useShader(this.shaders[0]);
+			this.drawGeo(this.grid);
 		}
 
 		this.clearFramebuffer();
 	}
 
-	compositePasses(passes) {
-		this.useShader(this.shaders[1]);
+	useFrameBufferPasses(passes) {
 		for(let i in passes) {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
 		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", 4);
+	}
+
+	compositePasses(passes) {
+		this.useShader(this.shaders[1]);
+		this.useFrameBufferPasses(passes);
 		this.drawGeo(this.screen);
+
+
 	}
 
 	draw() {
