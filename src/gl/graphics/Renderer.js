@@ -6,7 +6,6 @@ import FinalShader from '../shader/FinalShader.js';
 import ColorShader from '../shader/ColorShader.js';
 import GridShader from '../shader/GridShader.js';
 import LightShader from '../shader/LightShader.js';
-import NormalShader from '../shader/NormalShader.js';
 import { Voxel } from '../geo/Voxel.js';
 
 class RenderPass {
@@ -15,16 +14,17 @@ class RenderPass {
 		return this.renderer.getBufferTexture(this.id);
 	}
 
-	constructor(renderer, id, shader) {
+	constructor(renderer, id, shader, res) {
 		this.id = id;
 		this.shader = shader;
 		this.renderer = renderer;
+		this.resolution = res;
 
 		if(!shader.initialized) {
 			this.renderer.prepareShader(shader);
 		}
 
-		this.renderer.createFramebuffer(this.id);
+		this.renderer.createFramebuffer(this.id, this.resolution, this.resolution);
 	}
 
 	use() {
@@ -84,14 +84,25 @@ export class Renderer extends GLContext {
 				const pass = passes[i];
 				this.useTexture(pass.buffer, pass.id + "Buffer", i);
 			}
-			
-			this.drawScene(this.scene);
-		
-			this.useShader(this.shaders[0]);
-			this.drawGeo(this.grid);
+
+			switch(pass.id) {
+				case 'lightsource':
+					this.drawScene(this.scene, this.scene.lightSources);
+					break;
+				default:
+					this.drawScene(this.scene);
+					this.useShader(this.shaders[0]);
+					this.drawGeo(this.grid);
+			}
 		}
 
 		this.clearFramebuffer();
+	}
+
+	compositePasses(passes) {
+		this.useShader(this.shaders[1]);
+		this.useFrameBufferPasses(passes);
+		this.drawGeo(this.screen);
 	}
 
 	useFrameBufferPasses(passes) {
@@ -102,18 +113,11 @@ export class Renderer extends GLContext {
 		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", 4);
 	}
 
-	compositePasses(passes) {
-		this.useShader(this.shaders[1]);
-		this.useFrameBufferPasses(passes);
-		this.drawGeo(this.screen);
-
-
-	}
-
 	draw() {
 		if(!this.scene) return;
 
 		for(let geo of this.scene.objects) {
+			// update animated textures
 			if(geo.mat.animated) {
 				this.updateTexture(geo.mat.gltexture, geo.mat.texture);
 			}
@@ -150,8 +154,8 @@ export class Renderer extends GLContext {
 		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 	}
 
-	drawScene(scene) {
-		const camera = scene.camera;
+	drawScene(scene, camera) {
+		camera = camera || scene.camera;
 		const objects = scene.objects;
 		const shader = this.currentShader;
 

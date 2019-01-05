@@ -1,5 +1,4 @@
 import { Vec, Transform } from '../Math.js';
-import { MouseControler } from '../entity/MouseControler.js';
 
 export class Camera extends Transform {
 
@@ -9,6 +8,7 @@ export class Camera extends Transform {
 			scale = 0.004,
 			farplane = 350,
 			nearplane = 0.025,
+			controller = null,
 		} = args;
 		super(args);
 		
@@ -23,7 +23,9 @@ export class Camera extends Transform {
 
 		this.updated = false;
 
-		this.controller = new MouseControler(this);
+		if(controller) {
+			this.controller = new controller(this);
+		}
 
 		this.update();
 	}
@@ -64,6 +66,7 @@ export class Camera extends Transform {
 
 		this.updated = false;
 
-		this.controller.update();
+		if(this.controller)
+			this.controller.update();
 	}
 }

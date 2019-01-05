@@ -25,6 +25,7 @@ export default class FinalShader extends GLShader {
             uniform sampler2D colorBuffer;
             uniform sampler2D depthBuffer;
             uniform sampler2D lightBuffer;
+            uniform sampler2D lightsourceBuffer;
             uniform sampler2D aoBuffer;
             
             out vec4 oFragColor;
@@ -33,7 +34,7 @@ export default class FinalShader extends GLShader {
             {
                 vec4 color = texture(colorBuffer, texCoord);
                 vec4 light = texture(lightBuffer, texCoord);
-                vec4 normal = texture(normalBuffer, texCoord);
+                vec4 lightsource = texture(lightsourceBuffer, texCoord);
             
                 oFragColor = color * light;
             }

@@ -25,7 +25,7 @@ export default class LightShader extends GLShader {
     constructor() {
         super({ name: "light" });
 
-        this.lightPos = [0, 1500, 0];
+        this.lightPos = [0, 1000, 0];
     }
 
 }

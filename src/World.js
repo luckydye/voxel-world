@@ -7,6 +7,7 @@ import { VoxelWorldGenerator } from "./VoxelWorldGenerator.js";
 import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
+import { MouseControler } from './gl/entity/MouseControler.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
@@ -46,7 +47,8 @@ export default class World {
         this.camera = new Camera({ 
             fov: settings.scene.camera.fov,
             position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0.5, 200.5, -600.5),
-            rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5) 
+            rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5),
+			controller: MouseControler,
         });
 
         this.createVoxelScene();

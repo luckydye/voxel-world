@@ -23,7 +23,8 @@ void main () {
   float diffAngle = max(dot(vNormal, lightDir), 0.0);
   float diffuse = 0.5;
 
-  vec3 cDiffuse = diffAngle * cLight * diffuse * 2.0;
+  float intensity = pow(1.0 / (distance(vWorldPos.xyz, pointLightPos) * 0.001), 1.5) * 2.0;
+  vec3 cDiffuse = cLight * diffAngle * diffuse * intensity;
 
   vec3 color = (cAmbient + cDiffuse) * cBase.rgb;
   oFragColor = vec4(color, 1.0);

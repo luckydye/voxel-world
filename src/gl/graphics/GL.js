@@ -180,17 +180,19 @@ export class GLContext {
 		this.gl.bindVertexArray(VAO);
 	}
 
-	createFramebuffer(name) {
+	createFramebuffer(name, w, h) {
 		const gl = this.gl;
+		const width = w || this.resolution.width;
+		const height = h || this.resolution.height;
 
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const renderTraget = this.createBufferTexture(this.resolution.width, this.resolution.height);
+		const renderTraget = this.createBufferTexture(width, width);
 		this.useTexture(renderTraget);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
 
-		const depthTexture = this.createDepthTexture(this.resolution.width, this.resolution.height);
+		const depthTexture = this.createDepthTexture(height, height);
 		this.useTexture(depthTexture);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		
