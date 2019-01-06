@@ -184,18 +184,10 @@ export class VoxelWorldGenerator {
 
 					const mat = material(yvalue, x, y, z, Math.random());
 
-					if(y > yvalue) {
+					if(y > yvalue-5.5) {
 						tileData[x][y][z] = mat;
 					} else if(y > tileHeight-2) {
 						tileData[x][y][z] = mat;
-					}
-
-					if(tileHeight > 30) {
-						if(y < noiseV) {
-							tileData[x][y][z] = mat;
-						} else if(y == 0) {
-							tileData[x][y][z] = mat;
-						}
 					}
 
 					if (y < tileHeight && y > 0 &&
