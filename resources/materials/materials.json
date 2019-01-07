@@ -1,9 +1,6 @@
 {
     "WORLD": {
-        "texture": "worldtextures",
+        "texture": "defaultTextureAtlas",
         "textureSize": 16
-    },
-    "DEFAULT": {
-        "diffuseColor": [1, 1, 1]
     }
 }

@@ -61,7 +61,7 @@ export default class World {
         this.renderer.setScene(this.scene);
 
         this.terrain = new Terrain({
-            material: Material.TERRAIN,
+            material: Material.WORLD,
             ...args
         });
 
