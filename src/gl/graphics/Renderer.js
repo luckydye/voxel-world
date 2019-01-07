@@ -152,6 +152,19 @@ export class Renderer extends GLContext {
 		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
 	}
 
+	drawScene(scene, camera) {
+		camera = camera || scene.camera;
+		const objects = scene.objects;
+		const shader = this.currentShader;
+
+		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+		for(let obj of objects) {
+			this.drawGeo(obj);
+		}
+	}
+
 	drawGeo(geo) {
 		const shader = this.currentShader;
 
@@ -169,42 +182,6 @@ export class Renderer extends GLContext {
 		const buffer = geo.buffer;
 		this.setBuffersAndAttributes(shader.attributes, buffer);
 		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
-	}
-
-	drawScene(scene, camera) {
-		camera = camera || scene.camera;
-		const objects = scene.objects;
-		const shader = this.currentShader;
-
-		const vertxBuffer = scene.vertexBuffer;
-		const vertArray = [];
-
-		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-
-		for(let obj of objects) {
-			if(obj instanceof Voxel) {
-				if(!scene.cached) {
-					vertArray.push(...obj.buffer.vertArray);
-				}
-			} else {
-				this.drawGeo(obj);
-			}
-		}
-
-		if(!scene.cached && vertArray.length > 0) {
-			vertxBuffer.vertecies = new Float32Array(vertArray);
-			scene.cached = true;
-		}
-
-		if(scene.cached) {
-			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
-			this.setTransformUniforms(shader.uniforms);
-
-			this.applyMaterial(shader, this.defaultMaterial);
-
-			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
-		}
 	}
 
 }

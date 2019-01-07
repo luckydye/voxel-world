@@ -1,5 +1,4 @@
 import { Camera } from './Camera.js';
-import { VertexBuffer } from '../graphics/VertexBuffer.js';
 import { Vec } from '../Math.js';
 import { Light } from './Light.js';
 
@@ -27,14 +26,6 @@ export class Scene {
 	}
 
 	clear() {
-		this.cached = false;
-		this.vertexBuffer = new VertexBuffer([]);
-		this.vertexBuffer.type = "TRIANGLES";
-		this.vertexBuffer.attributes = [
-			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aTexCoords" },
-			{ size: 3, attribute: "aNormal" },
-		]
 		this.objects.clear();
 	}
 

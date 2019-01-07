@@ -76,11 +76,12 @@ export default class World {
         
         const settings = Resources.get('world');
         this.worldgen = new VoxelWorldGenerator(args || settings.world);
-        this.worldgen.scene = this.scene;
 
         //voxel world generation
         this.scene.clear();
         this.worldgen.regen(settings.world.seed);
+
+        this.scene.add(this.worldgen.group);
     }
 
     initTexture(texImage) {

@@ -4,6 +4,7 @@ import { Material } from './gl/graphics/Material.js';
 import { Voxel } from './gl/geo/Voxel.js';
 import { Vec } from './gl/Math.js';
 import { Resources } from './gl/Resources.js';
+import { Group } from './gl/geo/Group.js';
 
 let world = 'default';
 
@@ -60,7 +61,7 @@ export class VoxelWorldGenerator {
 		this.treeDensity = 0.65;
 		this.tiles = [];
 
-		this.scene = null;
+		this.group = new Group();
 
 		this.setSeed(seed);
 	}
@@ -105,7 +106,7 @@ export class VoxelWorldGenerator {
 
         if(!cube.invisible) {
             Statistics.data.voxels++;
-            this.scene.add(cube);
+            this.group.add(cube);
         }
     }
 
