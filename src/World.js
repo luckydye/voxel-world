@@ -9,9 +9,12 @@ import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
 import { MouseControler } from './gl/entity/MouseControler.js';
 import { Texture } from './gl/graphics/Texture.js';
+import { Geometry } from './gl/scene/Geometry.js';
+import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
+    'roomModel': './resources/models/room.obj',
 }, false);
 
 let nextFrame = 0, 
@@ -51,7 +54,43 @@ export default class World {
 			controller: MouseControler,
         });
 
-        this.createVoxelScene();
+        // this.createTerrainScene();
+        this.createModelFromFile('roomModel');
+    }
+
+    createModelFromFile(resource) {
+        this.scene = new Scene({
+            camera: this.camera,
+        });
+        this.renderer.setScene(this.scene);
+
+        const data = Resources.get(resource);
+
+        const geo = new Geometry();
+        geo.createBuffer = () => {
+            const vertArray = [];
+            for(let v = 0; v < data.vertecies.length; v++) {
+                vertArray.push(
+                    data.vertecies[v][0],
+                    data.vertecies[v][1],
+                    data.vertecies[v][2],
+                    data.uvs[v][0],
+                    data.uvs[v][1],
+                );
+            }
+            const vertxBuffer = VertexBuffer.create(vertArray);
+            vertxBuffer.type = "TRIANGLES";
+            vertxBuffer.attributes = [
+                { size: 3, attribute: "aPosition" },
+                { size: 2, attribute: "aTexCoords" }
+            ]
+            return vertxBuffer;
+        }
+        geo.scale = 10;
+        geo.position.z = 450;
+        this.scene.add(geo);
+
+        console.log(this.scene);
     }
 
     createTerrainScene(args) {

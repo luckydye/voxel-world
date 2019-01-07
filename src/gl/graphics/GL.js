@@ -29,12 +29,12 @@ export class GLContext {
 		this.fBufferResFactor = 1.0;
 
 		this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
-		//this.nativeResolution = 380;
+		// this.nativeResolution = 480;
 
 		// default options set
 		this.options = {
 			DEPTH_TEST: true,
-			CULL_FACE: true,
+			// CULL_FACE: true,
 		}
 
 		this.getContext(canvas);
@@ -53,9 +53,9 @@ export class GLContext {
 		res = res || this.resolution.width;
 		this._resolution = [res, res];
 
-		this.gl.canvas.width = res;
-		this.gl.canvas.height = res;
-		this.gl.viewport(0, 0, res, res);
+		this.gl.canvas.width = this._resolution[0];
+		this.gl.canvas.height = this._resolution[1];
+		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
 		this.gl.clearColor(0.2, 0.2, 0.2, 1.0);
 		this.gl.cullFace(this.gl.BACK);

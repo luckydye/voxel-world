@@ -4,7 +4,7 @@ import { Statistics } from './src/gl/Statistics.js';
 import Icons from './Icons.js';
 import { DialogBox } from './components/Dialog.js';
 
-window.addEventListener("load", () => onPageLod());
+window.addEventListener("DOMContentLoaded", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
 
 window.options = {

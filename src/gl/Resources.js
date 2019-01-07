@@ -8,6 +8,7 @@ global.resourceTypes = {
 	IMAGE: [".png", ".jpg"],
 	VIDEO: [".mp4"],
 	SHADER: [".shader", ".fs", ".vs"],
+	GEOMETRY: [".obj"],
 };
 
 global.queue = new Set();
@@ -89,6 +90,7 @@ export class Resources {
 		}
 
 		switch(type) {
+
 			case Resources.Types.JSON:
 				return fetch(path).then(res => res.json().catch(err => {
 					console.error("File failed parsing:", path);
@@ -124,6 +126,11 @@ export class Resources {
 					}
 					vid.src = path;
 				});
+
+			case Resources.Types.GEOMETRY:
+				return fetch(path).then(res => res.text().then(strData => {
+					return Resources.parseOBJFile(strData);
+				}));
 				
 			case Resources.Types.TEXT:
 				return fetch(path).then(res => res.text());
@@ -134,6 +141,45 @@ export class Resources {
 			default:
 				throw `Err: not a valid resource type: "${path}"`;
 		}
+	}
+
+	static parseOBJFile(str) {
+		const lines = str.split(/\n/g);
+
+		const startTime = performance.now();
+		const objData = {
+			vertecies: [],
+			uvs: [],
+		}
+
+		for(let line of lines) {
+			const data = line.split(" ");
+			const prefix = data[0];
+			let coords = [];
+
+			switch(prefix) {
+				case "v":
+					coords = data.slice(1);
+					objData.vertecies.push([
+						+coords[0],
+						+coords[1],
+						+coords[2]
+					]);
+					break;
+
+				case "vt":
+					coords = data.slice(1);
+					objData.uvs.push([
+						+coords[0],
+						+coords[1]
+					]);
+					break;
+			}
+		}
+
+		console.log("File loaded in", performance.now() - startTime, "ms");
+		
+		return objData;
 	}
 
 }

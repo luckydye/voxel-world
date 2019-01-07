@@ -29,9 +29,9 @@ export default class GridShader extends GLShader {
                 void main () {
                     vec4 color;
                     if(vPos.x == 0.0) {
-                        color = vec4(1.0, 0.1, 0.1, 0.5);
-                    } else if(vPos.z == 0.0) {
                         color = vec4(0.1, 0.1, 1.0, 0.5);
+                    } else if(vPos.z == 0.0) {
+                        color = vec4(1.0, 0.1, 0.1, 0.5);
                     } else {
                         color = vec4(0.5, 0.5, 0.5, 0.5);
                     }
