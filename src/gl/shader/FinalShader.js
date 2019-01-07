@@ -1,4 +1,4 @@
-import { GLShader } from "../graphics/GL.js";
+import { GLShader } from "../graphics/GLShader.js";
 
 export default class FinalShader extends GLShader {
 

@@ -7,6 +7,14 @@ import ColorShader from '../shader/ColorShader.js';
 import GridShader from '../shader/GridShader.js';
 import LightShader from '../shader/LightShader.js';
 import { Voxel } from '../geo/Voxel.js';
+import { Material } from './Material.js';
+import { Texture } from './Texture.js';
+import { Resources } from '../Resources.js';
+
+Resources.add({
+	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
+	'defaulttexture': './resources/textures/placeholder.png',
+}, false);
 
 class RenderPass {
 
@@ -46,8 +54,8 @@ export class Renderer extends GLContext {
 		});
 
 		this.renderPasses = [
-			new RenderPass(this, 'light', new LightShader()),
 			new RenderPass(this, 'color', new ColorShader()),
+			new RenderPass(this, 'light', new LightShader()),
 		]
 		
 		this.shaders = [
@@ -61,6 +69,9 @@ export class Renderer extends GLContext {
 
         Statistics.data.passes = this.renderPasses.length;
 		Statistics.data.resolution = this._resolution;
+
+		this.defaultMaterial = Material.create("default");
+		this.defaultMaterial.texture = new Texture(Resources.get("defaultTextureAtlas"));
 	}
 
 	setScene(scene) {
@@ -79,11 +90,6 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
-
-			for(let i in passes) {
-				const pass = passes[i];
-				this.useTexture(pass.buffer, pass.id + "Buffer", i);
-			}
 
 			switch(pass.id) {
 				case 'lightsource':
@@ -110,7 +116,7 @@ export class Renderer extends GLContext {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
-		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", 4);
+		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", passes.length);
 	}
 
 	draw() {
@@ -119,12 +125,31 @@ export class Renderer extends GLContext {
 		for(let geo of this.scene.objects) {
 			// update animated textures
 			if(geo.mat.animated) {
-				this.updateTexture(geo.mat.gltexture, geo.mat.texture);
+				this.updateTexture(geo.mat.texture.gltexture, geo.mat.texture.image);
 			}
 		}
 
 		this.renderMultiPasses(this.renderPasses);
 		this.compositePasses(this.renderPasses);
+	}
+
+	// give texture a .gltexture
+	prepareTexture(texture) {
+		if(!texture.gltexture) {
+			const image = texture.image || Resources.get("defaulttexture");
+			texture.gltexture = this.createTexture(image);
+		}
+	}
+
+	// give material attributes to shader
+	applyMaterial(shader, material) {
+		// colorTexture
+		const colorTexture = material.texture;
+		this.prepareTexture(colorTexture);
+		this.useTexture(colorTexture.gltexture, "colorTexture", this.renderPasses.length+1);
+		this.gl.uniform1f(shader.uniforms.textureScale, colorTexture.scale);
+
+		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
 	}
 
 	drawGeo(geo) {
@@ -139,15 +164,7 @@ export class Renderer extends GLContext {
 
 		this.setTransformUniforms(shader.uniforms, geo);
 
-		const material = geo.mat;
-		// give material attributes to shader
-		if(!material.gltexture && material.texture) {
-			const img = material.texture;
-			material.gltexture = this.createTexture(img);
-		}
-		this.useTexture(material.gltexture, "uTexture", 5);
-		this.gl.uniform1f(shader.uniforms.uTextureSize, material.textureSize);
-		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
+		this.applyMaterial(shader, geo.mat);
 
 		const buffer = geo.buffer;
 		this.setBuffersAndAttributes(shader.attributes, buffer);
@@ -173,14 +190,6 @@ export class Renderer extends GLContext {
 			} else {
 				this.drawGeo(obj);
 			}
-
-			if(!scene.defaultMaterial) {
-				if(obj && obj.mat) {
-					scene.defaultMaterial = obj.mat;
-					const img = obj.mat.texture;
-					scene.defaultMaterial.gltexture = this.createTexture(img);
-				}
-			}
 		}
 
 		if(!scene.cached && vertArray.length > 0) {
@@ -192,9 +201,7 @@ export class Renderer extends GLContext {
 			this.setBuffersAndAttributes(shader.attributes, vertxBuffer);
 			this.setTransformUniforms(shader.uniforms);
 
-			this.useTexture(scene.defaultMaterial.gltexture, "uTexture", 0);
-			this.gl.uniform1f(shader.uniforms.uTextureSize, scene.defaultMaterial.textureSize);
-			this.gl.uniform3fv(shader.uniforms.uDiffuseColor, scene.defaultMaterial.diffuseColor);
+			this.applyMaterial(shader, this.defaultMaterial);
 
 			this.gl.drawArrays(this.gl.TRIANGLES, 0, vertxBuffer.vertsPerElement);
 		}

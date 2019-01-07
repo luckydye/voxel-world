@@ -8,10 +8,10 @@ import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
 import { MouseControler } from './gl/entity/MouseControler.js';
+import { Texture } from './gl/graphics/Texture.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'defaulttexture': './resources/textures/placeholder.png',
 }, false);
 
 let nextFrame = 0, 
@@ -83,14 +83,19 @@ export default class World {
         this.worldgen.regen(settings.world.seed);
     }
 
+    initTexture(texImage) {
+        const texture = new Texture(texImage);
+        return texture;
+    }
+
     initMaterials() {
         const mats = Resources.get('materials');
         for(let name in mats) {
             const mat = Material.create(name);
-            mat.texture = Resources.get(mats[name].texture) || Resources.get("defaulttexture");
-            mat.animated = mat.texture.localName === "video";
+            const texImage = Resources.get(mats[name].texture);
+            const texture = this.initTexture(texImage);
+            mat.texture = texture;
             mat.diffuseColor = mats[name].diffuseColor || [1, 1, 1];
-            mat.textureSize = mats[name].textureSize || 0;
         }
     }
 

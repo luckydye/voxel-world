@@ -5,8 +5,6 @@ in vec4 vWorldPos;
 in vec3 vNormal;
 in vec2 vTexCoords;
 
-uniform sampler2D normalBuffer;
-
 uniform vec3 pointLightPos;
 uniform float ambient;
 

@@ -11,14 +11,7 @@ if(document.location.search) {
     world = document.location.search.substr(1);
 }
 
-let wtexture = './resources/textures/blocks_solid.png';
-
-if(document.location.hash == "#mc") {
-    wtexture = './resources/textures/blocks.png';
-}
-
 Resources.add({
-    'worldtextures': wtexture,
     'world': './resources/worlds/' + world + '.json',
 }, false);
 

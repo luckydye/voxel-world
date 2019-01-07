@@ -1,4 +1,5 @@
 import { Transform } from "../Math.js";
+import { GLShader } from "./GLShader.js";
 
 export class GLContext {
 
@@ -27,7 +28,8 @@ export class GLContext {
 
 		this.fBufferResFactor = 1.0;
 
-		this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
+		// this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
+		this.nativeResolution = 380;
 
 		// default options set
 		this.options = {
@@ -197,10 +199,12 @@ export class GLContext {
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		this.useTexture(null);
 
 		this.bufferTextures.set('depth', depthTexture);
 		this.bufferTextures.set(name, renderTraget);
 		this.framebuffers.set(name, fbo);
+
 		return fbo;
 	}
 
@@ -363,57 +367,4 @@ export class GLContext {
 		}
 	}
 	
-}
-
-export class GLShader {
-
-	get vertexShader() {
-		return this._vertShader;
-	}
-
-	get fragementShader() {
-		return this._fragShader;
-	}
-
-	get uniforms() {
-		return this._uniforms;
-	}
-
-	get attributes() {
-		return this._attributes;
-	}
-
-	get uniform() {
-		return {};
-	}
-
-	get src() {
-		return this.constructor.source;
-	}
-
-	constructor({ name } = {}) {
-		this.name = name;
-		
-		this.program = null;
-		this.initialized = false;
-	}
-
-    setUniforms(gl) {
-		const uniforms = this.uniforms;
-		if(uniforms) {
-			for(let opt in this.uniform) {
-				const value = this.uniform[opt];
-				if(opt === "integer") {
-					for(let opt in this.uniform.integer) {
-						gl.uniform1i(uniforms[opt], this.uniform.integer[opt]);
-					}
-				}
-				if(Array.isArray(value)) {
-					gl.uniform3fv(uniforms[opt], value);
-				} else {
-					gl.uniform1f(uniforms[opt], value);
-				}
-			}
-		}
-    }
 }
