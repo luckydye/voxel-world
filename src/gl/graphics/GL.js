@@ -28,8 +28,8 @@ export class GLContext {
 
 		this.fBufferResFactor = 1.0;
 
-		// this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
-		this.nativeResolution = 380;
+		this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
+		//this.nativeResolution = 380;
 
 		// default options set
 		this.options = {
