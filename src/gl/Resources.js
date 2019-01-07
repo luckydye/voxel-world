@@ -146,10 +146,10 @@ export class Resources {
 	static parseOBJFile(str) {
 		const lines = str.split(/\n/g);
 
-		const startTime = performance.now();
 		const objData = {
 			vertecies: [],
 			uvs: [],
+			indecies: [],
 		}
 
 		for(let line of lines) {
@@ -158,6 +158,7 @@ export class Resources {
 			let coords = [];
 
 			switch(prefix) {
+
 				case "v":
 					coords = data.slice(1);
 					objData.vertecies.push([
@@ -174,11 +175,17 @@ export class Resources {
 						+coords[1]
 					]);
 					break;
+
+				case "f":
+					coords = data.slice(1);
+					objData.indecies.push([
+						coords[0],
+						coords[1]
+					]);
+					break;
 			}
 		}
 
-		console.log("File loaded in", performance.now() - startTime, "ms");
-		
 		return objData;
 	}
 

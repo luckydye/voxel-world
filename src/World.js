@@ -14,7 +14,7 @@ import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
-    'roomModel': './resources/models/room.obj',
+    'spaceship': './resources/models/spaceship.obj',
 }, false);
 
 let nextFrame = 0, 
@@ -54,16 +54,18 @@ export default class World {
 			controller: MouseControler,
         });
 
-        // this.createTerrainScene();
-        this.createModelFromFile('roomModel');
-    }
-
-    createModelFromFile(resource) {
         this.scene = new Scene({
             camera: this.camera,
         });
+
         this.renderer.setScene(this.scene);
 
+        // this.createTerrainScene();
+        const model = this.createModelFromFile('spaceship');
+        this.scene.add(model);
+    }
+
+    createModelFromFile(resource) {
         const data = Resources.get(resource);
 
         const geo = new Geometry();
@@ -79,46 +81,38 @@ export default class World {
                 );
             }
             const vertxBuffer = VertexBuffer.create(vertArray);
-            vertxBuffer.type = "TRIANGLES";
+            vertxBuffer.type = "POINTS";
             vertxBuffer.attributes = [
                 { size: 3, attribute: "aPosition" },
                 { size: 2, attribute: "aTexCoords" }
             ]
             return vertxBuffer;
         }
-        geo.scale = 10;
-        geo.position.z = 450;
-        this.scene.add(geo);
+        geo.scale = 50;
+        geo.position.y = -150;
 
-        console.log(this.scene);
+        return geo;
     }
 
     createTerrainScene(args) {
-        this.scene = new Scene({
-            camera: this.camera,
-        });
-        this.renderer.setScene(this.scene);
-
         this.terrain = new Terrain({
             material: Material.WORLD,
             ...args
         });
 
+        this.scene.clear();
         this.scene.add(this.terrain);
     }
 
     createVoxelScene(args) {
-        this.scene = new Scene({
-            camera: this.camera,
-        });
-        this.renderer.setScene(this.scene);
-        
         const settings = Resources.get('world');
         this.worldgen = new VoxelWorldGenerator(args || settings.world);
 
         //voxel world generation
         this.scene.clear();
         this.worldgen.regen(settings.world.seed);
+
+        this.worldgen.group.mat = Material.WORLD;
 
         this.scene.add(this.worldgen.group);
     }

@@ -11,14 +11,14 @@ export class Toolbar extends HTMLElement {
 					position: relative;
 					background: white;
 					border-radius: 5px;
-					overflow: hidden;
-					width: 40px;
+					width: auto;
 					box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.15);
 				}
 				
 				.tools {
 					z-index: 100;
 					position: relative;
+					display: flex;
 				}
 				
 				:host([theme="dark"]) .toolbar {
@@ -67,7 +67,7 @@ export class Tool extends HTMLElement {
 				}
 				
 				.tool {
-					margin-top: 1px;
+					margin: 1px 1px 0 0;
 					user-select: none;
 					width: 40px;
 					height: 40px;

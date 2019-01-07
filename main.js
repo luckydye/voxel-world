@@ -114,7 +114,7 @@ function createToolbar(buttonConfig) {
 	for(let btn in buttonConfig) {
 		if(buttonConfig[btn] == "spacer") {
 			const spacer = document.createElement("div");
-			spacer.style.marginTop = "10px";
+			spacer.style.margin = "5px";
 			toolbar.appendChild(spacer);
 		} else {
 			toolbar.appendChild(buttonConfig[btn]);

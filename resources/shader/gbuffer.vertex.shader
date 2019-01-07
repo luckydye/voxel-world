@@ -27,4 +27,5 @@ void main() {
   vTexCoords = aTexCoords;
 
   gl_Position = uProjMatrix * uViewMatrix * vec4(pos.xyz, 1.0);
+  gl_PointSize = 2.5;
 }

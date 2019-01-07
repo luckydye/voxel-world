@@ -71,7 +71,7 @@ export class Renderer extends GLContext {
 		Statistics.data.resolution = this._resolution;
 
 		this.defaultMaterial = Material.create("default");
-		this.defaultMaterial.texture = new Texture(Resources.get("defaultTextureAtlas"));
+		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
 	}
 
 	setScene(scene) {
