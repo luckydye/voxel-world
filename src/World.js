@@ -81,7 +81,7 @@ export default class World {
                 );
             }
             const vertxBuffer = VertexBuffer.create(vertArray);
-            vertxBuffer.type = "POINTS";
+            vertxBuffer.type = "TRIANGLES";
             vertxBuffer.attributes = [
                 { size: 3, attribute: "aPosition" },
                 { size: 2, attribute: "aTexCoords" }
@@ -89,7 +89,7 @@ export default class World {
             return vertxBuffer;
         }
         geo.scale = 50;
-        geo.position.y = -150;
+        geo.position.y = -400;
 
         return geo;
     }

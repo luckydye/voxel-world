@@ -34,7 +34,7 @@ export class GLContext {
 		// default options set
 		this.options = {
 			DEPTH_TEST: true,
-			// CULL_FACE: true,
+			CULL_FACE: true,
 		}
 
 		this.getContext(canvas);
@@ -57,7 +57,7 @@ export class GLContext {
 		this.gl.canvas.height = this._resolution[1];
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
-		this.gl.clearColor(0.2, 0.2, 0.2, 1.0);
+		// this.gl.clearColor(0.15, 0.15, 0.15, 1.0);
 		this.gl.cullFace(this.gl.BACK);
 	}
 

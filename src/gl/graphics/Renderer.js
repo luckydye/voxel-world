@@ -10,6 +10,8 @@ import { Voxel } from '../geo/Voxel.js';
 import { Material } from './Material.js';
 import { Texture } from './Texture.js';
 import { Resources } from '../Resources.js';
+import { Geometry } from '../scene/Geometry.js';
+import { VertexBuffer } from './VertexBuffer.js';
 
 Resources.add({
 	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
@@ -46,32 +48,59 @@ class RenderPass {
 export class Renderer extends GLContext {
 
     onCreate() {
-		this.shaders = [];
 		this.renderPasses = [];
 		
 		window.addEventListener("resize", () => {
 			this.updateViewport();
 		});
 
+		this.defaultMaterial = Material.create("default");
+		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
+
+		this.debugPass = new RenderPass(this, 'debug', new ColorShader());
+
 		this.renderPasses = [
 			new RenderPass(this, 'color', new ColorShader()),
 			new RenderPass(this, 'light', new LightShader()),
 		]
-		
-		this.shaders = [
-			new GridShader(),
-			new FinalShader(),
-		];
-
-		for(let shader of this.shaders) {
-			this.prepareShader(shader);
-		}
 
         Statistics.data.passes = this.renderPasses.length;
 		Statistics.data.resolution = this._resolution;
 
-		this.defaultMaterial = Material.create("default");
-		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
+		this.gridShader = new GridShader();
+		this.prepareShader(this.gridShader);
+
+		this.compShader = new FinalShader();
+		this.prepareShader(this.compShader);
+
+		this.createDebugGeo();
+	}
+
+	createDebugGeo() {
+		this.originGeo = new Geometry();
+		this.originGeo.createBuffer = () => {
+			const data = Resources.get('spaceship');
+            const vertArray = [];
+            for(let v = 0; v < data.vertecies.length; v++) {
+                vertArray.push(
+                    data.vertecies[v][0],
+                    data.vertecies[v][1],
+                    data.vertecies[v][2],
+                    data.uvs[v][0],
+                    data.uvs[v][1],
+                );
+            }
+            const vertxBuffer = VertexBuffer.create(vertArray);
+            vertxBuffer.type = "POINTS";
+            vertxBuffer.attributes = [
+                { size: 3, attribute: "aPosition" },
+                { size: 2, attribute: "aTexCoords" }
+            ]
+            return vertxBuffer;
+        }
+		this.originGeo.scale = 50;
+		this.originGeo.position.y = -400;
+		this.originGeo.mat = this.defaultMaterial;
 	}
 
 	setScene(scene) {
@@ -90,23 +119,22 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
-
 			switch(pass.id) {
-				case 'lightsource':
-					this.drawScene(this.scene, this.scene.lightSources);
-					break;
 				default:
 					this.drawScene(this.scene);
-					this.useShader(this.shaders[0]);
-					this.drawGeo(this.grid);
 			}
 		}
+
+		// DEBUG RENDERPASS
+		// this.debugPass.use();
+		// this.useShader(this.debugPass.shader);
+		// this.drawGeo(this.originGeo);
 
 		this.clearFramebuffer();
 	}
 
 	compositePasses(passes) {
-		this.useShader(this.shaders[1]);
+		this.useShader(this.compShader);
 		this.useFrameBufferPasses(passes);
 		this.drawGeo(this.screen);
 	}
@@ -117,6 +145,7 @@ export class Renderer extends GLContext {
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
 		this.useTexture(this.getBufferTexture('depth'), "depthBuffer", passes.length);
+		this.useTexture(this.getBufferTexture('debug'), "debugBuffer", passes.length+1);
 	}
 
 	draw() {
@@ -146,7 +175,7 @@ export class Renderer extends GLContext {
 		// colorTexture
 		const colorTexture = material.texture;
 		this.prepareTexture(colorTexture);
-		this.useTexture(colorTexture.gltexture, "colorTexture", this.renderPasses.length+1);
+		this.useTexture(colorTexture.gltexture, "colorTexture", 5);
 		this.gl.uniform1f(shader.uniforms.textureScale, colorTexture.scale);
 
 		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
@@ -163,6 +192,9 @@ export class Renderer extends GLContext {
 		for(let obj of objects) {
 			this.drawGeo(obj);
 		}
+		
+		this.useShader(this.gridShader);
+		this.drawGeo(this.grid);
 	}
 
 	drawGeo(geo) {
