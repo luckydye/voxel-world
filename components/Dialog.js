@@ -18,7 +18,7 @@ export class DialogBox extends HTMLElement {
 					padding: 10px;
 					min-width: 350px;
 					position: absolute;
-					top: 50%;
+					top: 210px;
 					left: 50%;
 					transform: translate(-50%, -50%);
 					color: #c1c1c1;

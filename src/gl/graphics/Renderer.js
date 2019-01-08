@@ -178,7 +178,9 @@ export class Renderer extends GLContext {
 		this.useTexture(colorTexture.gltexture, "colorTexture", 5);
 		this.gl.uniform1f(shader.uniforms.textureScale, colorTexture.scale);
 
-		this.gl.uniform3fv(shader.uniforms.uDiffuseColor, material.diffuseColor);
+		this.gl.uniform3fv(shader.uniforms.diffuseColor, material.diffuseColor);
+		this.gl.uniform1f(shader.uniforms.reflection, material.reflection);
+		this.gl.uniform1f(shader.uniforms.transparency, material.transparency);
 	}
 
 	drawScene(scene, camera) {

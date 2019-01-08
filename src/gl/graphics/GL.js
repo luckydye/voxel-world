@@ -35,6 +35,7 @@ export class GLContext {
 		this.options = {
 			DEPTH_TEST: true,
 			CULL_FACE: true,
+			BLEND: true,
 		}
 
 		this.getContext(canvas);
@@ -57,8 +58,9 @@ export class GLContext {
 		this.gl.canvas.height = this._resolution[1];
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
-		// this.gl.clearColor(0.15, 0.15, 0.15, 1.0);
+		this.gl.clearColor(0.15, 0.15, 0.15, 1.0);
 		this.gl.cullFace(this.gl.BACK);
+		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 	}
 
 	clear() {
@@ -69,7 +71,7 @@ export class GLContext {
 		this.canvas = canvas;
 
 		const ctxtOpts = { 
-			alpha: false
+			// alpha: false
 		};
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);

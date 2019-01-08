@@ -60,9 +60,9 @@ export default class World {
 
         this.renderer.setScene(this.scene);
 
-        // this.createTerrainScene();
-        const model = this.createModelFromFile('spaceship');
-        this.scene.add(model);
+        this.createVoxelScene();
+
+        console.log(this.scene);
     }
 
     createModelFromFile(resource) {

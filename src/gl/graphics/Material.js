@@ -9,6 +9,8 @@ export class Material {
     constructor() {
         this.texture = null;
         this.diffuseColor = [1, 1, 1];
+        this.transparency = 0;
+        this.reflection = 0;
     }
 
 }
