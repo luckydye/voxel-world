@@ -26,6 +26,6 @@ void main() {
 
   float reflectivenss = texture(reflectionMap, textureCoords).r;
   if(reflectivenss > 0.0) {
-    oFragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    oFragColor = vec4(1.0, 1.0, 1.0, 1.0);
   }
 }

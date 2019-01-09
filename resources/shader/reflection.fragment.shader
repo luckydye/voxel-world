@@ -2,7 +2,7 @@
 precision mediump float;
 
 in vec2 vTexCoords;
-in vec4 vWorldPos;
+in vec3 vNormal;
 
 uniform sampler2D colorTexture;
 uniform sampler2D reflectionMap;
@@ -26,6 +26,6 @@ void main() {
 
   float reflectivenss = texture(reflectionMap, textureCoords).r;
   if(reflectivenss > 0.0) {
-    oFragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    discard;
   }
 }

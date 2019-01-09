@@ -34,14 +34,12 @@ export default class FinalShader extends GLShader {
                 
                 vec4 color = texture(diffuseBuffer, texCoords);
                 vec4 light = texture(lightBuffer, texCoords);
-
-                vec4 reflection = texture(reflectionBuffer, vec2(texCoords.x, -texCoords.y));
-                vec4 reflectedlight = texture(lightBuffer, vec2(texCoords.x, -texCoords.y));
+                vec4 reflection = texture(reflectionBuffer, texCoords);
             
                 oFragColor = color * light;
 
-                if(color.g == 1.0) {
-                    oFragColor = reflection * reflectedlight + vec4(0.15, 0.15, 0.9, 1.0);
+                if(color.rgb == vec3(1.0)) {
+                    oFragColor = reflection + vec4(0.15, 0.15, 0.9, 1.0) * 0.5;
                 }
             }
             `

@@ -92,11 +92,22 @@ export class Renderer extends GLContext {
 		for(let pass of passes) {
 			pass.use();
 			switch(pass.id) {
+				case "reflection":
+					this.gl.disable(this.gl.CULL_FACE);
+					this.drawScene(this.scene);
+					this.gl.enable(this.gl.CULL_FACE);
+					break;
+
 				case "diffuse":
 					this.useTexture(this.renderPasses[0].buffer, "reflectionBuffer", 2);
+					this.drawScene(this.scene);
+					this.useShader(this.gridShader);
+					this.drawGeo(this.grid);
 					break;
+					
+				default:
+					this.drawScene(this.scene);
 			}
-			this.drawScene(this.scene);
 		}
 
 		// DEBUG RENDERPASS
@@ -167,9 +178,6 @@ export class Renderer extends GLContext {
 		for(let obj of objects) {
 			this.drawGeo(obj);
 		}
-		
-		this.useShader(this.gridShader);
-		this.drawGeo(this.grid);
 	}
 
 	drawGeo(geo) {

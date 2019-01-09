@@ -17,6 +17,8 @@ out vec3 vNormal;
 
 void main() {
   vec4 pos = uModelMatrix * vec4(aPosition, 1.0);
+  pos.y *= -1.0;
+  pos.y += 42.0;
 
   vWorldPos = pos;
   vNormal = vec4(aNormal, 1.0).xyz;
