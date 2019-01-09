@@ -3,5 +3,8 @@
         "texture": "defaultTextureAtlas",
         "reflectionMap": "defaultReflectionMap",
         "textureSize": 16
+    },
+    "LIGHT": {
+        "diffuseColor": [1, 1, 1]
     }
 }

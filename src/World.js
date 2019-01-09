@@ -11,6 +11,7 @@ import { MouseControler } from './gl/entity/MouseControler.js';
 import { Texture } from './gl/graphics/Texture.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
+import { PointLight } from './gl/scene/PointLight.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
@@ -64,7 +65,7 @@ export default class World {
 
         this.createVoxelScene();
 
-        console.log(this.scene);
+		this.scene.add(new PointLight({ material: Material.LIGHT }));
     }
 
     createModelFromFile(resource) {

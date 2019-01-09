@@ -9,8 +9,6 @@ import LightShader from '../shader/LightShader.js';
 import { Material } from './Material.js';
 import { Texture } from './Texture.js';
 import { Resources } from '../Resources.js';
-import { Geometry } from '../scene/Geometry.js';
-import { VertexBuffer } from './VertexBuffer.js';
 import ReflectionShader from '../shader/ReflectionShader.js';
 
 Resources.add({
@@ -134,7 +132,7 @@ export class Renderer extends GLContext {
 
 		// update animated textures
 		for(let geo of this.scene.objects) {
-			if(geo.mat.animated) {
+			if(geo.mat && geo.mat.animated) {
 				this.updateTexture(geo.mat.texture.gltexture, geo.mat.texture.image);
 			}
 		}
@@ -186,9 +184,6 @@ export class Renderer extends GLContext {
 		const camera = this.scene.camera;
 		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
-
-		const uNormalMatrix  = mat4.create();
-		this.gl.uniformMatrix4fv(shader.uniforms.uNormalMatrix, false, uNormalMatrix);
 
 		this.setTransformUniforms(shader.uniforms, geo);
 
