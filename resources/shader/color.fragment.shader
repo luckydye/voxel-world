@@ -2,26 +2,31 @@
 precision mediump float;
 
 in vec2 vTexCoords;
+in vec4 vWorldPos;
 
 uniform sampler2D colorTexture;
-uniform float textureScale;
+uniform sampler2D reflectionMap;
+uniform sampler2D reflectionBuffer;
 
-uniform vec3 diffuseColor;
-uniform float reflection;
+uniform float textureScale;
 uniform float transparency;
+uniform vec3 diffuseColor;
 
 out vec4 oFragColor;
 
 void main() {
-  if(textureScale > 1.0) {
-    vec2 imageSize = vec2(textureSize(colorTexture, 0));
-    vec4 textureColor = texture(colorTexture, vec2(vTexCoords) / (imageSize.x / textureScale));
-    oFragColor = textureColor * vec4(diffuseColor, 1.0 - transparency);
-  } else {
-    oFragColor = vec4(diffuseColor, 1.0 - transparency);
-  }
+  // set diffuse color
+  oFragColor = vec4(diffuseColor, 1.0 - transparency);
 
-  if(reflection > 0.0) {
-    oFragColor = vec4(diffuseColor, 1.0 - transparency);
+  vec2 imageSize = vec2(textureSize(colorTexture, 0));
+  vec2 textureCoords = vec2(vTexCoords) / (imageSize.x / textureScale);
+
+  vec4 textureColor = texture(colorTexture, textureCoords);
+  oFragColor *= textureColor;
+
+  float reflectivenss = texture(reflectionMap, textureCoords).r;
+  if(reflectivenss > 0.0) {
+    vec4 reflectionColor = texture(reflectionBuffer, vWorldPos.xz / 1024.0);
+    oFragColor += reflectionColor;
   }
 }

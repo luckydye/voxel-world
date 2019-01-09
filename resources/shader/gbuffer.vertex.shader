@@ -11,9 +11,9 @@ uniform mat4 uNormalMatrix;
 
 uniform float uTime;
 
+out vec2 vTexCoords;
 out vec4 vWorldPos;
 out vec3 vNormal;
-out vec2 vTexCoords;
 
 vec3 warp(vec3 p) {
   return p + 0.5 * abs(cos((uTime * 0.002)) * 40.0) * aNormal;

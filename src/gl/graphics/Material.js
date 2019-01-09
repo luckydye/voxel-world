@@ -1,3 +1,5 @@
+import { Texture } from "./Texture.js";
+
 export class Material {
 
     static create(name) {
@@ -7,7 +9,9 @@ export class Material {
     }
 
     constructor() {
-        this.texture = null;
+        this.texture = new Texture();
+        this.reflectionMap = new Texture();
+        
         this.diffuseColor = [1, 1, 1];
         this.transparency = 0;
         this.reflection = 0;

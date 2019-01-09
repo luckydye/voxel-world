@@ -14,6 +14,8 @@ import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
+	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
+	'defaultReflectionMap': './resources/textures/blocks_solid_reflectionmap.png',
     'spaceship': './resources/models/spaceship.obj',
 }, false);
 
@@ -126,10 +128,16 @@ export default class World {
         const mats = Resources.get('materials');
         for(let name in mats) {
             const mat = Material.create(name);
+            
             const texImage = Resources.get(mats[name].texture);
             const texture = this.initTexture(texImage);
             mat.texture = texture;
+
             mat.diffuseColor = mats[name].diffuseColor || [1, 1, 1];
+
+            const reflectionImage = Resources.get(mats[name].reflectionMap);
+            const reflectionTexture = this.initTexture(reflectionImage);
+            mat.reflectionMap = reflectionTexture;
         }
     }
 

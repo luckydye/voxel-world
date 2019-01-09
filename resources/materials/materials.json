@@ -1,6 +1,7 @@
 {
     "WORLD": {
         "texture": "defaultTextureAtlas",
+        "reflectionMap": "defaultReflectionMap",
         "textureSize": 16
     }
 }
