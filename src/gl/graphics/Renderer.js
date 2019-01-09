@@ -11,6 +11,7 @@ import { Texture } from './Texture.js';
 import { Resources } from '../Resources.js';
 import { Geometry } from '../scene/Geometry.js';
 import { VertexBuffer } from './VertexBuffer.js';
+import ReflectionShader from '../shader/ReflectionShader.js';
 
 Resources.add({
 	'defaulttexture': './resources/textures/placeholder.png',
@@ -75,7 +76,7 @@ export class Renderer extends GLContext {
 		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
 
 		this.renderPasses = [
-			new RenderPass(this, 'reflection', new ColorShader()),
+			new RenderPass(this, 'reflection', new ReflectionShader()),
 			new RenderPass(this, 'diffuse', new ColorShader()),
 			new RenderPass(this, 'light', new LightShader()),
 		]
