@@ -21,7 +21,7 @@ void main() {
   pos.y += 42.0;
 
   vWorldPos = pos;
-  vNormal = vec4(aNormal, 1.0).xyz;
+  vNormal = aNormal;
   vTexCoords = aTexCoords;
 
   gl_Position = uProjMatrix * uViewMatrix * vec4(pos.xyz, 1.0);

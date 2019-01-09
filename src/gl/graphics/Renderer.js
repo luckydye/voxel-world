@@ -93,9 +93,9 @@ export class Renderer extends GLContext {
 			pass.use();
 			switch(pass.id) {
 				case "reflection":
-					this.gl.disable(this.gl.CULL_FACE);
+					this.gl.cullFace(this.gl.FRONT);
 					this.drawScene(this.scene);
-					this.gl.enable(this.gl.CULL_FACE);
+					this.gl.cullFace(this.gl.BACK);
 					break;
 
 				case "diffuse":
