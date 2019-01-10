@@ -10,10 +10,11 @@ export class Scene {
 		this.objects = new Set();
 		
 		this.lightSources = new DirectionalLight({ 
-            fov: 120,
-            position: new Vec(0, 500, -2000),
-            rotation: new Vec(55, 33, 0) 
-        });
+            fov: 90,
+            position: new Vec(0, 600, -3000),
+            rotation: new Vec(24, 50, 0) 
+		});
+		
 		this.camera = camera || new Camera({
 			fov: 90,
 		});

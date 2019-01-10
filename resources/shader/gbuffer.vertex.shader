@@ -9,16 +9,20 @@ uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 uniform mat4 uNormalMatrix;
 
+uniform mat4 lightProjViewMatrix;
+
 uniform float uTime;
 
 out vec2 vTexCoords;
 out vec4 vWorldPos;
 out vec3 vNormal;
 out vec3 vertexPos;
+out mat4 vLightProjViewMatrix;
 
 void main() {
   vec4 pos = uModelMatrix * vec4(aPosition, 1.0);
 
+  vLightProjViewMatrix = lightProjViewMatrix;
   vertexPos = aPosition;
   vWorldPos = pos;
   vNormal = aNormal;

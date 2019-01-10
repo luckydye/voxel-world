@@ -188,6 +188,8 @@ export class GLContext {
 		const width = w || this.resolution.width;
 		const height = h || this.resolution.height;
 
+		// dont render a depth buffer for every framebuffer
+
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
@@ -202,7 +204,7 @@ export class GLContext {
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		this.useTexture(null);
 
-		this.bufferTextures.set('depth', depthTexture);
+		this.bufferTextures.set(name+'Depth', depthTexture);
 		this.bufferTextures.set(name, renderTraget);
 		this.framebuffers.set(name, fbo);
 
