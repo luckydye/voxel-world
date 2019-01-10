@@ -85,9 +85,6 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
-			
-			this.clear();
-			this.gl.clearColor(0.15, 0.2, 0.3, 1.0);
 
 			switch(pass.id) {
 				
@@ -113,7 +110,11 @@ export class Renderer extends GLContext {
 	}
 
 	compositePasses(passes) {
+		this.clear();
+		this.gl.clearColor(0.05, 0.1, 0.15, 1.0);
+
 		this.useShader(this.compShader);
+			
 		for(let i in passes) {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
