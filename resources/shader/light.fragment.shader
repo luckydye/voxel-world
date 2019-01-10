@@ -3,10 +3,12 @@ precision mediump float;
 
 in vec4 vWorldPos;
 in vec3 vNormal;
-in vec2 vTexCoords;
+in vec3 vertexPos;
 
 uniform vec3 pointLightPos;
 uniform float ambient;
+uniform vec3 lightColor;
+uniform float lightIntensity;
 
 out vec4 oFragColor;
 
@@ -26,4 +28,8 @@ void main () {
 
   vec3 color = (cAmbient + cDiffuse) * cBase.rgb;
   oFragColor = vec4(color, 1.0);
+
+  if(lightIntensity > 0.0) {
+    oFragColor = vec4(lightColor, 1.0);
+  }
 }

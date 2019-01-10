@@ -58,7 +58,6 @@ export class GLContext {
 		this.gl.canvas.height = this._resolution[1];
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
-		this.gl.clearColor(0.15, 0.2, 0.3, 1.0);
 		this.gl.cullFace(this.gl.BACK);
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 	}

@@ -85,6 +85,10 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
+			
+			this.clear();
+			this.gl.clearColor(0.15, 0.2, 0.3, 1.0);
+
 			switch(pass.id) {
 				
 				case "reflection":
@@ -163,16 +167,31 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		for(let obj of objects) {
-			this.drawMesh(obj);
+			if(obj.isLight) {
+				this.drawLight(obj);
+			} else {
+				this.drawMesh(obj);
+			}
 		}
+	}
+
+	drawLight(geo) {
+		const shader = this.currentShader;
+
+		this.setTransformUniforms(shader.uniforms, geo);
+
+		this.gl.uniform3fv(shader.uniforms.lightColor, geo.color);
+		this.gl.uniform1f(shader.uniforms.lightIntensity, geo.intensity);
+
+		const buffer = geo.buffer;
+		this.setBuffersAndAttributes(shader.attributes, buffer);
+		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 	}
 
 	drawMesh(geo) {
 		const shader = this.currentShader;
 
-		const camera = this.scene.camera;
-		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+		this.gl.uniform1f(shader.uniforms.lightIntensity, 0);
 
 		this.setTransformUniforms(shader.uniforms, geo);
 
@@ -187,10 +206,6 @@ export class Renderer extends GLContext {
 
 	drawGeo(geo) {
 		const shader = this.currentShader;
-
-		const camera = this.scene.camera;
-		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
-		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		this.setTransformUniforms(shader.uniforms, geo);
 

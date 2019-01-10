@@ -2,28 +2,28 @@ import { Geometry } from "../scene/Geometry.js";
 import { VertexBuffer } from "../graphics/VertexBuffer.js";
 
 export class PointLight extends Geometry {
+	
+	get isLight() { return true; }
 
 	createBuffer() {
 		const vertArray = [
 			this.position.x,
 			this.position.y,
 			this.position.z,
-			this.color[0],
-			this.color[1],
-			this.color[2],
+			0, 0,
 		]
 		const vertxBuffer = VertexBuffer.create(vertArray);
 		vertxBuffer.type = "POINTS";
 		vertxBuffer.attributes = [
 			{ size: 3, attribute: "aPosition" },
-			{ size: 3, attribute: "aColor" },
+			{ size: 2, attribute: "aColor" },
 		]
 		return vertxBuffer;
 	}
 
 	onCreate({
 		intensity = 10,
-		color = [1, 1, 1]
+		color = [0, 1, 0]
 	}) {
 		this.intensity = intensity;
 		this.color = color;

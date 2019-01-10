@@ -14,10 +14,12 @@ uniform float uTime;
 out vec2 vTexCoords;
 out vec4 vWorldPos;
 out vec3 vNormal;
+out vec3 vertexPos;
 
 void main() {
   vec4 pos = uModelMatrix * vec4(aPosition, 1.0);
 
+  vertexPos = aPosition;
   vWorldPos = pos;
   vNormal = aNormal;
   vTexCoords = aTexCoords;

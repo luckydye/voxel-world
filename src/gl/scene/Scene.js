@@ -1,6 +1,6 @@
 import { Camera } from './Camera.js';
 import { Vec } from '../Math.js';
-import { Light } from './Light.js';
+import { DirectionalLight } from './DirectionalLight.js';
 
 let lastTick = 0;
 
@@ -9,7 +9,7 @@ export class Scene {
 	constructor({ camera } = {}) {
 		this.objects = new Set();
 		
-		this.lightSources = new Light({ 
+		this.lightSources = new DirectionalLight({ 
             fov: 120,
             position: new Vec(0, 500, -2000),
             rotation: new Vec(55, 33, 0) 
