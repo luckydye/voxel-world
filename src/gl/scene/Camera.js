@@ -20,6 +20,7 @@ export class Camera extends Transform {
 
 		this.projMatrix = mat4.create();
 		this.viewMatrix = mat4.create();
+		this.projViewMatrix = mat4.create();
 
 		this.updated = false;
 
@@ -63,6 +64,8 @@ export class Camera extends Transform {
 
 		mat4.rotateX(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.x);
 		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
+		
+		mat4.multiply(this.projViewMatrix, this.projMatrix, this.viewMatrix);
 
 		this.updated = false;
 
