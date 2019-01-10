@@ -65,7 +65,9 @@ export default class World {
 
         this.createVoxelScene();
 
-		// this.scene.add(new PointLight({ material: Material.LIGHT }));
+        this.scene.add(new PointLight({ material: Material.LIGHT }));
+
+        console.log(this.scene);
     }
 
     createModelFromFile(resource) {

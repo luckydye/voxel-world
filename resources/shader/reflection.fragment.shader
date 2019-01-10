@@ -6,7 +6,6 @@ in vec3 vNormal;
 
 uniform sampler2D colorTexture;
 uniform sampler2D reflectionMap;
-uniform sampler2D reflectionBuffer;
 
 uniform float textureScale;
 uniform float transparency;

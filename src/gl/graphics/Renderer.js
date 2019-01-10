@@ -46,7 +46,6 @@ export class Renderer extends GLContext {
 
 	setScene(scene) {
 		this.scene = scene;
-		this.scene.clear();
 
 		this.grid = new Grid(200);
 		this.screen = new Plane({ material: null });
@@ -81,15 +80,13 @@ export class Renderer extends GLContext {
 
         Statistics.data.passes = this.renderPasses.length;
 		Statistics.data.resolution = this._resolution;
-
-		// Debug pass
-		// this.debugPass = new RenderPass(this, 'debug', new ColorShader());
 	}
 
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
 			switch(pass.id) {
+				
 				case "reflection":
 					this.gl.cullFace(this.gl.FRONT);
 					this.drawScene(this.scene);
@@ -100,19 +97,12 @@ export class Renderer extends GLContext {
 					this.useTexture(this.renderPasses[0].buffer, "reflectionBuffer", 2);
 					this.drawScene(this.scene);
 					this.useShader(this.gridShader);
-					this.drawGeo(this.grid);
+					this.drawMesh(this.grid);
 					break;
 					
 				default:
 					this.drawScene(this.scene);
 			}
-		}
-
-		// DEBUG RENDERPASS
-		if(this.debugPass != null) {
-			this.debugPass.use();
-			this.useShader(this.debugPass.shader);
-			this.drawGeo(/* some geo */);
 		}
 
 		this.clearFramebuffer();
@@ -144,8 +134,7 @@ export class Renderer extends GLContext {
 	// give texture a .gltexture
 	prepareTexture(texture) {
 		if(!texture.gltexture) {
-			const image = texture.image || null;
-			texture.gltexture = this.createTexture(image);
+			texture.gltexture = this.createTexture(texture.image || null);
 		}
 	}
 
@@ -174,7 +163,25 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		for(let obj of objects) {
-			this.drawGeo(obj);
+			this.drawMesh(obj);
+		}
+	}
+
+	drawMesh(geo) {
+		const shader = this.currentShader;
+
+		const camera = this.scene.camera;
+		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
+		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
+
+		this.setTransformUniforms(shader.uniforms, geo);
+
+		if(geo.mat) {
+			this.applyMaterial(shader, geo.mat);
+		
+			const buffer = geo.buffer;
+			this.setBuffersAndAttributes(shader.attributes, buffer);
+			this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 		}
 	}
 
@@ -186,10 +193,6 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		this.setTransformUniforms(shader.uniforms, geo);
-
-		if(geo.mat) {
-			this.applyMaterial(shader, geo.mat);
-		}
 
 		const buffer = geo.buffer;
 		this.setBuffersAndAttributes(shader.attributes, buffer);
