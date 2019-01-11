@@ -51,7 +51,7 @@ export default class World {
         const settingsCamRot = settings.scene.camera.rotation;
 
         this.camera = new Camera({ 
-            fov: settings.scene.camera.fov,
+            fov: 90,
             position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0.5, 200.5, -600.5),
             rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5),
 			controller: MouseControler,

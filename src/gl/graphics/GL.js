@@ -23,8 +23,6 @@ export class GLContext {
 		this.framebuffers = new Map();
 		this.bufferTextures = new Map();
 
-		this.fBufferResFactor = 1.0;
-
 		// default options set
 		this.options = {
 			DEPTH_TEST: true,
@@ -44,15 +42,16 @@ export class GLContext {
 		}
 	}
 
-	setResolution(resolution) {
-		if(resolution) {
-			this.gl.canvas.width = resolution[0];
-			this.gl.canvas.height = resolution[1];
-		}
-		this.gl.viewport(0, 0, this.resolution.width, this.resolution.height);
+	viewport(width, height) {
+		this.gl.viewport(0, 0, width, height);
+	}
 
-		this.gl.cullFace(this.gl.BACK);
-		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+	setResolution(width, height) {
+		if(width && height) {
+			this.gl.canvas.width = width;
+			this.gl.canvas.height = height;
+		}
+		this.viewport(this.resolution.width, this.resolution.height);
 	}
 
 	clear() {
@@ -68,7 +67,8 @@ export class GLContext {
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
 
-		this.setResolution();
+		this.gl.cullFace(this.gl.BACK);
+		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 	}
 
 	useShader(shader) {
@@ -219,9 +219,6 @@ export class GLContext {
 	createDepthTexture(w, h) {
 		const gl = this.gl;
 
-		w *= this.fBufferResFactor;
-		h *= this.fBufferResFactor;
-
 		const texture = gl.createTexture();
 
 		gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -238,9 +235,6 @@ export class GLContext {
 
 	createBufferTexture(w, h) {
 		const gl = this.gl;
-
-		w *= this.fBufferResFactor;
-		h *= this.fBufferResFactor;
 
 		const texture = gl.createTexture();
 

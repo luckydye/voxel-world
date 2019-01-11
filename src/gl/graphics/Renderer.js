@@ -25,7 +25,7 @@ class RenderPass {
 		return this.renderer.getBufferTexture(this.id + 'Depth');
 	}
 
-	constructor(renderer, id, shader, w, h) {
+	constructor(renderer, id, shader, ar, resolution) {
 		this.id = id;
 		this.shader = shader;
 		this.renderer = renderer;
@@ -34,46 +34,55 @@ class RenderPass {
 			this.renderer.prepareShader(shader);
 		}
 
-		const width = w || this.renderer.resolution.width;
-		const height = h || this.renderer.resolution.height;
+		this.bufferWidth = resolution;
+		this.bufferHeight = resolution / ar;
 
-		this.renderer.createFramebuffer(this.id, width, height);
+		this.renderer.createFramebuffer(this.id, 
+			this.bufferWidth, this.bufferHeight);
 	}
 
 	use() {
 		this.renderer.useFramebuffer(this.id);
 		this.renderer.clear();
-		this.renderer.updateViewport();
+		this.renderer.viewport(this.bufferWidth, this.bufferHeight);
 		this.renderer.useShader(this.shader);
 	}
 }
 
 export class Renderer extends GLContext {
 
+	get width() { return 1280; }
+	get height() { return 1280; }
+
+	get aspectratio() { return this.width / this.height; }
+
 	setScene(scene) {
 		this.scene = scene;
 
 		this.grid = new Grid(200);
 		this.screen = new Plane({ material: null });
+
+		this.updateViewport();
 	}
 
 	updateViewport() {
+		this.setResolution(this.width, this.height);
+		this.scene.camera.sensor = {
+			width: this.width,
+			height: this.height
+		};
 		this.scene.camera.update();
-		this.scene.lightSources.update();
+
+		Statistics.data.resolution = this.resolution;
 	}
 
     onCreate() {
-		this.renderPasses = [];
-		
-		window.addEventListener("resize", () => {
-			this.updateViewport();
-			this.setResolution([
-				window.innerWidth,
-				window.innerHeight
-			]);
-		});
-
-		this.setResolution([ 1280, 720 ]);
+		this.renderPasses = [
+			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840),
+			new RenderPass(this, 'light', new LightShader(), this.aspectratio, 3840),
+			new RenderPass(this, 'reflection', new ReflectionShader(), this.aspectratio, this.width),
+			new RenderPass(this, 'diffuse', new ColorShader(), this.aspectratio, this.width),
+		]
 
 		this.gridShader = new GridShader();
 		this.prepareShader(this.gridShader);
@@ -84,25 +93,18 @@ export class Renderer extends GLContext {
 		this.defaultMaterial = Material.create("default");
 		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
 
-		this.renderPasses = [
-			new RenderPass(this, 'shadow', new ColorShader()),
-			new RenderPass(this, 'light', new LightShader()),
-			new RenderPass(this, 'reflection', new ReflectionShader()),
-			new RenderPass(this, 'diffuse', new ColorShader()),
-		]
-
         Statistics.data.passes = this.renderPasses.length;
-		Statistics.data.resolution = this.resolution;
 	}
 
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
-
 			switch(pass.id) {
 				
 				case "shadow":
-					this.drawScene(this.scene, this.scene.lightSources);
+					this.drawScene(this.scene, this.scene.lightSources, obj => {
+						return obj.mat && obj.mat.castShadows;
+					});
 					break;
 
 				case "light":
@@ -112,12 +114,14 @@ export class Renderer extends GLContext {
 					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
 						false, lightS.projViewMatrix);
 
-					this.drawScene(this.scene);
+					this.drawScene(this.scene, this.scene.camera, obj => {
+						return obj.mat && obj.mat.receiveShadows;
+					});
 					break;
 				
 				case "reflection":
 					this.gl.cullFace(this.gl.FRONT);
-					this.drawScene(this.scene);
+					this.drawScene(this.scene, this.scene.camera);
 					this.gl.cullFace(this.gl.BACK);
 					break;
 
@@ -136,6 +140,8 @@ export class Renderer extends GLContext {
 	compositePasses(passes) {
 		this.clear();
 		this.gl.clearColor(0.05, 0.1, 0.15, 1.0);
+		
+		this.viewport(this.resolution.width, this.resolution.height);
 
 		this.useShader(this.compShader);
 			
@@ -144,10 +150,8 @@ export class Renderer extends GLContext {
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
 
-		this.gl.uniform1f(this.compShader.uniforms.resolutionFactor, 
-			window.innerWidth / this.resolution.width);
-
-		this.gl.uniform1f(this.compShader.uniforms.aspectratio, 
+		this.gl.uniform1f(this.compShader.uniforms.aspectRatio, 
+			this.width / this.height * 
 			this.resolution.width / this.resolution.height);
 
 		this.drawGeo(this.screen);
@@ -190,7 +194,7 @@ export class Renderer extends GLContext {
 		this.gl.uniform1f(shader.uniforms.transparency, material.transparency);
 	}
 
-	drawScene(scene, camera) {
+	drawScene(scene, camera, filter) {
 		camera = camera || scene.camera;
 		const objects = scene.objects;
 		const shader = this.currentShader;
@@ -199,10 +203,12 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
 		for(let obj of objects) {
-			if(obj.isLight) {
-				this.drawLight(obj);
-			} else {
-				this.drawMesh(obj);
+			if(filter && filter(obj) || !filter) {
+				if(obj.isLight) {
+					this.drawLight(obj);
+				} else {
+					this.drawMesh(obj);
+				}
 			}
 		}
 	}
