@@ -12,7 +12,7 @@ export class Scene {
 		this.lightSources = new DirectionalLight({ 
             fov: 90,
             position: new Vec(0, 700, -3000),
-            rotation: new Vec(50, 50, 0) 
+			rotation: new Vec(50, 50, 0),
 		});
 		
 		this.camera = camera || new Camera({
@@ -38,7 +38,6 @@ export class Scene {
 		}
 		if(this.lightSources) {
 			this.lightSources.rotation.y += 0.05 * (time - lastTick);
-			// this.lightSources.rotation.x += 0.02 * (time - lastTick);
 			this.lightSources.update();
 		}
 		lastTick = time;

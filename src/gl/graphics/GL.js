@@ -5,12 +5,9 @@ export class GLContext {
 
 	get resolution() {
 		return {
-			width: this._resolution[0],
-			height: this._resolution[1]
+			width: this.gl.canvas.width,
+			height: this.gl.canvas.height
 		};
-	}
-	set resolution(vecArr) {
-		this._resolution = [ w, h ] = vecArr;
 	}
 
 	onCreate() {
@@ -27,9 +24,6 @@ export class GLContext {
 		this.bufferTextures = new Map();
 
 		this.fBufferResFactor = 1.0;
-
-		this.nativeResolution = Math.max(window.innerWidth, window.innerHeight);
-		// this.nativeResolution = 480;
 
 		// default options set
 		this.options = {
@@ -50,13 +44,12 @@ export class GLContext {
 		}
 	}
 
-	setResolution(res) {
-		res = res || this.resolution.width;
-		this._resolution = [res, res];
-
-		this.gl.canvas.width = this._resolution[0];
-		this.gl.canvas.height = this._resolution[1];
-		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+	setResolution(resolution) {
+		if(resolution) {
+			this.gl.canvas.width = resolution[0];
+			this.gl.canvas.height = resolution[1];
+		}
+		this.gl.viewport(0, 0, this.resolution.width, this.resolution.height);
 
 		this.gl.cullFace(this.gl.BACK);
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
@@ -75,7 +68,7 @@ export class GLContext {
 		this.gl = canvas.getContext("webgl2", ctxtOpts) || 
 				  canvas.getContext("webgl", ctxtOpts);
 
-		this.setResolution(this.nativeResolution);
+		this.setResolution();
 	}
 
 	useShader(shader) {
@@ -183,21 +176,19 @@ export class GLContext {
 		this.gl.bindVertexArray(VAO);
 	}
 
-	createFramebuffer(name, w, h) {
+	createFramebuffer(name, width, height) {
 		const gl = this.gl;
-		const width = w || this.resolution.width;
-		const height = h || this.resolution.height;
 
 		// dont render a depth buffer for every framebuffer
 
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const renderTraget = this.createBufferTexture(width, width);
+		const renderTraget = this.createBufferTexture(width, height);
 		this.useTexture(renderTraget);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
 
-		const depthTexture = this.createDepthTexture(height, height);
+		const depthTexture = this.createDepthTexture(width, height);
 		this.useTexture(depthTexture);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 		

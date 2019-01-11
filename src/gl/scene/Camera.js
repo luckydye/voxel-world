@@ -9,6 +9,8 @@ export class Camera extends Transform {
 			farplane = 350,
 			nearplane = 0.025,
 			controller = null,
+			width = 1280,
+			height = 720,
 		} = args;
 		super(args);
 		
@@ -22,7 +24,10 @@ export class Camera extends Transform {
 		this.viewMatrix = mat4.create();
 		this.projViewMatrix = mat4.create();
 
-		this.updated = false;
+		this.sensor = {
+			width: width,
+			height: height
+		}
 
 		if(controller) {
 			this.controller = new controller(this);
@@ -41,7 +46,7 @@ export class Camera extends Transform {
 		const viewMatrix = this.viewMatrix;
 		const camera = this;
 
-		const ar = window.innerWidth / window.innerHeight;
+		const ar = this.sensor.width / this.sensor.height;
 		mat4.perspective(projMatrix, Math.PI / 180 * camera.fov, ar, camera.nearplane, camera.farplane);
 		mat4.lookAt(
 			viewMatrix, 
@@ -66,8 +71,6 @@ export class Camera extends Transform {
 		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
 		
 		mat4.multiply(this.projViewMatrix, this.projMatrix, this.viewMatrix);
-
-		this.updated = false;
 
 		if(this.controller)
 			this.controller.update();

@@ -25,17 +25,19 @@ class RenderPass {
 		return this.renderer.getBufferTexture(this.id + 'Depth');
 	}
 
-	constructor(renderer, id, shader, res) {
+	constructor(renderer, id, shader, w, h) {
 		this.id = id;
 		this.shader = shader;
 		this.renderer = renderer;
-		this.resolution = res;
 
 		if(!shader.initialized) {
 			this.renderer.prepareShader(shader);
 		}
 
-		this.renderer.createFramebuffer(this.id, this.resolution, this.resolution);
+		const width = w || this.renderer.resolution.width;
+		const height = h || this.renderer.resolution.height;
+
+		this.renderer.createFramebuffer(this.id, width, height);
 	}
 
 	use() {
@@ -56,7 +58,6 @@ export class Renderer extends GLContext {
 	}
 
 	updateViewport() {
-		this.setResolution();
 		this.scene.camera.update();
 		this.scene.lightSources.update();
 	}
@@ -66,7 +67,13 @@ export class Renderer extends GLContext {
 		
 		window.addEventListener("resize", () => {
 			this.updateViewport();
+			this.setResolution([
+				window.innerWidth,
+				window.innerHeight
+			]);
 		});
+
+		this.setResolution([ 1280, 720 ]);
 
 		this.gridShader = new GridShader();
 		this.prepareShader(this.gridShader);
@@ -79,13 +86,13 @@ export class Renderer extends GLContext {
 
 		this.renderPasses = [
 			new RenderPass(this, 'shadow', new ColorShader()),
+			new RenderPass(this, 'light', new LightShader()),
 			new RenderPass(this, 'reflection', new ReflectionShader()),
 			new RenderPass(this, 'diffuse', new ColorShader()),
-			new RenderPass(this, 'light', new LightShader()),
 		]
 
         Statistics.data.passes = this.renderPasses.length;
-		Statistics.data.resolution = this._resolution;
+		Statistics.data.resolution = this.resolution;
 	}
 
 	renderMultiPasses(passes) {
@@ -96,6 +103,16 @@ export class Renderer extends GLContext {
 				
 				case "shadow":
 					this.drawScene(this.scene, this.scene.lightSources);
+					break;
+
+				case "light":
+					this.useTexture(this.renderPasses[0].depthBuffer, "shadowDepthMap", 2);
+
+					const lightS = this.scene.lightSources;
+					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
+						false, lightS.projViewMatrix);
+
+					this.drawScene(this.scene);
 					break;
 				
 				case "reflection":
@@ -109,15 +126,6 @@ export class Renderer extends GLContext {
 					this.drawScene(this.scene);
 					this.useShader(this.gridShader);
 					this.drawMesh(this.grid);
-					break;
-
-				case "light":
-					const lightS = this.scene.lightSources;
-					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
-						false, lightS.projViewMatrix);
-
-					this.useTexture(this.renderPasses[0].depthBuffer, "shadowDepthMap", 2);
-					this.drawScene(this.scene);
 					break;
 			}
 		}
@@ -135,6 +143,13 @@ export class Renderer extends GLContext {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
+
+		this.gl.uniform1f(this.compShader.uniforms.resolutionFactor, 
+			window.innerWidth / this.resolution.width);
+
+		this.gl.uniform1f(this.compShader.uniforms.aspectratio, 
+			this.resolution.width / this.resolution.height);
+
 		this.drawGeo(this.screen);
 	}
 
