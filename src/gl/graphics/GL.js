@@ -179,27 +179,37 @@ export class GLContext {
 	createFramebuffer(name, width, height) {
 		const gl = this.gl;
 
-		// dont render a depth buffer for every framebuffer
-
 		const fbo = this.gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-		const renderTraget = this.createBufferTexture(width, height);
-		this.useTexture(renderTraget);
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
+		return {
+			colorbuffer: () => {
+				const renderTraget = this.createBufferTexture(width, height);
+				this.useTexture(renderTraget);
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTraget, 0);
 
-		const depthTexture = this.createDepthTexture(width, height);
-		this.useTexture(depthTexture);
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
-		
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		this.useTexture(null);
+				const depthTexture = this.createDepthTexture(width, height);
+				this.useTexture(depthTexture);
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+				
+				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+				this.useTexture(null);
 
-		this.bufferTextures.set(name+'Depth', depthTexture);
-		this.bufferTextures.set(name, renderTraget);
-		this.framebuffers.set(name, fbo);
+				this.bufferTextures.set(name, renderTraget);
+				this.framebuffers.set(name, fbo);
+			},
+			depthbuffer: () => {
+				const depthTexture = this.createDepthTexture(width, height);
+				this.useTexture(depthTexture);
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+				
+				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+				this.useTexture(null);
 
-		return fbo;
+				this.bufferTextures.set(name, depthTexture);
+				this.framebuffers.set(name, fbo);
+			}
+		}
 	}
 
 	createProgram(vertShader, fragShader) {

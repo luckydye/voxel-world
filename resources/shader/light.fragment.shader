@@ -22,24 +22,26 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     float closestDepth = texture(shadowDepthMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
     
-    float bias = 0.00005;
-    float shadow = currentDepth - bias <= closestDepth ? 1.0 : 0.0;  
+    float bias = 0.00003;
+    float shadow = currentDepth - bias < closestDepth ? 1.0 : 0.0;
 
     return shadow;
 }
 
 void main () {
 
+  vec4 position = vWorldPos;
+
   vec4 cBase = vec4(1.0, 1.0, 1.0, 1.0);
   vec3 cLight = vec3(1.0, 1.0, 1.0);
 
   vec3 cAmbient = ambient * cLight;
 
-  vec3 lightDir = normalize(pointLightPos - vWorldPos.xyz);
+  vec3 lightDir = normalize(pointLightPos - position.xyz);
   float diffAngle = max(dot(vNormal, lightDir), 0.0);
   float diffuse = 0.5;
 
-  float intensity = pow(1.0 / (distance(vWorldPos.xyz, pointLightPos) * 0.001), 1.5) * 2.0;
+  float intensity = pow(1.0 / (distance(position.xyz, pointLightPos) * 0.001), 1.5) * 2.0;
   vec3 cDiffuse = cLight * diffAngle * diffuse * intensity;
 
   vec3 color = (cAmbient + cDiffuse) * cBase.rgb;
@@ -50,7 +52,8 @@ void main () {
   }
 
   // shadow map
-  vec4 fragPosLightSpace = vLightProjViewMatrix * vWorldPos;
+
+  vec4 fragPosLightSpace = vLightProjViewMatrix * position;
   float shadow = ShadowCalculation(fragPosLightSpace);
   
   oFragColor *= vec4(vec3(shadow + 0.33), 1.0);

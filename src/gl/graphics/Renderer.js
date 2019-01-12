@@ -21,30 +21,29 @@ class RenderPass {
 		return this.renderer.getBufferTexture(this.id);
 	}
 
-	get depthBuffer() {
-		return this.renderer.getBufferTexture(this.id + 'Depth');
-	}
-
-	constructor(renderer, id, shader, ar, resolution) {
+	constructor(renderer, id, shader, ar, resolution, isDepthBuffer) {
 		this.id = id;
 		this.shader = shader;
 		this.renderer = renderer;
 
 		if(!shader.initialized) {
 			this.renderer.prepareShader(shader);
-		}
+        }
+        
+		this.width = resolution;
+		this.height = resolution / ar;
 
-		this.bufferWidth = resolution;
-		this.bufferHeight = resolution / ar;
-
-		this.renderer.createFramebuffer(this.id, 
-			this.bufferWidth, this.bufferHeight);
+		if(isDepthBuffer) {
+            this.renderer.createFramebuffer(this.id, this.width, this.height).depthbuffer();
+        } else {
+            this.renderer.createFramebuffer(this.id, this.width, this.height).colorbuffer();
+        }
 	}
 
 	use() {
 		this.renderer.useFramebuffer(this.id);
 		this.renderer.clear();
-		this.renderer.viewport(this.bufferWidth, this.bufferHeight);
+		this.renderer.viewport(this.width, this.height);
 		this.renderer.useShader(this.shader);
 	}
 }
@@ -78,7 +77,7 @@ export class Renderer extends GLContext {
 
     onCreate() {
 		this.renderPasses = [
-			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840),
+			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840, true),
 			new RenderPass(this, 'light', new LightShader(), this.aspectratio, 3840),
 			new RenderPass(this, 'reflection', new ReflectionShader(), this.aspectratio, this.width),
 			new RenderPass(this, 'diffuse', new ColorShader(), this.aspectratio, this.width),
@@ -108,7 +107,7 @@ export class Renderer extends GLContext {
 					break;
 
 				case "light":
-					this.useTexture(this.renderPasses[0].depthBuffer, "shadowDepthMap", 2);
+					this.useTexture(this.getBufferTexture('shadow'), "shadowDepthMap", 2);
 
 					const lightS = this.scene.lightSources;
 					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
@@ -126,7 +125,7 @@ export class Renderer extends GLContext {
 					break;
 
 				case "diffuse":
-					this.useTexture(this.renderPasses[1].buffer, "reflectionBuffer", 2);
+					this.useTexture(this.getBufferTexture('reflection'), "reflectionBuffer", 2);
 					this.drawScene(this.scene);
 					this.useShader(this.gridShader);
 					this.drawMesh(this.grid);
