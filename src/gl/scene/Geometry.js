@@ -1,9 +1,8 @@
-import { Material } from "../graphics/Material.js";
 import { Transform } from "../Math.js";
 
 export class Geometry extends Transform {
 
-    get buffer() {
+	get buffer() {
 		this._buffer = this._buffer || this.createBuffer();
 		return this._buffer;
 	}
@@ -12,14 +11,17 @@ export class Geometry extends Transform {
 		const {
 			material = null,
 			uv = [0, 0],
+			rigidcube = false
 		} = args;
 		super(args);
+
+		this.rigidbody = rigidcube;
 
 		this.mat = material;
 		this.uv = uv;
 
 		this.onCreate(args);
-	}
+    }
 
 	onCreate(arsg) { }
 

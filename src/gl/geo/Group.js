@@ -4,7 +4,6 @@ import { VertexBuffer } from "../graphics/VertexBuffer.js";
 export class Group extends Geometry {
 
 	createBuffer() {
-		const s = 1;
 		const vertArray = this.build();
 		const vertxBuffer = VertexBuffer.create(vertArray);
 		vertxBuffer.type = "TRIANGLES";

@@ -21,6 +21,10 @@ class RenderPass {
 		return this.renderer.getBufferTexture(this.id);
 	}
 
+	get depthbuffer() {
+		return this.renderer.getBufferTexture(this.id + 'Depth');
+	}
+
 	constructor(renderer, id, shader, ar, resolution, isDepthBuffer) {
 		this.id = id;
 		this.shader = shader;
@@ -76,6 +80,8 @@ export class Renderer extends GLContext {
 	}
 
     onCreate() {
+		this.fogEnabled = false;
+
 		this.renderPasses = [
 			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840, true),
 			new RenderPass(this, 'light', new LightShader(), this.aspectratio, 3840),
@@ -145,10 +151,13 @@ export class Renderer extends GLContext {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
+		this.useTexture(this.getBufferTexture('depth'), 'depthBuffer', 4);
 
 		this.gl.uniform1f(this.compShader.uniforms.aspectRatio, 
 			this.width / this.height * 
 			this.resolution.width / this.resolution.height);
+
+		this.gl.uniform1i(this.compShader.uniforms.fog, this.fogEnabled);
 
 		this.drawGeo(this.screen);
 	}
