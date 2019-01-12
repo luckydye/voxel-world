@@ -2,9 +2,14 @@
     "WORLD": {
         "texture": "defaultTextureAtlas",
         "reflectionMap": "defaultReflectionMap",
-        "textureSize": 16
+        "textureSize": 16,
+        "receiveShadows": true,
+        "castShadows": true
     },
-    "LIGHT": {
-        "diffuseColor": [1, 1, 1]
+    "TEST": {
+        "texture": "placeholder",
+        "diffuseColor": [1, 1, 1],
+        "receiveShadows": true,
+        "castShadows": true
     }
 }

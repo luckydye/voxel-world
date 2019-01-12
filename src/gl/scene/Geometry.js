@@ -10,7 +10,7 @@ export class Geometry extends Transform {
 
 	constructor(args = {}) {
 		const {
-			material = Material.default,
+			material = null,
 			uv = [0, 0],
 		} = args;
 		super(args);

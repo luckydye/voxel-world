@@ -8,16 +8,18 @@ import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
 import { MouseControler } from './gl/entity/MouseControler.js';
-import { Texture } from './gl/graphics/Texture.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
-import { PointLight } from './gl/scene/PointLight.js';
+import { Cube } from './gl/geo/Cube.js';
+import { Plane } from './gl/geo/Plane.js';
+import { Voxel } from './gl/geo/Voxel.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',
 	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
 	'defaultReflectionMap': './resources/textures/blocks_solid_reflectionmap.png',
     'spaceship': './resources/models/spaceship.obj',
+    'placeholder': './resources/textures/placeholder.png',
 }, false);
 
 let nextFrame = 0, 
@@ -41,8 +43,27 @@ export default class World {
         });
     }
 
+    renderLoop() {
+        const currentFrame = performance.now();
+        const delta = currentFrame - lastFrame;
+
+        accumulator += delta;
+        if(accumulator >= (1000 / tickrate)) {
+            this.scene.update(delta);
+
+            accumulator = 0;
+        }
+        this.renderer.draw();
+        
+        lastFrame = currentFrame;
+        nextFrame = requestAnimationFrame(this.renderLoop.bind(this));
+    }
+
     init(canvas) {
-        this.initMaterials();
+        const mats = Resources.get('materials');
+        for(let name in mats) {
+            Material.createFromJson(name, mats[name]);
+        }
 
         this.renderer = new Renderer(canvas);
 
@@ -64,8 +85,6 @@ export default class World {
         this.renderer.setScene(this.scene);
 
         this.createVoxelScene();
-
-        this.scene.add(new PointLight({ material: Material.LIGHT }));
 
         console.log(this.scene);
     }
@@ -120,43 +139,5 @@ export default class World {
         this.worldgen.group.mat = Material.WORLD;
 
         this.scene.add(this.worldgen.group);
-    }
-
-    initTexture(texImage) {
-        const texture = new Texture(texImage);
-        return texture;
-    }
-
-    initMaterials() {
-        const mats = Resources.get('materials');
-        for(let name in mats) {
-            const mat = Material.create(name);
-            
-            const texImage = Resources.get(mats[name].texture);
-            const texture = this.initTexture(texImage);
-            mat.texture = texture;
-
-            mat.diffuseColor = mats[name].diffuseColor || [1, 1, 1];
-
-            const reflectionImage = Resources.get(mats[name].reflectionMap);
-            const reflectionTexture = this.initTexture(reflectionImage);
-            mat.reflectionMap = reflectionTexture;
-        }
-    }
-
-    renderLoop() {
-        const currentFrame = performance.now();
-        const delta = currentFrame - lastFrame;
-
-        accumulator += delta;
-        if(accumulator >= (1000 / tickrate)) {
-            this.scene.update(delta);
-
-            accumulator = 0;
-        }
-        this.renderer.draw();
-        
-        lastFrame = currentFrame;
-        nextFrame = requestAnimationFrame(this.renderLoop.bind(this));
     }
 }

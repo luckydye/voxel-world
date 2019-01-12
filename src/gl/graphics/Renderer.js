@@ -89,9 +89,6 @@ export class Renderer extends GLContext {
 		this.compShader = new FinalShader();
 		this.prepareShader(this.compShader);
 
-		this.defaultMaterial = Material.create("default");
-		this.defaultMaterial.texture = new Texture(Resources.get("defaulttexture"));
-
         Statistics.data.passes = this.renderPasses.length;
 	}
 
