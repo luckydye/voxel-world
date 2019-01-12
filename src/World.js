@@ -10,9 +10,6 @@ import { Terrain } from './gl/geo/Terrain.js';
 import { MouseControler } from './gl/entity/MouseControler.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
-import { Cube } from './gl/geo/Cube.js';
-import { Plane } from './gl/geo/Plane.js';
-import { Voxel } from './gl/geo/Voxel.js';
 
 Resources.add({
     'materials': './resources/materials/materials.json',

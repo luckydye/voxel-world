@@ -37,7 +37,7 @@ export class Scene {
 			this.camera.update();
 		}
 		if(this.lightSources) {
-			this.lightSources.rotation.y += 0.05 * (time - lastTick);
+			this.lightSources.rotation.y += 0.02 * (time - lastTick);
 			this.lightSources.update();
 		}
 		lastTick = time;
