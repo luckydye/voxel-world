@@ -1,13 +1,9 @@
 import { Statistics } from '../Statistics.js';
-import { Grid } from '../geo/Grid.js';
 import { Plane } from '../geo/Plane.js';
 import { GLContext } from './GL.js';
 import FinalShader from '../shader/FinalShader.js';
 import ColorShader from '../shader/ColorShader.js';
-import GridShader from '../shader/GridShader.js';
 import LightShader from '../shader/LightShader.js';
-import { Material } from './Material.js';
-import { Texture } from './Texture.js';
 import { Resources } from '../Resources.js';
 import ReflectionShader from '../shader/ReflectionShader.js';
 
@@ -62,7 +58,6 @@ export class Renderer extends GLContext {
 	setScene(scene) {
 		this.scene = scene;
 
-		this.grid = new Grid(200);
 		this.screen = new Plane({ material: null });
 
 		this.updateViewport();
@@ -81,6 +76,7 @@ export class Renderer extends GLContext {
 
     onCreate() {
 		this.fogEnabled = false;
+		this.bloomEnabled = false;
 
 		this.renderPasses = [
 			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840, true),
@@ -89,8 +85,14 @@ export class Renderer extends GLContext {
 			new RenderPass(this, 'diffuse', new ColorShader(), this.aspectratio, this.width),
 		]
 
-		this.gridShader = new GridShader();
-		this.prepareShader(this.gridShader);
+		if(this.bloomEnabled) {
+			const bloomShader = new LightShader();
+			bloomShader.ambient = 0;
+
+			this.renderPasses.push(
+				new RenderPass(this, 'bloom', bloomShader, this.aspectratio, this.width)
+			);
+		}
 
 		this.compShader = new FinalShader();
 		this.prepareShader(this.compShader);
@@ -101,6 +103,9 @@ export class Renderer extends GLContext {
 	renderMultiPasses(passes) {
 		for(let pass of passes) {
 			pass.use();
+
+			const lightS = this.scene.lightSources;
+			
 			switch(pass.id) {
 				
 				case "shadow":
@@ -112,7 +117,6 @@ export class Renderer extends GLContext {
 				case "light":
 					this.useTexture(this.getBufferTexture('shadow'), "shadowDepthMap", 2);
 
-					const lightS = this.scene.lightSources;
 					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
 						false, lightS.projViewMatrix);
 
@@ -130,8 +134,12 @@ export class Renderer extends GLContext {
 				case "diffuse":
 					this.useTexture(this.getBufferTexture('reflection'), "reflectionBuffer", 2);
 					this.drawScene(this.scene);
-					this.useShader(this.gridShader);
-					this.drawMesh(this.grid);
+					break;
+
+				case "bloom":
+					this.drawScene(this.scene, this.scene.camera, obj => {
+						return obj.isLight;
+					});
 					break;
 			}
 		}
@@ -151,7 +159,7 @@ export class Renderer extends GLContext {
 			const pass = passes[i];
 			this.useTexture(pass.buffer, pass.id + "Buffer", i);
 		}
-		this.useTexture(this.getBufferTexture('depth'), 'depthBuffer', 4);
+		this.useTexture(this.getBufferTexture('depth'), 'depthBuffer', passes.length+1);
 
 		this.gl.uniform1f(this.compShader.uniforms.aspectRatio, 
 			this.width / this.height * 

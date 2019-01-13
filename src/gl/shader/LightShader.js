@@ -16,17 +16,16 @@ export default class LightShader extends GLShader {
     }
 
     get uniform() {
-		// return {
-        //     ambient: 0.75,
-        //     shadowcolor: 0.33,
-        // };
 		return {
-            ambient: 0.05,
-            shadowcolor: 0.03,
+            ambient: this.ambient,
+            shadowcolor: this.shadowcolor,
         };
 	}
     
     constructor() {
         super({ name: "light" });
+
+        this.ambient = 0.05;
+        this.shadowcolor = 0.03;
     }
 }
