@@ -20,7 +20,13 @@ class Tile {
 	constructor(x, y, size, height) {
 		this.tileData = new Array(size);
 		this.height = height;
-		this.pos = { x, y };
+		this.pos = { x: x * size, y: y * size };
+
+		this.group = new Group();
+		this.group.mat = Material.WORLD;
+
+		this.group.position.x = this.pos.x * 20;
+		this.group.position.z = this.pos.y * 20;
 
 		for(let i = 0; i < this.tileData.length; i++) {
 			this.tileData[i] = new Array(this.height);
@@ -44,27 +50,6 @@ const UV = {
 }
 
 export class VoxelWorldGenerator {
-
-	constructor({ 
-		tileSize = 16, 
-		tileHeight = 40,
-		seed = 0,
-		resolution = 15,
-		threshold = 0.2,
-		terrainheight = 15,
-	} = {}) {
-		this.tileSize = tileSize;
-		this.tileHeight = tileHeight;
-		this.resolution = resolution;
-		this.threshold = threshold;
-		this.terrainheight = terrainheight;
-		this.treeDensity = 0.65;
-		this.tiles = [];
-
-		this.group = new Group();
-
-		this.setSeed(seed);
-	}
 	
 	setSeed(n) {
 		this.seed = n;
@@ -72,74 +57,74 @@ export class VoxelWorldGenerator {
 		Statistics.data.seed = n;
 	}
 
-    voxel(tileData, x, y, z) {
-        const tileSize = this.tileSize;
-        const tileHeight = this.tileHeight;
-        const cube = new Voxel({
-            material: Material.WORLD,
-            uv: tileData[x][y][z],
-            position: new Vec(
-                ((x * 20) + 10) - ((tileSize/2) * 20),
-                ((y * 20) + 10) - ((tileHeight) * 20) - 0.5,
-                ((z * 20) + 10) - ((tileSize/2) * 20),
-            )
-        });
+	constructor({ 
+		tileSize = 2, 
+		tileHeight = 40,
+		seed = 0,
+		resolution = 15,
+		threshold = 0.2,
+		terrainheight = 15,
+	} = {}) {
+		this.tileSize = 32;
 
-        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
-            cube.visible.TOP = false;
-        }
-        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
-            cube.visible.BOTTOM = false;
-        }
-        if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {
-            cube.visible.RIGHT = false;
-        }
-        if((z+1 > 0 && z+1 < tileSize) && tileData[x][y][z+1]) {
-            cube.visible.LEFT = false;
-        }
-        if((x-1 > 0 && x-1 < tileSize) && tileData[x-1][y][z]) {
-            cube.visible.BACK = false;
-        }
-        if((x+1 > 0 && x+1 < tileSize) && tileData[x+1][y][z]) {
-            cube.visible.FRONT = false;
-        }
+		this.worldSize = tileSize;
+		this.tileHeight = tileHeight;
+		this.resolution = resolution;
+		this.threshold = threshold;
+		this.terrainheight = terrainheight;
+		this.treeDensity = 0.65;
+		this.tiles = [];
 
-        if(!cube.invisible) {
-            Statistics.data.voxels++;
-            this.group.add(cube);
-        }
-    }
+		this.scene = null;
+
+		this.setSeed(seed);
+	}
 
     regen(seed) {
         seed = seed || Math.random();
-        this.setSeed(seed);
-        this.tiles = [
-            this.generateTile(0, 0),
-        ]
-        this.buildTiles(this.tiles);
+		this.setSeed(seed);
+		
+		return new Promise((resolve, reject) => {
+			const size = this.worldSize;
+			this.buildTiles([
+				this.generateTile(0, 0),
+			]);
+			for(let x = 0; x < size*2; x++) {
+				for(let y = 0; y < size*2; y++) {
+					if(x != 0 && y != 0) {
+						setTimeout(() => {
+							this.buildTiles([
+								this.generateTile(x - size, y - size),
+							])
+						}, 250);
+					}
+				}
+			}
+		});
     }
 
     buildTiles(tiles) {
         Statistics.data.voxels = 0;
 
         for(let tile of tiles) {
-            const tileData = tile.tileData;
+			const tileData = tile.tileData;
             for(let x = 0; x < tileData.length; x++) {
                 for(let y = 0; y < tileData[x].length; y++) {
                     for(let z = 0; z < tileData[x][y].length; z++) {
                         if(tileData[x][y][z]) {
-                            this.voxel(tileData, x + tile.pos.x, y, z + tile.pos.y);
+                            this.voxel(tile, x, y, z, tile.pos.x, tile.pos.y);
                         }
                     }
                 }
             }
-        }
+			this.scene.add(tile.group);
+		}
     }
 
 	generateTile(x, y) {
         const tileHeight = this.tileHeight;
         const tileSize = this.tileSize;
-		const tile = new Tile(x * tileSize, y * tileHeight, tileSize, tileHeight);
+		const tile = new Tile(x, y, tileSize, tileHeight);
 		const tileData = tile.tileData;
 		const res = this.resolution;
 
@@ -224,7 +209,7 @@ export class VoxelWorldGenerator {
 							!tileData[x][y-1][z] &&
 							tileData[x][y+1][z] == UV.GRASS) {
 
-							let yvalue = noise.perlin2(x * treeDensity, z * treeDensity) + 0.1;
+							let yvalue = noise.perlin2(x * treeDensity + tile.pos.y, z * treeDensity + tile.pos.y) + 0.1;
 							
 							if(yvalue < 0.5 && yvalue > 0.45) {
 								this.makeThing(tileData, x, y, z);
@@ -298,5 +283,44 @@ export class VoxelWorldGenerator {
 	makeThing(tileData, x, y, z) {
 		// tileData[x][y][z] = UV.LAVA;
 	}
+
+    voxel(tile, x, y, z, offsetX = 0, offsetY = 0) {
+		const tileData = tile.tileData;
+        const tileSize = this.tileSize;
+		const tileHeight = this.tileHeight;
+        const cube = new Voxel({
+            material: Material.WORLD,
+            uv: tileData[x][y][z],
+            position: new Vec(
+                ((x * 20) + 10) - ((tileSize/2) * 20),
+                ((y * 20) + 10) - ((tileHeight) * 20) - 0.5,
+                ((z * 20) + 10) - ((tileSize/2) * 20),
+            )
+        });
+
+        if((y-1 > 0 && y-1 < tileHeight) && tileData[x][y-1][z]) {
+            cube.visible.TOP = false;
+        }
+        if((y+1 > 0 && y+1 < tileHeight) && tileData[x][y+1][z]) {
+            cube.visible.BOTTOM = false;
+        }
+        if((z-1 > 0 && z-1 < tileSize) && tileData[x][y][z-1]) {
+            cube.visible.RIGHT = false;
+        }
+        if((z+1 > 0 && z+1 < tileSize) && tileData[x][y][z+1]) {
+            cube.visible.LEFT = false;
+        }
+        if((x-1 > 0 && x-1 < tileSize) && tileData[x-1][y][z]) {
+            cube.visible.BACK = false;
+        }
+        if((x+1 > 0 && x+1 < tileSize) && tileData[x+1][y][z]) {
+            cube.visible.FRONT = false;
+        }
+
+        if(!cube.invisible) {
+            Statistics.data.voxels++;
+            tile.group.add(cube);
+        }
+    }
 
 }

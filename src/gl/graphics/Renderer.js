@@ -224,6 +224,7 @@ export class Renderer extends GLContext {
 
 		for(let obj of objects) {
 			if(filter && filter(obj) || !filter) {
+				// check if obj is in view, dont render it if not
 				this.drawMesh(obj);
 			}
 		}
