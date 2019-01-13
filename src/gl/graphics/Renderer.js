@@ -231,12 +231,8 @@ export class Renderer extends GLContext {
 
 	drawMesh(geo) {
 		const shader = this.currentShader;
-
-		this.gl.uniform1f(shader.uniforms.lightIntensity, 0);
-
 		if(geo.mat) {
 			this.applyMaterial(shader, geo.mat);
-		
 			this.drawGeo(geo);
 		}
 	}

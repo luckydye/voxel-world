@@ -77,12 +77,6 @@ export default class World {
 			controller: MouseControler,
         });
 
-        this.scene = new Scene({
-            camera: this.camera,
-        });
-
-        this.renderer.setScene(this.scene);
-
         this.renderer.fogEnabled = true;
 
         this.createVoxelScene();
@@ -109,7 +103,7 @@ export default class World {
             vertxBuffer.type = "TRIANGLES";
             vertxBuffer.attributes = [
                 { size: 3, attribute: "aPosition" },
-                { size: 2, attribute: "aTexCoords" }
+                { size: 3, attribute: "aTexCoords" }
             ]
             return vertxBuffer;
         }
@@ -120,8 +114,14 @@ export default class World {
     }
 
     createTerrainScene(args) {
+        this.scene = new Scene({
+            camera: this.camera,
+        });
+
+        this.renderer.setScene(this.scene);
+
         this.terrain = new Terrain({
-            material: Material.WORLD,
+            material: Material.TEST,
             ...args
         });
 
@@ -130,6 +130,12 @@ export default class World {
     }
 
     createVoxelScene(args) {
+        this.scene = new Scene({
+            camera: this.camera,
+        });
+
+        this.renderer.setScene(this.scene);
+
         const settings = Resources.get('world');
         this.worldgen = new VoxelWorldGenerator(args || settings.world);
 
@@ -141,6 +147,10 @@ export default class World {
 
         this.scene.add(this.worldgen.group);
 
+        this.addLights();
+    }
+
+    addLights() {
         const pointLight = new PointLight({
             material: Material.LIGHT,
             position: new Vec(0, -300, 0),
