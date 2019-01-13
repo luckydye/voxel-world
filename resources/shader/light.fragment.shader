@@ -1,22 +1,31 @@
 #version 300 es
 precision mediump float;
 
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    float intensity;
+    float size;
+};
+
 in vec4 vWorldPos;
 in vec3 vNormal;
 in vec3 vertexPos;
 in mat4 vLightProjViewMatrix;
 
+uniform sampler2D depthBuffer;
 uniform sampler2D shadowDepthMap;
 
-uniform vec3 pointLightPos;
 uniform float ambient;
-uniform vec3 lightColor;
-uniform float lightIntensity;
+uniform float shadowcolor;
+
+#define POINT_LIGHTS_COUNT 4
+
+uniform PointLight pointLights[POINT_LIGHTS_COUNT];
 
 out vec4 oFragColor;
 
-float ShadowCalculation(vec4 fragPosLightSpace)
-{
+float ShadowCalculation(vec4 fragPosLightSpace) {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float closestDepth = texture(shadowDepthMap, projCoords.xy).r;
@@ -28,33 +37,43 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     return shadow;
 }
 
+vec3 CalculatePointLight(PointLight light, vec3 vertPos, vec3 normal) {
+
+    vec3 lightDir = normalize(light.position - vertPos);
+    float diff = max(dot(normal, lightDir), 0.0);
+
+    float dist = length(light.position - vertPos) / (light.size * 50.0);
+
+    float attenuation = 1.0 / pow(dist, light.intensity);
+
+    vec3 diffuse = light.color * diff * light.color;
+    diffuse *= attenuation;
+
+    if(dist < 0.115) {
+        diffuse = light.color;
+    }
+    
+    return diffuse;
+}
+
 void main () {
+    float ambientIntesity = ambient;
+    vec3 shadowColor = vec3(shadowcolor);
 
-  vec4 position = vWorldPos;
+    // shadows
+    vec4 fragPosLightSpace = vLightProjViewMatrix * vWorldPos;
+    float shadow = ShadowCalculation(fragPosLightSpace);
+    oFragColor = vec4(vec3(shadow * shadowColor), 1.0);
 
-  vec4 cBase = vec4(1.0, 1.0, 1.0, 1.0);
-  vec3 cLight = vec3(1.0, 1.0, 1.0);
+    // ambient
+    vec3 ambientColor = vec3(1.0, 1.0, 1.0) * ambientIntesity;
+    oFragColor += vec4(ambientColor, 1.0);
 
-  vec3 cAmbient = ambient * cLight;
-
-  vec3 lightDir = normalize(pointLightPos - position.xyz);
-  float diffAngle = max(dot(vNormal, lightDir), 0.0);
-  float diffuse = 0.5;
-
-  float intensity = pow(1.0 / (distance(position.xyz, pointLightPos) * 0.001), 1.5) * 2.0;
-  vec3 cDiffuse = cLight * diffAngle * diffuse * intensity;
-
-  vec3 color = (cAmbient + cDiffuse) * cBase.rgb;
-  oFragColor = vec4(color, 1.0);
-
-  if(lightIntensity > 0.0) {
-    oFragColor = vec4(lightColor, 1.0);
-  }
-
-  // shadow map
-
-  vec4 fragPosLightSpace = vLightProjViewMatrix * position;
-  float shadow = ShadowCalculation(fragPosLightSpace);
-  
-  oFragColor *= vec4(vec3(shadow + 0.33), 1.0);
+    // pointlights
+    for(int i = 0; i < POINT_LIGHTS_COUNT; i++) {
+        if(pointLights[i].intensity != 0.0) {
+            vec3 lightColor = CalculatePointLight(pointLights[i], vWorldPos.xyz, vNormal);
+            oFragColor += vec4(lightColor, 1.0);
+        }
+    }
 }

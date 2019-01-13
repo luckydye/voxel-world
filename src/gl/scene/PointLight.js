@@ -1,40 +1,21 @@
-import { Geometry } from "../scene/Geometry.js";
-import { VertexBuffer } from "../graphics/VertexBuffer.js";
+import { Cube } from "../geo/Cube.js";
 
-export class PointLight extends Geometry {
+export class PointLight extends Cube {
 	
 	get isLight() { return true; }
 
-	createBuffer() {
-		const vertArray = [
-			this.position.x,
-			this.position.y,
-			this.position.z,
-			0, 0,
-		]
-		const vertxBuffer = VertexBuffer.create(vertArray);
-		vertxBuffer.type = "POINTS";
-		vertxBuffer.attributes = [
-			{ size: 3, attribute: "aPosition" },
-			{ size: 2, attribute: "aColor" },
-		]
-		return vertxBuffer;
-	}
-
 	onCreate({
-		intensity = 10,
-		color = [0, 1, 0]
+		intensity = 5.0,
+		color = [1, 1, 1],
+		size = 10,
 	}) {
 		this.intensity = intensity;
 		this.color = color;
+		this.size = size;
 
-		this.position.y = -500;
+		this.scale = this.size * 0.33;
 
-		setInterval(() => {
-			const time = performance.now();
-			this.position.x = Math.sin(time / 1000) * 400;
-			this.position.z = Math.cos(time / 1000) * 400;
-		}, 16);
+		// this.mat.diffuseColor = color;
 	}
 
 }

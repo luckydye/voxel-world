@@ -11,19 +11,16 @@ export class Geometry extends Transform {
 		const {
 			material = null,
 			uv = [0, 0],
-			rigidcube = false
 		} = args;
-		super(args);
+			super(args);
 
-		this.rigidbody = rigidcube;
-
-		this.mat = material;
-		this.uv = uv;
-
-		this.onCreate(args);
+			this.mat = material;
+            this.uv = uv;
+            
+			this.onCreate(args);
     }
 
-	onCreate(arsg) { }
+	onCreate(args) { }
 
 	createBuffer() { }
 }

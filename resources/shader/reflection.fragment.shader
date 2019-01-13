@@ -14,17 +14,19 @@ uniform vec3 diffuseColor;
 out vec4 oFragColor;
 
 void main() {
-  // set diffuse color
-  oFragColor = vec4(diffuseColor, 1.0 - transparency);
+    // set diffuse color
+    oFragColor = vec4(diffuseColor, 1.0 - transparency);
 
-  vec2 imageSize = vec2(textureSize(colorTexture, 0));
-  vec2 textureCoords = vec2(vTexCoords) / (imageSize.x / textureScale);
+    vec2 imageSize = vec2(textureSize(colorTexture, 0));
+    if(imageSize.x > 1.0) {
+        vec2 textureCoords = vec2(vTexCoords) / (imageSize.x / textureScale);
 
-  vec4 textureColor = texture(colorTexture, textureCoords);
-  oFragColor *= textureColor;
+        vec4 textureColor = texture(colorTexture, textureCoords);
+        oFragColor *= textureColor;
 
-  float reflectivenss = texture(reflectionMap, textureCoords).r;
-  if(reflectivenss > 0.0) {
-    discard;
-  }
+        float reflectivenss = texture(reflectionMap, textureCoords).r;
+        if(reflectivenss > 0.0) {
+            discard;
+        }
+    }
 }

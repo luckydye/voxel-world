@@ -8,7 +8,10 @@
     },
     "TEST": {
         "texture": "placeholder",
-        "diffuseColor": [1, 1, 1],
+        "receiveShadows": true,
+        "castShadows": true
+    },
+    "LIGHT": {
         "receiveShadows": true,
         "castShadows": true
     }

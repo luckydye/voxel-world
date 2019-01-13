@@ -207,28 +207,26 @@ export class Renderer extends GLContext {
 		this.gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, camera.projMatrix);
 		this.gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, camera.viewMatrix);
 
-		for(let obj of objects) {
-			if(filter && filter(obj) || !filter) {
-				if(obj.isLight) {
-					this.drawLight(obj);
-				} else {
-					this.drawMesh(obj);
-				}
+		let lightCount = 0;
+		for(let light of objects) {
+			if(light.isLight) {
+				this.gl.uniform3fv(shader.uniforms["pointLights["+lightCount+"].position"], [
+					light.position.x,
+					-light.position.y,
+					light.position.z,
+				]);
+				this.gl.uniform3fv(shader.uniforms["pointLights["+lightCount+"].color"], light.color);
+				this.gl.uniform1f(shader.uniforms["pointLights["+lightCount+"].intensity"], light.intensity);
+				this.gl.uniform1f(shader.uniforms["pointLights["+lightCount+"].size"], light.size);
+				lightCount++;
 			}
 		}
-	}
 
-	drawLight(geo) {
-		const shader = this.currentShader;
-
-		this.setTransformUniforms(shader.uniforms, geo);
-
-		this.gl.uniform3fv(shader.uniforms.lightColor, geo.color);
-		this.gl.uniform1f(shader.uniforms.lightIntensity, geo.intensity);
-
-		const buffer = geo.buffer;
-		this.setBuffersAndAttributes(shader.attributes, buffer);
-		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
+		for(let obj of objects) {
+			if(filter && filter(obj) || !filter) {
+				this.drawMesh(obj);
+			}
+		}
 	}
 
 	drawMesh(geo) {
@@ -236,14 +234,10 @@ export class Renderer extends GLContext {
 
 		this.gl.uniform1f(shader.uniforms.lightIntensity, 0);
 
-		this.setTransformUniforms(shader.uniforms, geo);
-
 		if(geo.mat) {
 			this.applyMaterial(shader, geo.mat);
 		
-			const buffer = geo.buffer;
-			this.setBuffersAndAttributes(shader.attributes, buffer);
-			this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
+			this.drawGeo(geo);
 		}
 	}
 

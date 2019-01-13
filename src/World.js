@@ -10,6 +10,7 @@ import { Terrain } from './gl/geo/Terrain.js';
 import { MouseControler } from './gl/entity/MouseControler.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
+import { PointLight } from './gl/scene/PointLight.js';
 import { Cube } from './gl/geo/Cube.js';
 
 Resources.add({
@@ -82,6 +83,8 @@ export default class World {
 
         this.renderer.setScene(this.scene);
 
+        this.renderer.fogEnabled = true;
+
         this.createVoxelScene();
 
         console.log(this.scene);
@@ -137,5 +140,39 @@ export default class World {
         this.worldgen.group.mat = Material.WORLD;
 
         this.scene.add(this.worldgen.group);
+
+        const pointLight = new PointLight({
+            material: Material.LIGHT,
+            position: new Vec(0, -300, 0),
+            intensity: 3.0,
+            color: [1.0, 0.1, 0.1],
+            size: 2,
+        });
+        this.scene.add(pointLight);
+
+        const pointLight2 = new PointLight({
+            material: Material.LIGHT,
+            position: new Vec(0, -300, 0),
+            intensity: 2.5,
+            color: [0.4, 1.0, 0.1],
+            size: 3,
+        });
+        this.scene.add(pointLight2);
+
+        setInterval(() => {
+            const time = performance.now();
+            pointLight.rotation.x += 0.54;
+            pointLight.rotation.y += 0.54;
+
+            pointLight.position.x = Math.sin(time / 600) * 300;
+            pointLight.position.z = Math.cos(time / 600) * 300;
+
+            pointLight2.rotation.x += 0.54;
+            pointLight2.rotation.y += 0.54;
+
+            pointLight2.position.x = Math.sin(time / 1000) * 600;
+            pointLight2.position.z = Math.cos(time / 1000) * 600;
+            pointLight2.position.y = (Math.sin(time / 2000) * 100) - 400;
+        }, 14);
     }
 }

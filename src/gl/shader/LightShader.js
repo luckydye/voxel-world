@@ -16,16 +16,17 @@ export default class LightShader extends GLShader {
     }
 
     get uniform() {
+		// return {
+        //     ambient: 0.75,
+        //     shadowcolor: 0.33,
+        // };
 		return {
-            pointLightPos: this.lightPos,
-            ambient: 0.45,
+            ambient: 0.05,
+            shadowcolor: 0.03,
         };
 	}
     
     constructor() {
         super({ name: "light" });
-
-        this.lightPos = [0, 1000, 0];
     }
-
 }
