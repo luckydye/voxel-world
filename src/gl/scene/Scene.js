@@ -41,6 +41,8 @@ export class Scene {
 			this.lightSources.update();
 		}
 		lastTick = time;
+		
+		this.onupdate && this.onupdate();
 	}
 
 }

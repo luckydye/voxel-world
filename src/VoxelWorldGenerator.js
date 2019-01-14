@@ -1,20 +1,8 @@
 import noise from '../lib/perlin.js';
-import { Statistics } from './gl/Statistics.js';
 import { Material } from './gl/graphics/Material.js';
 import { Voxel } from './gl/geo/Voxel.js';
 import { Vec } from './gl/Math.js';
-import { Resources } from './gl/Resources.js';
 import { Group } from './gl/geo/Group.js';
-
-let world = 'default';
-
-if(document.location.search) {
-    world = document.location.search.substr(1);
-}
-
-Resources.add({
-    'world': './resources/worlds/' + world + '.json',
-}, false);
 
 class Tile {
 	constructor(x, y, size, height) {
@@ -54,10 +42,9 @@ export class VoxelWorldGenerator {
 	setSeed(n) {
 		this.seed = n;
 		noise.seed(n);
-		Statistics.data.seed = n;
 	}
 
-	constructor({ 
+	setOptions({ 
 		tileSize = 2, 
 		tileHeight = 40,
 		seed = 0,
@@ -73,52 +60,48 @@ export class VoxelWorldGenerator {
 		this.threshold = threshold;
 		this.terrainheight = terrainheight;
 		this.treeDensity = 0.65;
-		this.tiles = [];
-
-		this.scene = null;
 
 		this.setSeed(seed);
 	}
 
-    regen(seed) {
+	constructor(args) {
+		this.setOptions(args);
+	}
+
+    regen(seed, callback) {
         seed = seed || Math.random();
 		this.setSeed(seed);
 		
 		return new Promise((resolve, reject) => {
 			const size = this.worldSize;
-			this.buildTiles([
-				this.generateTile(0, 0),
-			]);
+			
+			callback(this.buildTile(this.generateTile(0, 0)));
+
 			for(let x = 0; x < size*2; x++) {
 				for(let y = 0; y < size*2; y++) {
 					if(x != 0 && y != 0) {
-						setTimeout(() => {
-							this.buildTiles([
-								this.generateTile(x - size, y - size),
-							])
-						}, 250);
+						const tile = this.buildTile(this.generateTile(x - size, y - size));
+						callback(tile);
 					}
 				}
 			}
+			
+			resolve();
 		});
     }
 
-    buildTiles(tiles) {
-        Statistics.data.voxels = 0;
-
-        for(let tile of tiles) {
-			const tileData = tile.tileData;
-            for(let x = 0; x < tileData.length; x++) {
-                for(let y = 0; y < tileData[x].length; y++) {
-                    for(let z = 0; z < tileData[x][y].length; z++) {
-                        if(tileData[x][y][z]) {
-                            this.voxel(tile, x, y, z, tile.pos.x, tile.pos.y);
-                        }
-                    }
-                }
-            }
-			this.scene.add(tile.group);
+    buildTile(tile) {
+		const tileData = tile.tileData;
+		for(let x = 0; x < tileData.length; x++) {
+			for(let y = 0; y < tileData[x].length; y++) {
+				for(let z = 0; z < tileData[x][y].length; z++) {
+					if(tileData[x][y][z]) {
+						this.voxel(tile, x, y, z, tile.pos.x, tile.pos.y);
+					}
+				}
+			}
 		}
+		return tile;
     }
 
 	generateTile(x, y) {
@@ -318,9 +301,10 @@ export class VoxelWorldGenerator {
         }
 
         if(!cube.invisible) {
-            Statistics.data.voxels++;
-            tile.group.add(cube);
-        }
+			if(cube.buffer) {
+				tile.group.add(cube);
+			}
+		}
     }
 
 }

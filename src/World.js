@@ -3,7 +3,6 @@ import { Renderer } from "./gl/graphics/Renderer.js";
 import { Scene } from "./gl/scene/Scene.js";
 import { Vec } from "./gl/Math.js";
 import { Camera } from "./gl/scene/Camera.js";
-import { VoxelWorldGenerator } from "./VoxelWorldGenerator.js";
 import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
@@ -11,9 +10,11 @@ import { MouseControler } from './gl/entity/MouseControler.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
 import { PointLight } from './gl/scene/PointLight.js';
-import { Cube } from './gl/geo/Cube.js';
+import { Texture } from './gl/graphics/Texture.js';
+import { Group } from './gl/geo/Group.js';
 
 Resources.add({
+    'world': './resources/worlds/default.json',
     'materials': './resources/materials/materials.json',
 	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
 	'defaultReflectionMap': './resources/textures/blocks_solid_reflectionmap.png',
@@ -25,6 +26,8 @@ let nextFrame = 0,
     lastFrame = 0, 
     accumulator = 0, 
     tickrate = 128;
+
+let worker;
 
 export default class World {
 
@@ -58,11 +61,32 @@ export default class World {
         nextFrame = requestAnimationFrame(this.renderLoop.bind(this));
     }
 
+    createMatFromJson(name, json) {
+        const mat = Material.create(name);
+            
+        const texImage = Resources.get(json.texture);
+        const texture = new Texture(texImage);
+        mat.texture = texture;
+
+        mat.diffuseColor = json.diffuseColor || [1, 1, 1];
+
+        const reflectionImage = Resources.get(json.reflectionMap);
+        const reflectionTexture = new Texture(reflectionImage);
+        mat.reflectionMap = reflectionTexture;
+
+        mat.receiveShadows = json.receiveShadows;
+        mat.castShadows = json.castShadows;
+
+        return mat;
+    }
+
     init(canvas) {
         const mats = Resources.get('materials');
         for(let name in mats) {
-            Material.createFromJson(name, mats[name]);
+            this.createMatFromJson(name, mats[name]);
         }
+         
+        worker = new Worker('./src/Worldgen.js', { type: "module" });
 
         this.renderer = new Renderer(canvas);
 
@@ -137,13 +161,18 @@ export default class World {
         this.renderer.setScene(this.scene);
 
         const settings = Resources.get('world');
-        this.worldgen = new VoxelWorldGenerator(args || settings.world);
 
-        this.worldgen.scene = this.scene;
+        worker.postMessage({ type: 'regen', settings: settings.world });
 
-        //voxel world generation
         this.scene.clear();
-        this.worldgen.regen(settings.world.seed);
+
+        worker.onmessage = e => {
+            if(e.data.type == 'tile') {
+                const tile = Object.assign(new Group, e.data.tile.group);
+                tile.mat = Material.WORLD;
+                this.scene.add(tile);
+            }
+        }
 
         this.addLights();
     }
@@ -167,7 +196,7 @@ export default class World {
         });
         this.scene.add(pointLight2);
 
-        setInterval(() => {
+        this.scene.onupdate = () => {
             const time = performance.now();
             pointLight.rotation.x += 0.54;
             pointLight.rotation.y += 0.54;
@@ -181,6 +210,6 @@ export default class World {
             pointLight2.position.x = Math.sin(time / 1000) * 600;
             pointLight2.position.z = Math.cos(time / 1000) * 600;
             pointLight2.position.y = (Math.sin(time / 2000) * 100) - 400;
-        }, 14);
+        }
     }
 }
