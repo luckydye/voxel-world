@@ -160,7 +160,7 @@ export default class World {
 
         this.renderer.setScene(this.scene);
 
-        const settings = Resources.get('world');
+        const settings = args || Resources.get('world');
 
         worker.postMessage({ type: 'regen', settings: settings.world });
 
