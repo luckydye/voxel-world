@@ -29,6 +29,10 @@ let nextFrame = 0,
 
 let worker;
 
+function createWorker() {
+    return new Worker('./dist/Worldgen.js');
+}
+
 export default class World {
 
     onloaded() { }
@@ -86,7 +90,7 @@ export default class World {
             this.createMatFromJson(name, mats[name]);
         }
          
-        worker = new Worker('./src/Worldgen.js', { type: "module" });
+        worker = createWorker();
 
         this.renderer = new Renderer(canvas);
 

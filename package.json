@@ -1,0 +1,25 @@
+{
+  "name": "voxel-world",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build:worker": "parcel ./src/Worldgen.js --no-cache --no-source-maps"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/luckydye/voxel-world.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/luckydye/voxel-world/issues"
+  },
+  "homepage": "https://gitlab.com/luckydye/voxel-world#readme",
+  "dependencies": {
+    "parcel-bundler": "^1.11.0"
+  }
+}
