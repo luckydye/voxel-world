@@ -200,6 +200,15 @@ export default class World {
         });
         this.scene.add(pointLight2);
 
+        const pointLight3 = new PointLight({
+            material: null,
+            position: new Vec(0, -800, 0),
+            intensity: 1.0,
+            color: [1.0, 1.0, 1.0],
+            size: 10,
+        });
+        this.scene.add(pointLight3);
+
         this.scene.onupdate = () => {
             const time = performance.now();
             pointLight.rotation.x += 0.54;

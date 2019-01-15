@@ -16,7 +16,7 @@ in mat4 vLightProjViewMatrix;
 uniform sampler2D depthBuffer;
 uniform sampler2D shadowDepthMap;
 
-uniform float ambient;
+uniform vec3 uAmbientColor;
 uniform float shadowcolor;
 
 #define POINT_LIGHTS_COUNT 4
@@ -57,7 +57,7 @@ vec3 CalculatePointLight(PointLight light, vec3 vertPos, vec3 normal) {
 }
 
 void main () {
-    float ambientIntesity = ambient;
+    float ambientIntesity = 0.75;
     vec3 shadowColor = vec3(shadowcolor);
 
     // shadows
@@ -66,7 +66,7 @@ void main () {
     oFragColor = vec4(vec3(shadow * shadowColor), 1.0);
 
     // ambient
-    vec3 ambientColor = vec3(1.0, 1.0, 1.0) * ambientIntesity;
+    vec3 ambientColor = uAmbientColor * ambientIntesity;
     oFragColor += vec4(ambientColor, 1.0);
 
     // pointlights
