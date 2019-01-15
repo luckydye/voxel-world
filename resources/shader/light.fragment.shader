@@ -57,16 +57,13 @@ vec3 CalculatePointLight(PointLight light, vec3 vertPos, vec3 normal) {
 }
 
 void main () {
-    float ambientIntesity = 0.75;
-    vec3 shadowColor = vec3(shadowcolor);
-
     // shadows
     vec4 fragPosLightSpace = vLightProjViewMatrix * vWorldPos;
     float shadow = ShadowCalculation(fragPosLightSpace);
-    oFragColor = vec4(vec3(shadow * shadowColor), 1.0);
-
+    oFragColor = vec4(vec3(shadow * shadowcolor), 1.0);
+    
     // ambient
-    vec3 ambientColor = uAmbientColor * ambientIntesity;
+    vec3 ambientColor = uAmbientColor;
     oFragColor += vec4(ambientColor, 1.0);
 
     // pointlights

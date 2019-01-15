@@ -61,6 +61,8 @@ void main(void) {
 		oFragColor += vec4(fogValue, 1.0) * 2.0;
 	}
 
+	// oFragColor = light;
+
 	// 	bloom
 	// vec2 imageSize = vec2(textureSize(bloomBuffer, 0));
 	// vec3 bloomX = blur(bloomBuffer, texCoords, imageSize.x, vec2(1.0, 0.0)).rgb;
