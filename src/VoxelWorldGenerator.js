@@ -1,5 +1,4 @@
 import noise from '../lib/perlin.js';
-import { Material } from './gl/graphics/Material.js';
 import { Voxel } from './gl/geo/Voxel.js';
 import { Vec } from './gl/Math.js';
 import { Group } from './gl/geo/Group.js';
@@ -11,7 +10,6 @@ class Tile {
 		this.pos = { x: x * size, y: y * size };
 
 		this.group = new Group();
-		this.group.mat = Material.WORLD;
 
 		this.group.position.x = this.pos.x * 20;
 		this.group.position.z = this.pos.y * 20;
@@ -45,7 +43,7 @@ export class VoxelWorldGenerator {
 	}
 
 	setOptions({ 
-		tileSize = 2, 
+		tileSize = 4, 
 		tileHeight = 40,
 		seed = 0,
 		resolution = 15,
@@ -75,8 +73,6 @@ export class VoxelWorldGenerator {
 		return new Promise((resolve, reject) => {
 			const size = this.worldSize;
 			
-			callback(this.buildTile(this.generateTile(0, 0)));
-
 			for(let x = 0; x < size*2; x++) {
 				for(let y = 0; y < size*2; y++) {
 					if(x != 0 && y != 0) {
@@ -272,7 +268,6 @@ export class VoxelWorldGenerator {
         const tileSize = this.tileSize;
 		const tileHeight = this.tileHeight;
         const cube = new Voxel({
-            material: Material.WORLD,
             uv: tileData[x][y][z],
             position: new Vec(
                 ((x * 20) + 10) - ((tileSize/2) * 20),

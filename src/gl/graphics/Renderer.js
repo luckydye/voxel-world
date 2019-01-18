@@ -6,6 +6,8 @@ import ColorShader from '../shader/ColorShader.js';
 import LightShader from '../shader/LightShader.js';
 import { Resources } from '../Resources.js';
 import ReflectionShader from '../shader/ReflectionShader.js';
+import { Grid } from '../geo/Grid.js';
+import GridShader from '../shader/GridShader.js';
 
 Resources.add({
 	'defaulttexture': './resources/textures/placeholder.png',
@@ -123,6 +125,7 @@ export class Renderer extends GLContext {
 					this.drawScene(this.scene, this.scene.camera, obj => {
 						return obj.mat && obj.mat.receiveShadows;
 					});
+					this.drawGrid();
 					break;
 				
 				case "reflection":
@@ -134,6 +137,7 @@ export class Renderer extends GLContext {
 				case "diffuse":
 					this.useTexture(this.getBufferTexture('reflection'), "reflectionBuffer", 2);
 					this.drawScene(this.scene);
+					this.drawGrid();
 					break;
 
 				case "bloom":
@@ -145,6 +149,27 @@ export class Renderer extends GLContext {
 		}
 
 		this.clearFramebuffer();
+	}
+
+	drawGrid() {
+
+		if(!this.gridShader) {
+			this.gridShader = new GridShader();
+			this.prepareShader(this.gridShader);
+		}
+		if(!this.grid) {
+			this.grid = new Grid(160, 16);
+		}
+
+		const camera = this.scene.camera;
+		if(camera) {
+			this.useShader(this.gridShader);
+	
+			this.gl.uniformMatrix4fv(this.gridShader.uniforms.uProjMatrix, false, camera.projMatrix);
+			this.gl.uniformMatrix4fv(this.gridShader.uniforms.uViewMatrix, false, camera.viewMatrix);
+	
+			this.drawGeo(this.grid);
+		}
 	}
 
 	compositePasses(passes) {

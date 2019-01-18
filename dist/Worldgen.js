@@ -469,103 +469,7 @@ var _default = function Noise() {
 }();
 
 exports.default = _default;
-},{}],"gl/graphics/Texture.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Texture = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Texture =
-/*#__PURE__*/
-function () {
-  _createClass(Texture, [{
-    key: "image",
-    get: function get() {
-      return this.img;
-    },
-    set: function set(image) {
-      this.img = image;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this.image.width;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.image.height;
-    }
-  }]);
-
-  function Texture(image) {
-    _classCallCheck(this, Texture);
-
-    this.gltexture = null; // gets filled in by the renderer
-
-    this.image = image || null;
-    this.scale = 16;
-    this.animated = false;
-    this.animated = image && image.localName === "video" || false;
-  }
-
-  return Texture;
-}();
-
-exports.Texture = Texture;
-},{}],"gl/graphics/Material.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Material = void 0;
-
-var _Texture = require("./Texture.js");
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Material =
-/*#__PURE__*/
-function () {
-  _createClass(Material, null, [{
-    key: "create",
-    value: function create(name) {
-      Material[name] = new Material();
-      Material[name].name = name;
-      return Material[name];
-    }
-  }]);
-
-  function Material() {
-    _classCallCheck(this, Material);
-
-    this.texture = new _Texture.Texture();
-    this.reflectionMap = new _Texture.Texture();
-    this.diffuseColor = [1, 1, 1];
-    this.transparency = 0;
-    this.reflection = 0;
-    this.receiveShadows = true;
-    this.castShadows = true;
-  }
-
-  return Material;
-}();
-
-exports.Material = Material;
-},{"./Texture.js":"gl/graphics/Texture.js"}],"gl/Math.js":[function(require,module,exports) {
+},{}],"gl/Math.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1065,8 +969,6 @@ exports.VoxelWorldGenerator = void 0;
 
 var _perlin = _interopRequireDefault(require("../lib/perlin.js"));
 
-var _Material = require("./gl/graphics/Material.js");
-
 var _Voxel = require("./gl/geo/Voxel.js");
 
 var _Math = require("./gl/Math.js");
@@ -1091,7 +993,6 @@ var Tile = function Tile(x, y, size, height) {
     y: y * size
   };
   this.group = new _Group.Group();
-  this.group.mat = _Material.Material.WORLD;
   this.group.position.x = this.pos.x * 20;
   this.group.position.z = this.pos.y * 20;
 
@@ -1130,7 +1031,7 @@ function () {
     value: function setOptions() {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           _ref$tileSize = _ref.tileSize,
-          tileSize = _ref$tileSize === void 0 ? 2 : _ref$tileSize,
+          tileSize = _ref$tileSize === void 0 ? 4 : _ref$tileSize,
           _ref$tileHeight = _ref.tileHeight,
           tileHeight = _ref$tileHeight === void 0 ? 40 : _ref$tileHeight,
           _ref$seed = _ref.seed,
@@ -1168,7 +1069,6 @@ function () {
       this.setSeed(seed);
       return new Promise(function (resolve, reject) {
         var size = _this.worldSize;
-        callback(_this.buildTile(_this.generateTile(0, 0)));
 
         for (var x = 0; x < size * 2; x++) {
           for (var y = 0; y < size * 2; y++) {
@@ -1345,7 +1245,6 @@ function () {
       var tileSize = this.tileSize;
       var tileHeight = this.tileHeight;
       var cube = new _Voxel.Voxel({
-        material: _Material.Material.WORLD,
         uv: tileData[x][y][z],
         position: new _Math.Vec(x * 20 + 10 - tileSize / 2 * 20, y * 20 + 10 - tileHeight * 20 - 0.5, z * 20 + 10 - tileSize / 2 * 20)
       });
@@ -1386,7 +1285,7 @@ function () {
 }();
 
 exports.VoxelWorldGenerator = VoxelWorldGenerator;
-},{"../lib/perlin.js":"../lib/perlin.js","./gl/graphics/Material.js":"gl/graphics/Material.js","./gl/geo/Voxel.js":"gl/geo/Voxel.js","./gl/Math.js":"gl/Math.js","./gl/geo/Group.js":"gl/geo/Group.js"}],"Worldgen.js":[function(require,module,exports) {
+},{"../lib/perlin.js":"../lib/perlin.js","./gl/geo/Voxel.js":"gl/geo/Voxel.js","./gl/Math.js":"gl/Math.js","./gl/geo/Group.js":"gl/geo/Group.js"}],"Worldgen.js":[function(require,module,exports) {
 "use strict";
 
 var _VoxelWorldGenerator = require("./VoxelWorldGenerator.js");
@@ -1397,11 +1296,14 @@ onmessage = function onmessage(e) {
   switch (e.data.type) {
     case 'regen':
       worldGen.setOptions(e.data.settings);
+      var startTime = performance.now();
       worldGen.regen(0, function (tile) {
         self.postMessage({
           type: 'tile',
           tile: tile
         });
+      }).then(function () {
+        console.log("World gen in", Math.floor(performance.now() - startTime), "ms");
       });
       break;
   }
@@ -1433,7 +1335,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55513" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50254" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

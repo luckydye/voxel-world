@@ -108,8 +108,6 @@ export default class World {
         this.renderer.fogEnabled = true;
 
         this.createVoxelScene();
-
-        console.log(this.scene);
     }
 
     createModelFromFile(resource) {
