@@ -62,7 +62,7 @@ export class VoxelWorldGenerator {
 
 	constructor(args) {
 		this.setOptions(args);
-		this.tileSize = 16;
+		this.tileSize = 32;
 	}
 
 	generate(startpoint, TILECOUNT, put) {
@@ -101,14 +101,15 @@ export class VoxelWorldGenerator {
 	
 			function getNeighbors() {
 				const neighbors = [
-					[x+1, y-1], 
 					[x+1, y], 
-					[x+1, y+1], 
-					[x-1, y-1], 
 					[x-1, y], 
-					[x-1, y+1],
 					[x, y-1], 
 					[x, y+1],
+
+					[x+1, y-1], 
+					[x+1, y+1], 
+					[x-1, y-1], 
+					[x-1, y+1],
 				]
 				for(let n of neighbors) {
 					if(valid(n)) openSet.add(n);
@@ -232,9 +233,9 @@ export class VoxelWorldGenerator {
 
 					const treeHeight = Math.floor(Math.random() * 10 + 10);
 
-					if (x+5 < tileSize && x-5 > 0 &&
+					if (x+4 < tileSize && x-4 > 0 &&
 						y > treeHeight &&
-						z+5 < tileSize && z-5 > 0) {
+						z+4 < tileSize && z-4 > 0) {
 
 						if (tileData[x][y+1] && 
 							tileData[x][y-1] && 

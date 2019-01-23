@@ -7,7 +7,7 @@
 // orig method which is the require for previous bundles
 
 // eslint-disable-next-line no-global-assign
-parcelRequire = (function (modules, cache, entry) {
+parcelRequire = (function (modules, cache, entry, globalName) {
   // Save the require from previous bundle to this closure if any
   var previousRequire = typeof parcelRequire === 'function' && parcelRequire;
   var nodeRequire = typeof require === 'function' && require;
@@ -42,10 +42,11 @@ parcelRequire = (function (modules, cache, entry) {
       }
 
       localRequire.resolve = resolve;
+      localRequire.cache = {};
 
       var module = cache[name] = new newRequire.Module(name);
 
-      modules[name][0].call(module.exports, localRequire, module, module.exports);
+      modules[name][0].call(module.exports, localRequire, module, module.exports, this);
     }
 
     return cache[name].exports;
@@ -70,19 +71,46 @@ parcelRequire = (function (modules, cache, entry) {
   newRequire.modules = modules;
   newRequire.cache = cache;
   newRequire.parent = previousRequire;
+  newRequire.register = function (id, exports) {
+    modules[id] = [function (require, module) {
+      module.exports = exports;
+    }, {}];
+  };
 
   for (var i = 0; i < entry.length; i++) {
     newRequire(entry[i]);
   }
 
+  if (entry.length) {
+    // Expose entry point to Node, AMD or browser globals
+    // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js
+    var mainExports = newRequire(entry[entry.length - 1]);
+
+    // CommonJS
+    if (typeof exports === "object" && typeof module !== "undefined") {
+      module.exports = mainExports;
+
+    // RequireJS
+    } else if (typeof define === "function" && define.amd) {
+     define(function () {
+       return mainExports;
+     });
+
+    // <script>
+    } else if (globalName) {
+      this[globalName] = mainExports;
+    }
+  }
+
   // Override the current require with this new one
   return newRequire;
-})({5:[function(require,module,exports) {
+})({"../lib/perlin.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
+exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -101,1140 +129,1268 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * attribution is appreciated.
  *
  */
+var _default = function Noise() {
+  var module = function Noise() {
+    _classCallCheck(this, Noise);
+  };
 
-exports.default = function Noise() {
-	var module = function Noise() {
-		_classCallCheck(this, Noise);
-	};
+  function Grad(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
 
-	function Grad(x, y, z) {
-		this.x = x;this.y = y;this.z = z;
-	}
+  Grad.prototype.dot2 = function (x, y) {
+    return this.x * x + this.y * y;
+  };
 
-	Grad.prototype.dot2 = function (x, y) {
-		return this.x * x + this.y * y;
-	};
+  Grad.prototype.dot3 = function (x, y, z) {
+    return this.x * x + this.y * y + this.z * z;
+  };
 
-	Grad.prototype.dot3 = function (x, y, z) {
-		return this.x * x + this.y * y + this.z * z;
-	};
+  var grad3 = [new Grad(1, 1, 0), new Grad(-1, 1, 0), new Grad(1, -1, 0), new Grad(-1, -1, 0), new Grad(1, 0, 1), new Grad(-1, 0, 1), new Grad(1, 0, -1), new Grad(-1, 0, -1), new Grad(0, 1, 1), new Grad(0, -1, 1), new Grad(0, 1, -1), new Grad(0, -1, -1)];
+  var p = [151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180]; // To remove the need for index wrapping, double the permutation table length
 
-	var grad3 = [new Grad(1, 1, 0), new Grad(-1, 1, 0), new Grad(1, -1, 0), new Grad(-1, -1, 0), new Grad(1, 0, 1), new Grad(-1, 0, 1), new Grad(1, 0, -1), new Grad(-1, 0, -1), new Grad(0, 1, 1), new Grad(0, -1, 1), new Grad(0, 1, -1), new Grad(0, -1, -1)];
+  var perm = new Array(512);
+  var gradP = new Array(512); // This isn't a very good seeding function, but it works ok. It supports 2^16
+  // different seed values. Write something better if you need more seeds.
 
-	var p = [151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180];
-	// To remove the need for index wrapping, double the permutation table length
-	var perm = new Array(512);
-	var gradP = new Array(512);
+  module.seed = function (seed) {
+    if (seed > 0 && seed < 1) {
+      // Scale the seed out
+      seed *= 65536;
+    }
 
-	// This isn't a very good seeding function, but it works ok. It supports 2^16
-	// different seed values. Write something better if you need more seeds.
-	module.seed = function (seed) {
-		if (seed > 0 && seed < 1) {
-			// Scale the seed out
-			seed *= 65536;
-		}
+    seed = Math.floor(seed);
 
-		seed = Math.floor(seed);
-		if (seed < 256) {
-			seed |= seed << 8;
-		}
+    if (seed < 256) {
+      seed |= seed << 8;
+    }
 
-		for (var i = 0; i < 256; i++) {
-			var v;
-			if (i & 1) {
-				v = p[i] ^ seed & 255;
-			} else {
-				v = p[i] ^ seed >> 8 & 255;
-			}
+    for (var i = 0; i < 256; i++) {
+      var v;
 
-			perm[i] = perm[i + 256] = v;
-			gradP[i] = gradP[i + 256] = grad3[v % 12];
-		}
-	};
+      if (i & 1) {
+        v = p[i] ^ seed & 255;
+      } else {
+        v = p[i] ^ seed >> 8 & 255;
+      }
 
-	module.seed(0);
+      perm[i] = perm[i + 256] = v;
+      gradP[i] = gradP[i + 256] = grad3[v % 12];
+    }
+  };
 
-	/*
- for(var i=0; i<256; i++) {
-   perm[i] = perm[i + 256] = p[i];
-   gradP[i] = gradP[i + 256] = grad3[perm[i] % 12];
- }*/
+  module.seed(0);
+  /*
+  for(var i=0; i<256; i++) {
+    perm[i] = perm[i + 256] = p[i];
+    gradP[i] = gradP[i + 256] = grad3[perm[i] % 12];
+  }*/
+  // Skewing and unskewing factors for 2, 3, and 4 dimensions
 
-	// Skewing and unskewing factors for 2, 3, and 4 dimensions
-	var F2 = 0.5 * (Math.sqrt(3) - 1);
-	var G2 = (3 - Math.sqrt(3)) / 6;
+  var F2 = 0.5 * (Math.sqrt(3) - 1);
+  var G2 = (3 - Math.sqrt(3)) / 6;
+  var F3 = 1 / 3;
+  var G3 = 1 / 6; // 2D simplex noise
 
-	var F3 = 1 / 3;
-	var G3 = 1 / 6;
+  module.simplex2 = function (xin, yin) {
+    var n0, n1, n2; // Noise contributions from the three corners
+    // Skew the input space to determine which simplex cell we're in
 
-	// 2D simplex noise
-	module.simplex2 = function (xin, yin) {
-		var n0, n1, n2; // Noise contributions from the three corners
-		// Skew the input space to determine which simplex cell we're in
-		var s = (xin + yin) * F2; // Hairy factor for 2D
-		var i = Math.floor(xin + s);
-		var j = Math.floor(yin + s);
-		var t = (i + j) * G2;
-		var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-		var y0 = yin - j + t;
-		// For the 2D case, the simplex shape is an equilateral triangle.
-		// Determine which simplex we are in.
-		var i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
-		if (x0 > y0) {
-			// lower triangle, XY order: (0,0)->(1,0)->(1,1)
-			i1 = 1;j1 = 0;
-		} else {
-			// upper triangle, YX order: (0,0)->(0,1)->(1,1)
-			i1 = 0;j1 = 1;
-		}
-		// A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
-		// a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
-		// c = (3-sqrt(3))/6
-		var x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
-		var y1 = y0 - j1 + G2;
-		var x2 = x0 - 1 + 2 * G2; // Offsets for last corner in (x,y) unskewed coords
-		var y2 = y0 - 1 + 2 * G2;
-		// Work out the hashed gradient indices of the three simplex corners
-		i &= 255;
-		j &= 255;
-		var gi0 = gradP[i + perm[j]];
-		var gi1 = gradP[i + i1 + perm[j + j1]];
-		var gi2 = gradP[i + 1 + perm[j + 1]];
-		// Calculate the contribution from the three corners
-		var t0 = 0.5 - x0 * x0 - y0 * y0;
-		if (t0 < 0) {
-			n0 = 0;
-		} else {
-			t0 *= t0;
-			n0 = t0 * t0 * gi0.dot2(x0, y0); // (x,y) of grad3 used for 2D gradient
-		}
-		var t1 = 0.5 - x1 * x1 - y1 * y1;
-		if (t1 < 0) {
-			n1 = 0;
-		} else {
-			t1 *= t1;
-			n1 = t1 * t1 * gi1.dot2(x1, y1);
-		}
-		var t2 = 0.5 - x2 * x2 - y2 * y2;
-		if (t2 < 0) {
-			n2 = 0;
-		} else {
-			t2 *= t2;
-			n2 = t2 * t2 * gi2.dot2(x2, y2);
-		}
-		// Add contributions from each corner to get the final noise value.
-		// The result is scaled to return values in the interval [-1,1].
-		return 70 * (n0 + n1 + n2);
-	};
+    var s = (xin + yin) * F2; // Hairy factor for 2D
 
-	// 3D simplex noise
-	module.simplex3 = function (xin, yin, zin) {
-		var n0, n1, n2, n3; // Noise contributions from the four corners
+    var i = Math.floor(xin + s);
+    var j = Math.floor(yin + s);
+    var t = (i + j) * G2;
+    var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
 
-		// Skew the input space to determine which simplex cell we're in
-		var s = (xin + yin + zin) * F3; // Hairy factor for 2D
-		var i = Math.floor(xin + s);
-		var j = Math.floor(yin + s);
-		var k = Math.floor(zin + s);
+    var y0 = yin - j + t; // For the 2D case, the simplex shape is an equilateral triangle.
+    // Determine which simplex we are in.
 
-		var t = (i + j + k) * G3;
-		var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-		var y0 = yin - j + t;
-		var z0 = zin - k + t;
+    var i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
 
-		// For the 3D case, the simplex shape is a slightly irregular tetrahedron.
-		// Determine which simplex we are in.
-		var i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
-		var i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
-		if (x0 >= y0) {
-			if (y0 >= z0) {
-				i1 = 1;j1 = 0;k1 = 0;i2 = 1;j2 = 1;k2 = 0;
-			} else if (x0 >= z0) {
-				i1 = 1;j1 = 0;k1 = 0;i2 = 1;j2 = 0;k2 = 1;
-			} else {
-				i1 = 0;j1 = 0;k1 = 1;i2 = 1;j2 = 0;k2 = 1;
-			}
-		} else {
-			if (y0 < z0) {
-				i1 = 0;j1 = 0;k1 = 1;i2 = 0;j2 = 1;k2 = 1;
-			} else if (x0 < z0) {
-				i1 = 0;j1 = 1;k1 = 0;i2 = 0;j2 = 1;k2 = 1;
-			} else {
-				i1 = 0;j1 = 1;k1 = 0;i2 = 1;j2 = 1;k2 = 0;
-			}
-		}
-		// A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
-		// a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
-		// a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
-		// c = 1/6.
-		var x1 = x0 - i1 + G3; // Offsets for second corner
-		var y1 = y0 - j1 + G3;
-		var z1 = z0 - k1 + G3;
+    if (x0 > y0) {
+      // lower triangle, XY order: (0,0)->(1,0)->(1,1)
+      i1 = 1;
+      j1 = 0;
+    } else {
+      // upper triangle, YX order: (0,0)->(0,1)->(1,1)
+      i1 = 0;
+      j1 = 1;
+    } // A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
+    // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
+    // c = (3-sqrt(3))/6
 
-		var x2 = x0 - i2 + 2 * G3; // Offsets for third corner
-		var y2 = y0 - j2 + 2 * G3;
-		var z2 = z0 - k2 + 2 * G3;
 
-		var x3 = x0 - 1 + 3 * G3; // Offsets for fourth corner
-		var y3 = y0 - 1 + 3 * G3;
-		var z3 = z0 - 1 + 3 * G3;
+    var x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
 
-		// Work out the hashed gradient indices of the four simplex corners
-		i &= 255;
-		j &= 255;
-		k &= 255;
-		var gi0 = gradP[i + perm[j + perm[k]]];
-		var gi1 = gradP[i + i1 + perm[j + j1 + perm[k + k1]]];
-		var gi2 = gradP[i + i2 + perm[j + j2 + perm[k + k2]]];
-		var gi3 = gradP[i + 1 + perm[j + 1 + perm[k + 1]]];
+    var y1 = y0 - j1 + G2;
+    var x2 = x0 - 1 + 2 * G2; // Offsets for last corner in (x,y) unskewed coords
 
-		// Calculate the contribution from the four corners
-		var t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
-		if (t0 < 0) {
-			n0 = 0;
-		} else {
-			t0 *= t0;
-			n0 = t0 * t0 * gi0.dot3(x0, y0, z0); // (x,y) of grad3 used for 2D gradient
-		}
-		var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
-		if (t1 < 0) {
-			n1 = 0;
-		} else {
-			t1 *= t1;
-			n1 = t1 * t1 * gi1.dot3(x1, y1, z1);
-		}
-		var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
-		if (t2 < 0) {
-			n2 = 0;
-		} else {
-			t2 *= t2;
-			n2 = t2 * t2 * gi2.dot3(x2, y2, z2);
-		}
-		var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
-		if (t3 < 0) {
-			n3 = 0;
-		} else {
-			t3 *= t3;
-			n3 = t3 * t3 * gi3.dot3(x3, y3, z3);
-		}
-		// Add contributions from each corner to get the final noise value.
-		// The result is scaled to return values in the interval [-1,1].
-		return 32 * (n0 + n1 + n2 + n3);
-	};
+    var y2 = y0 - 1 + 2 * G2; // Work out the hashed gradient indices of the three simplex corners
 
-	// ##### Perlin noise stuff
+    i &= 255;
+    j &= 255;
+    var gi0 = gradP[i + perm[j]];
+    var gi1 = gradP[i + i1 + perm[j + j1]];
+    var gi2 = gradP[i + 1 + perm[j + 1]]; // Calculate the contribution from the three corners
 
-	function fade(t) {
-		return t * t * t * (t * (t * 6 - 15) + 10);
-	}
+    var t0 = 0.5 - x0 * x0 - y0 * y0;
 
-	function lerp(a, b, t) {
-		return (1 - t) * a + t * b;
-	}
+    if (t0 < 0) {
+      n0 = 0;
+    } else {
+      t0 *= t0;
+      n0 = t0 * t0 * gi0.dot2(x0, y0); // (x,y) of grad3 used for 2D gradient
+    }
 
-	// 2D Perlin Noise
-	module.perlin2 = function (x, y) {
-		// Find unit grid cell containing point
-		var X = Math.floor(x),
-		    Y = Math.floor(y);
-		// Get relative xy coordinates of point within that cell
-		x = x - X;y = y - Y;
-		// Wrap the integer cells at 255 (smaller integer period can be introduced here)
-		X = X & 255;Y = Y & 255;
+    var t1 = 0.5 - x1 * x1 - y1 * y1;
 
-		// Calculate noise contributions from each of the four corners
-		var n00 = gradP[X + perm[Y]].dot2(x, y);
-		var n01 = gradP[X + perm[Y + 1]].dot2(x, y - 1);
-		var n10 = gradP[X + 1 + perm[Y]].dot2(x - 1, y);
-		var n11 = gradP[X + 1 + perm[Y + 1]].dot2(x - 1, y - 1);
+    if (t1 < 0) {
+      n1 = 0;
+    } else {
+      t1 *= t1;
+      n1 = t1 * t1 * gi1.dot2(x1, y1);
+    }
 
-		// Compute the fade curve value for x
-		var u = fade(x);
+    var t2 = 0.5 - x2 * x2 - y2 * y2;
 
-		// Interpolate the four results
-		return lerp(lerp(n00, n10, u), lerp(n01, n11, u), fade(y));
-	};
+    if (t2 < 0) {
+      n2 = 0;
+    } else {
+      t2 *= t2;
+      n2 = t2 * t2 * gi2.dot2(x2, y2);
+    } // Add contributions from each corner to get the final noise value.
+    // The result is scaled to return values in the interval [-1,1].
 
-	// 3D Perlin Noise
-	module.perlin3 = function (x, y, z) {
-		// Find unit grid cell containing point
-		var X = Math.floor(x),
-		    Y = Math.floor(y),
-		    Z = Math.floor(z);
-		// Get relative xyz coordinates of point within that cell
-		x = x - X;y = y - Y;z = z - Z;
-		// Wrap the integer cells at 255 (smaller integer period can be introduced here)
-		X = X & 255;Y = Y & 255;Z = Z & 255;
 
-		// Calculate noise contributions from each of the eight corners
-		var n000 = gradP[X + perm[Y + perm[Z]]].dot3(x, y, z);
-		var n001 = gradP[X + perm[Y + perm[Z + 1]]].dot3(x, y, z - 1);
-		var n010 = gradP[X + perm[Y + 1 + perm[Z]]].dot3(x, y - 1, z);
-		var n011 = gradP[X + perm[Y + 1 + perm[Z + 1]]].dot3(x, y - 1, z - 1);
-		var n100 = gradP[X + 1 + perm[Y + perm[Z]]].dot3(x - 1, y, z);
-		var n101 = gradP[X + 1 + perm[Y + perm[Z + 1]]].dot3(x - 1, y, z - 1);
-		var n110 = gradP[X + 1 + perm[Y + 1 + perm[Z]]].dot3(x - 1, y - 1, z);
-		var n111 = gradP[X + 1 + perm[Y + 1 + perm[Z + 1]]].dot3(x - 1, y - 1, z - 1);
+    return 70 * (n0 + n1 + n2);
+  }; // 3D simplex noise
 
-		// Compute the fade curve value for x, y, z
-		var u = fade(x);
-		var v = fade(y);
-		var w = fade(z);
 
-		// Interpolate
-		return lerp(lerp(lerp(n000, n100, u), lerp(n001, n101, u), w), lerp(lerp(n010, n110, u), lerp(n011, n111, u), w), v);
-	};
+  module.simplex3 = function (xin, yin, zin) {
+    var n0, n1, n2, n3; // Noise contributions from the four corners
+    // Skew the input space to determine which simplex cell we're in
 
-	return module;
+    var s = (xin + yin + zin) * F3; // Hairy factor for 2D
+
+    var i = Math.floor(xin + s);
+    var j = Math.floor(yin + s);
+    var k = Math.floor(zin + s);
+    var t = (i + j + k) * G3;
+    var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
+
+    var y0 = yin - j + t;
+    var z0 = zin - k + t; // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
+    // Determine which simplex we are in.
+
+    var i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
+
+    var i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
+
+    if (x0 >= y0) {
+      if (y0 >= z0) {
+        i1 = 1;
+        j1 = 0;
+        k1 = 0;
+        i2 = 1;
+        j2 = 1;
+        k2 = 0;
+      } else if (x0 >= z0) {
+        i1 = 1;
+        j1 = 0;
+        k1 = 0;
+        i2 = 1;
+        j2 = 0;
+        k2 = 1;
+      } else {
+        i1 = 0;
+        j1 = 0;
+        k1 = 1;
+        i2 = 1;
+        j2 = 0;
+        k2 = 1;
+      }
+    } else {
+      if (y0 < z0) {
+        i1 = 0;
+        j1 = 0;
+        k1 = 1;
+        i2 = 0;
+        j2 = 1;
+        k2 = 1;
+      } else if (x0 < z0) {
+        i1 = 0;
+        j1 = 1;
+        k1 = 0;
+        i2 = 0;
+        j2 = 1;
+        k2 = 1;
+      } else {
+        i1 = 0;
+        j1 = 1;
+        k1 = 0;
+        i2 = 1;
+        j2 = 1;
+        k2 = 0;
+      }
+    } // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
+    // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
+    // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
+    // c = 1/6.
+
+
+    var x1 = x0 - i1 + G3; // Offsets for second corner
+
+    var y1 = y0 - j1 + G3;
+    var z1 = z0 - k1 + G3;
+    var x2 = x0 - i2 + 2 * G3; // Offsets for third corner
+
+    var y2 = y0 - j2 + 2 * G3;
+    var z2 = z0 - k2 + 2 * G3;
+    var x3 = x0 - 1 + 3 * G3; // Offsets for fourth corner
+
+    var y3 = y0 - 1 + 3 * G3;
+    var z3 = z0 - 1 + 3 * G3; // Work out the hashed gradient indices of the four simplex corners
+
+    i &= 255;
+    j &= 255;
+    k &= 255;
+    var gi0 = gradP[i + perm[j + perm[k]]];
+    var gi1 = gradP[i + i1 + perm[j + j1 + perm[k + k1]]];
+    var gi2 = gradP[i + i2 + perm[j + j2 + perm[k + k2]]];
+    var gi3 = gradP[i + 1 + perm[j + 1 + perm[k + 1]]]; // Calculate the contribution from the four corners
+
+    var t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+
+    if (t0 < 0) {
+      n0 = 0;
+    } else {
+      t0 *= t0;
+      n0 = t0 * t0 * gi0.dot3(x0, y0, z0); // (x,y) of grad3 used for 2D gradient
+    }
+
+    var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+
+    if (t1 < 0) {
+      n1 = 0;
+    } else {
+      t1 *= t1;
+      n1 = t1 * t1 * gi1.dot3(x1, y1, z1);
+    }
+
+    var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+
+    if (t2 < 0) {
+      n2 = 0;
+    } else {
+      t2 *= t2;
+      n2 = t2 * t2 * gi2.dot3(x2, y2, z2);
+    }
+
+    var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+
+    if (t3 < 0) {
+      n3 = 0;
+    } else {
+      t3 *= t3;
+      n3 = t3 * t3 * gi3.dot3(x3, y3, z3);
+    } // Add contributions from each corner to get the final noise value.
+    // The result is scaled to return values in the interval [-1,1].
+
+
+    return 32 * (n0 + n1 + n2 + n3);
+  }; // ##### Perlin noise stuff
+
+
+  function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+
+  function lerp(a, b, t) {
+    return (1 - t) * a + t * b;
+  } // 2D Perlin Noise
+
+
+  module.perlin2 = function (x, y) {
+    // Find unit grid cell containing point
+    var X = Math.floor(x),
+        Y = Math.floor(y); // Get relative xy coordinates of point within that cell
+
+    x = x - X;
+    y = y - Y; // Wrap the integer cells at 255 (smaller integer period can be introduced here)
+
+    X = X & 255;
+    Y = Y & 255; // Calculate noise contributions from each of the four corners
+
+    var n00 = gradP[X + perm[Y]].dot2(x, y);
+    var n01 = gradP[X + perm[Y + 1]].dot2(x, y - 1);
+    var n10 = gradP[X + 1 + perm[Y]].dot2(x - 1, y);
+    var n11 = gradP[X + 1 + perm[Y + 1]].dot2(x - 1, y - 1); // Compute the fade curve value for x
+
+    var u = fade(x); // Interpolate the four results
+
+    return lerp(lerp(n00, n10, u), lerp(n01, n11, u), fade(y));
+  }; // 3D Perlin Noise
+
+
+  module.perlin3 = function (x, y, z) {
+    // Find unit grid cell containing point
+    var X = Math.floor(x),
+        Y = Math.floor(y),
+        Z = Math.floor(z); // Get relative xyz coordinates of point within that cell
+
+    x = x - X;
+    y = y - Y;
+    z = z - Z; // Wrap the integer cells at 255 (smaller integer period can be introduced here)
+
+    X = X & 255;
+    Y = Y & 255;
+    Z = Z & 255; // Calculate noise contributions from each of the eight corners
+
+    var n000 = gradP[X + perm[Y + perm[Z]]].dot3(x, y, z);
+    var n001 = gradP[X + perm[Y + perm[Z + 1]]].dot3(x, y, z - 1);
+    var n010 = gradP[X + perm[Y + 1 + perm[Z]]].dot3(x, y - 1, z);
+    var n011 = gradP[X + perm[Y + 1 + perm[Z + 1]]].dot3(x, y - 1, z - 1);
+    var n100 = gradP[X + 1 + perm[Y + perm[Z]]].dot3(x - 1, y, z);
+    var n101 = gradP[X + 1 + perm[Y + perm[Z + 1]]].dot3(x - 1, y, z - 1);
+    var n110 = gradP[X + 1 + perm[Y + 1 + perm[Z]]].dot3(x - 1, y - 1, z);
+    var n111 = gradP[X + 1 + perm[Y + 1 + perm[Z + 1]]].dot3(x - 1, y - 1, z - 1); // Compute the fade curve value for x, y, z
+
+    var u = fade(x);
+    var v = fade(y);
+    var w = fade(z); // Interpolate
+
+    return lerp(lerp(lerp(n000, n100, u), lerp(n001, n101, u), w), lerp(lerp(n010, n110, u), lerp(n011, n111, u), w), v);
+  };
+
+  return module;
 }();
-},{}],7:[function(require,module,exports) {
+
+exports.default = _default;
+},{}],"gl/Math.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
+exports.Transform = exports.Vec = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Vec = exports.Vec = function Vec() {
-	var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-	var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+var Vec = function Vec() {
+  var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-	_classCallCheck(this, Vec);
+  _classCallCheck(this, Vec);
 
-	this.x = x;
-	this.y = y;
-	this.z = z;
+  this.x = x;
+  this.y = y;
+  this.z = z;
 };
 
-var Transform = exports.Transform = function Transform() {
-	var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-	    _ref$position = _ref.position,
-	    position = _ref$position === undefined ? new Vec() : _ref$position,
-	    _ref$rotation = _ref.rotation,
-	    rotation = _ref$rotation === undefined ? new Vec() : _ref$rotation,
-	    _ref$scale = _ref.scale,
-	    scale = _ref$scale === undefined ? 1 : _ref$scale;
+exports.Vec = Vec;
 
-	_classCallCheck(this, Transform);
+var Transform = function Transform() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$position = _ref.position,
+      position = _ref$position === void 0 ? new Vec() : _ref$position,
+      _ref$rotation = _ref.rotation,
+      rotation = _ref$rotation === void 0 ? new Vec() : _ref$rotation,
+      _ref$scale = _ref.scale,
+      scale = _ref$scale === void 0 ? 1 : _ref$scale;
 
-	this.position = position;
-	this.rotation = rotation;
-	this.scale = scale;
+  _classCallCheck(this, Transform);
+
+  this.position = position;
+  this.rotation = rotation;
+  this.scale = scale;
 };
-},{}],15:[function(require,module,exports) {
+
+exports.Transform = Transform;
+},{}],"gl/scene/Geometry.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-exports.Geometry = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports.Geometry = void 0;
 
 var _Math = require("../Math.js");
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-var Geometry = exports.Geometry = function (_Transform) {
-	_inherits(Geometry, _Transform);
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-	_createClass(Geometry, [{
-		key: "buffer",
-		get: function get() {
-			this._buffer = this._buffer || this.createBuffer();
-			return this._buffer;
-		}
-	}]);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-	function Geometry() {
-		var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-		_classCallCheck(this, Geometry);
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-		var _args$material = args.material,
-		    material = _args$material === undefined ? null : _args$material,
-		    _args$uv = args.uv,
-		    uv = _args$uv === undefined ? [0, 0] : _args$uv;
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-		var _this = _possibleConstructorReturn(this, (Geometry.__proto__ || Object.getPrototypeOf(Geometry)).call(this, args));
+var Geometry =
+/*#__PURE__*/
+function (_Transform) {
+  _inherits(Geometry, _Transform);
 
-		_this.mat = material;
-		_this.uv = uv;
+  _createClass(Geometry, [{
+    key: "buffer",
+    get: function get() {
+      this._buffer = this._buffer || this.createBuffer();
+      return this._buffer;
+    }
+  }]);
 
-		_this.onCreate(args);
-		return _this;
-	}
+  function Geometry() {
+    var _this;
 
-	_createClass(Geometry, [{
-		key: "onCreate",
-		value: function onCreate(args) {}
-	}, {
-		key: "createBuffer",
-		value: function createBuffer() {}
-	}]);
+    var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-	return Geometry;
+    _classCallCheck(this, Geometry);
+
+    var _args$material = args.material,
+        material = _args$material === void 0 ? null : _args$material,
+        _args$uv = args.uv,
+        uv = _args$uv === void 0 ? [0, 0] : _args$uv;
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Geometry).call(this, args));
+    _this.mat = material;
+    _this.uv = uv;
+
+    _this.onCreate(args);
+
+    return _this;
+  }
+
+  _createClass(Geometry, [{
+    key: "onCreate",
+    value: function onCreate(args) {}
+  }, {
+    key: "createBuffer",
+    value: function createBuffer() {}
+  }]);
+
+  return Geometry;
 }(_Math.Transform);
-},{"../Math.js":7}],17:[function(require,module,exports) {
+
+exports.Geometry = Geometry;
+},{"../Math.js":"gl/Math.js"}],"gl/graphics/VertexBuffer.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
+exports.VertexBuffer = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var VertexBuffer = exports.VertexBuffer = function () {
-	_createClass(VertexBuffer, [{
-		key: "vertsPerElement",
-		get: function get() {
-			return this.vertecies.length / this.elements;
-		}
-	}, {
-		key: "elements",
-		get: function get() {
-			var count = 0;
-			for (var key in this.attributes) {
-				count += this.attributes[key].size;
-			}
-			return count;
-		}
-	}]);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-	function VertexBuffer(vertArray) {
-		_classCallCheck(this, VertexBuffer);
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-		this.type = "TRIANGLES";
-		this.vertecies = new Float32Array(vertArray);
-		this.vertArray = vertArray;
-		this.attributes = {};
-	}
+var VertexBuffer =
+/*#__PURE__*/
+function () {
+  _createClass(VertexBuffer, [{
+    key: "vertsPerElement",
+    get: function get() {
+      return this.vertecies.length / this.elements;
+    }
+  }, {
+    key: "elements",
+    get: function get() {
+      var count = 0;
 
-	_createClass(VertexBuffer, [{
-		key: "clear",
-		value: function clear() {
-			this.vertecies = new Float32Array([]);
-			this.vertArray = [];
-		}
-	}], [{
-		key: "create",
-		value: function create() {
-			for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-				args[_key] = arguments[_key];
-			}
+      for (var key in this.attributes) {
+        count += this.attributes[key].size;
+      }
 
-			return new (Function.prototype.bind.apply(VertexBuffer, [null].concat(args)))();
-		}
-	}]);
+      return count;
+    }
+  }]);
 
-	return VertexBuffer;
+  function VertexBuffer(vertArray) {
+    _classCallCheck(this, VertexBuffer);
+
+    this.type = "TRIANGLES";
+    this.vertecies = new Float32Array(vertArray);
+    this.vertArray = vertArray;
+    this.attributes = {};
+  }
+
+  _createClass(VertexBuffer, [{
+    key: "clear",
+    value: function clear() {
+      this.vertecies = new Float32Array([]);
+      this.vertArray = [];
+    }
+  }], [{
+    key: "create",
+    value: function create() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _construct(VertexBuffer, args);
+    }
+  }]);
+
+  return VertexBuffer;
 }();
-},{}],13:[function(require,module,exports) {
+
+exports.VertexBuffer = VertexBuffer;
+},{}],"gl/geo/Cube.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-exports.Cube = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports.Cube = void 0;
 
 var _Geometry2 = require("../scene/Geometry.js");
 
 var _VertexBuffer = require("../graphics/VertexBuffer.js");
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-var Cube = exports.Cube = function (_Geometry) {
-	_inherits(Cube, _Geometry);
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-	_createClass(Cube, [{
-		key: "invisible",
-		get: function get() {
-			return !this.visible.TOP && !this.visible.BOTTOM && !this.visible.LEFT && !this.visible.RIGHT && !this.visible.FRONT && !this.visible.BACK;
-		}
-	}]);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-	function Cube() {
-		var _ref;
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-		_classCallCheck(this, Cube);
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
-		}
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-		var _this = _possibleConstructorReturn(this, (_ref = Cube.__proto__ || Object.getPrototypeOf(Cube)).call.apply(_ref, [this].concat(args)));
+var Cube =
+/*#__PURE__*/
+function (_Geometry) {
+  _inherits(Cube, _Geometry);
 
-		_this.vertsPerFace = 6;
+  _createClass(Cube, [{
+    key: "invisible",
+    get: function get() {
+      return !this.visible.TOP && !this.visible.BOTTOM && !this.visible.LEFT && !this.visible.RIGHT && !this.visible.FRONT && !this.visible.BACK;
+    }
+  }]);
 
-		_this.visible = {
-			TOP: true,
-			BOTTOM: true,
-			LEFT: true,
-			RIGHT: true,
-			FRONT: true,
-			BACK: true
-		};
-		return _this;
-	}
+  function Cube() {
+    var _getPrototypeOf2;
 
-	_createClass(Cube, [{
-		key: "createBuffer",
-		value: function createBuffer() {
-			var vertArray = [];
-			var faces = this.faces;
+    var _this;
 
-			var visibleFaces = [];
+    _classCallCheck(this, Cube);
 
-			for (var key in this.visible) {
-				if (this.visible[key]) {
-					visibleFaces.push(key);
-				}
-			}
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
 
-			visibleFaces.forEach(function (face) {
-				vertArray = vertArray.concat(faces[face]);
-			});
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Cube)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    _this.vertsPerFace = 6;
+    _this.visible = {
+      TOP: true,
+      BOTTOM: true,
+      LEFT: true,
+      RIGHT: true,
+      FRONT: true,
+      BACK: true
+    };
+    return _this;
+  }
 
-			var vertxBuffer = _VertexBuffer.VertexBuffer.create(vertArray);
-			vertxBuffer.type = "TRIANGLES";
-			vertxBuffer.attributes = [{ size: 3, attribute: "aPosition" }, { size: 2, attribute: "aTexCoords" }, { size: 3, attribute: "aNormal" }];
+  _createClass(Cube, [{
+    key: "createBuffer",
+    value: function createBuffer() {
+      var vertArray = [];
+      var faces = this.faces;
+      var visibleFaces = [];
 
-			return vertxBuffer;
-		}
-	}, {
-		key: "faces",
-		get: function get() {
-			var s = 1;
-			var w = 10;
-			var h = 10;
+      for (var key in this.visible) {
+        if (this.visible[key]) {
+          visibleFaces.push(key);
+        }
+      }
 
-			var u = this.uv[0];
-			var v = this.uv[1];
+      visibleFaces.forEach(function (face) {
+        vertArray = vertArray.concat(faces[face]);
+      });
 
-			var x = 0;
-			var y = 0;
-			var z = 0;
+      var vertxBuffer = _VertexBuffer.VertexBuffer.create(vertArray);
 
-			return {
-				TOP: [s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, s * h + z, 0 + u, 1 + v, 0, 1, 0],
-				BOTTOM: [-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0],
-				LEFT: [-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1, -s * w + x, s * h + y, s * w + z, 0 + u, 1 + v, 0, 0, 1, -s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1],
-				RIGHT: [s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, -s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v, 0, 0, -1],
-				FRONT: [s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0],
-				BACK: [-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, -1, 0, 0]
-			};
-		}
-	}]);
+      vertxBuffer.type = "TRIANGLES";
+      vertxBuffer.attributes = [{
+        size: 3,
+        attribute: "aPosition"
+      }, {
+        size: 2,
+        attribute: "aTexCoords"
+      }, {
+        size: 3,
+        attribute: "aNormal"
+      }];
+      return vertxBuffer;
+    }
+  }, {
+    key: "faces",
+    get: function get() {
+      var s = 1;
+      var w = 10;
+      var h = 10;
+      var u = this.uv[0];
+      var v = this.uv[1];
+      var x = 0;
+      var y = 0;
+      var z = 0;
+      return {
+        TOP: [s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, s * h + z, 0 + u, 1 + v, 0, 1, 0],
+        BOTTOM: [-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0],
+        LEFT: [-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1, -s * w + x, s * h + y, s * w + z, 0 + u, 1 + v, 0, 0, 1, -s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1],
+        RIGHT: [s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, -s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v, 0, 0, -1],
+        FRONT: [s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0],
+        BACK: [-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, -1, 0, 0]
+      };
+    }
+  }]);
 
-	return Cube;
+  return Cube;
 }(_Geometry2.Geometry);
-},{"../scene/Geometry.js":15,"../graphics/VertexBuffer.js":17}],9:[function(require,module,exports) {
+
+exports.Cube = Cube;
+},{"../scene/Geometry.js":"gl/scene/Geometry.js","../graphics/VertexBuffer.js":"gl/graphics/VertexBuffer.js"}],"gl/geo/Voxel.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-exports.Voxel = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports.Voxel = void 0;
 
 var _Cube2 = require("./Cube.js");
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var Voxel = exports.Voxel = function (_Cube) {
-	_inherits(Voxel, _Cube);
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-	function Voxel() {
-		_classCallCheck(this, Voxel);
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-		return _possibleConstructorReturn(this, (Voxel.__proto__ || Object.getPrototypeOf(Voxel)).apply(this, arguments));
-	}
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-	_createClass(Voxel, [{
-		key: "faces",
-		get: function get() {
-			var s = this.scale;
-			var w = 10;
-			var h = 10;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-			var u = this.uv[0];
-			var v = this.uv[1];
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-			var x = this.position.x;
-			var y = -this.position.y;
-			var z = this.position.z;
+var Voxel =
+/*#__PURE__*/
+function (_Cube) {
+  _inherits(Voxel, _Cube);
 
-			return {
-				TOP: [s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, s * h + z, 0 + u, 1 + v, 0, 1, 0],
-				BOTTOM: [-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0],
-				LEFT: [-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1, -s * w + x, s * h + y, s * w + z, 0 + u, 1 + v, 0, 0, 1, -s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1],
-				RIGHT: [s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, -s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v, 0, 0, -1],
-				FRONT: [s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0],
-				BACK: [-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, -1, 0, 0]
-			};
-		}
-	}]);
+  function Voxel() {
+    _classCallCheck(this, Voxel);
 
-	return Voxel;
+    return _possibleConstructorReturn(this, _getPrototypeOf(Voxel).apply(this, arguments));
+  }
+
+  _createClass(Voxel, [{
+    key: "faces",
+    get: function get() {
+      var s = this.scale;
+      var w = 10;
+      var h = 10;
+      var u = this.uv[0];
+      var v = this.uv[1];
+      var x = this.position.x;
+      var y = -this.position.y;
+      var z = this.position.z;
+      return {
+        TOP: [s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 0, 1, 0, -s * w + x, s * w + y, -s * h + z, 0 + u, 0 + v, 0, 1, 0, -s * w + x, s * w + y, s * h + z, 0 + u, 1 + v, 0, 1, 0],
+        BOTTOM: [-s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, -s * h + z, 1 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 0, -1, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 0, -1, 0, s * w + x, -s * w + y, s * h + z, 1 + u, 1 + v, 0, -1, 0],
+        LEFT: [-s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, -s * h + y, s * w + z, 1 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1, -s * w + x, s * h + y, s * w + z, 0 + u, 1 + v, 0, 0, 1, -s * w + x, -s * h + y, s * w + z, 0 + u, 0 + v, 0, 0, 1, s * w + x, s * h + y, s * w + z, 1 + u, 1 + v, 0, 0, 1],
+        RIGHT: [s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, s * w + x, -s * h + y, -s * w + z, 1 + u, 0 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, s * w + x, s * h + y, -s * w + z, 1 + u, 1 + v, 0, 0, -1, -s * w + x, -s * h + y, -s * w + z, 0 + u, 0 + v, 0, 0, -1, -s * w + x, s * h + y, -s * w + z, 0 + u, 1 + v, 0, 0, -1],
+        FRONT: [s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, 1, 0, 0, s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, 1, 0, 0, s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, 1, 0, 0],
+        BACK: [-s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, s * w + y, -s * h + z, 1 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, s * w + y, s * h + z, 1 + u, 1 + v, -1, 0, 0, -s * w + x, -s * w + y, -s * h + z, 0 + u, 0 + v, -1, 0, 0, -s * w + x, -s * w + y, s * h + z, 0 + u, 1 + v, -1, 0, 0]
+      };
+    }
+  }]);
+
+  return Voxel;
 }(_Cube2.Cube);
-},{"./Cube.js":13}],11:[function(require,module,exports) {
+
+exports.Voxel = Voxel;
+},{"./Cube.js":"gl/geo/Cube.js"}],"gl/geo/Group.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-exports.Group = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports.Group = void 0;
 
 var _Geometry2 = require("../scene/Geometry.js");
 
 var _VertexBuffer = require("../graphics/VertexBuffer.js");
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var Group = exports.Group = function (_Geometry) {
-	_inherits(Group, _Geometry);
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-	function Group() {
-		_classCallCheck(this, Group);
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-		return _possibleConstructorReturn(this, (Group.__proto__ || Object.getPrototypeOf(Group)).apply(this, arguments));
-	}
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-	_createClass(Group, [{
-		key: "createBuffer",
-		value: function createBuffer() {
-			var vertArray = this.build();
-			var vertxBuffer = _VertexBuffer.VertexBuffer.create(vertArray);
-			vertxBuffer.type = "TRIANGLES";
-			vertxBuffer.attributes = [{ size: 3, attribute: "aPosition" }, { size: 2, attribute: "aTexCoords" }, { size: 3, attribute: "aNormal" }];
-			return vertxBuffer;
-		}
-	}, {
-		key: "build",
-		value: function build() {
-			var vertArray = [];
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-			try {
-				for (var _iterator = this.objects[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var obj = _step.value;
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-					vertArray.push.apply(vertArray, _toConsumableArray(obj._buffer.vertArray));
-				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
-			}
+var Group =
+/*#__PURE__*/
+function (_Geometry) {
+  _inherits(Group, _Geometry);
 
-			return vertArray;
-		}
-	}, {
-		key: "onCreate",
-		value: function onCreate(args) {
-			args.objects = args.objects || [];
-			this.objects = args.objects;
-		}
-	}, {
-		key: "add",
-		value: function add(geo) {
-			this.objects.push(geo);
-		}
-	}]);
+  function Group() {
+    _classCallCheck(this, Group);
 
-	return Group;
+    return _possibleConstructorReturn(this, _getPrototypeOf(Group).apply(this, arguments));
+  }
+
+  _createClass(Group, [{
+    key: "createBuffer",
+    value: function createBuffer() {
+      var vertArray = this.build();
+
+      var vertxBuffer = _VertexBuffer.VertexBuffer.create(vertArray);
+
+      vertxBuffer.type = "TRIANGLES";
+      vertxBuffer.attributes = [{
+        size: 3,
+        attribute: "aPosition"
+      }, {
+        size: 2,
+        attribute: "aTexCoords"
+      }, {
+        size: 3,
+        attribute: "aNormal"
+      }];
+      return vertxBuffer;
+    }
+  }, {
+    key: "build",
+    value: function build() {
+      var vertArray = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.objects[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var obj = _step.value;
+          vertArray.push.apply(vertArray, _toConsumableArray(obj._buffer.vertArray));
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return != null) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return vertArray;
+    }
+  }, {
+    key: "onCreate",
+    value: function onCreate(args) {
+      args.objects = args.objects || [];
+      this.objects = args.objects;
+    }
+  }, {
+    key: "add",
+    value: function add(geo) {
+      this.objects.push(geo);
+    }
+  }]);
+
+  return Group;
 }(_Geometry2.Geometry);
-},{"../scene/Geometry.js":15,"../graphics/VertexBuffer.js":17}],3:[function(require,module,exports) {
-'use strict';
+
+exports.Group = Group;
+},{"../scene/Geometry.js":"gl/scene/Geometry.js","../graphics/VertexBuffer.js":"gl/graphics/VertexBuffer.js"}],"VoxelWorldGenerator.js":[function(require,module,exports) {
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-exports.VoxelWorldGenerator = undefined;
+exports.VoxelWorldGenerator = void 0;
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+var _perlin = _interopRequireDefault(require("../lib/perlin.js"));
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _Voxel = require("./gl/geo/Voxel.js");
 
-var _perlin = require('../lib/perlin.js');
+var _Math = require("./gl/Math.js");
 
-var _perlin2 = _interopRequireDefault(_perlin);
-
-var _Voxel = require('./gl/geo/Voxel.js');
-
-var _Math = require('./gl/Math.js');
-
-var _Group = require('./gl/geo/Group.js');
+var _Group = require("./gl/geo/Group.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Tile = function Tile(x, y, size, height) {
-	_classCallCheck(this, Tile);
+  _classCallCheck(this, Tile);
 
-	this.tileData = new Array(size);
-	this.height = height;
-	this.pos = { x: x * size, y: y * size };
+  this.tileData = new Array(size);
+  this.height = height;
+  this.pos = {
+    x: x * size,
+    y: y * size
+  };
+  this.group = new _Group.Group();
+  this.group.position.x = this.pos.x * 20;
+  this.group.position.z = this.pos.y * 20;
 
-	this.group = new _Group.Group();
+  for (var i = 0; i < this.tileData.length; i++) {
+    this.tileData[i] = new Array(this.height);
 
-	this.group.position.x = this.pos.x * 20;
-	this.group.position.z = this.pos.y * 20;
-
-	for (var i = 0; i < this.tileData.length; i++) {
-		this.tileData[i] = new Array(this.height);
-		for (var j = 0; j < this.tileData[i].length; j++) {
-			this.tileData[i][j] = new Array(size);
-		}
-	}
+    for (var j = 0; j < this.tileData[i].length; j++) {
+      this.tileData[i][j] = new Array(size);
+    }
+  }
 };
 
 var UV = {
-	LOG: [0, 0],
-	GRASS: [1, 0],
-	LAVA: [2, 0],
-	STONE: [3, 0],
-
-	LEAVES: [0, 1],
-	DIRT: [1, 1],
-	WATER: [2, 1],
-	SAND: [3, 1]
+  LOG: [0, 0],
+  GRASS: [1, 0],
+  LAVA: [2, 0],
+  STONE: [3, 0],
+  LEAVES: [0, 1],
+  DIRT: [1, 1],
+  WATER: [2, 1],
+  SAND: [3, 1]
 };
 
-var VoxelWorldGenerator = exports.VoxelWorldGenerator = function () {
-	_createClass(VoxelWorldGenerator, [{
-		key: 'setSeed',
-		value: function setSeed(n) {
-			this.seed = n;
-			_perlin2.default.seed(n);
-		}
-	}, {
-		key: 'setOptions',
-		value: function setOptions() {
-			var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-			    _ref$tileSize = _ref.tileSize,
-			    tileSize = _ref$tileSize === undefined ? 4 : _ref$tileSize,
-			    _ref$tileHeight = _ref.tileHeight,
-			    tileHeight = _ref$tileHeight === undefined ? 40 : _ref$tileHeight,
-			    _ref$seed = _ref.seed,
-			    seed = _ref$seed === undefined ? 0 : _ref$seed,
-			    _ref$resolution = _ref.resolution,
-			    resolution = _ref$resolution === undefined ? 15 : _ref$resolution,
-			    _ref$threshold = _ref.threshold,
-			    threshold = _ref$threshold === undefined ? 0.2 : _ref$threshold,
-			    _ref$terrainheight = _ref.terrainheight,
-			    terrainheight = _ref$terrainheight === undefined ? 15 : _ref$terrainheight;
+var VoxelWorldGenerator =
+/*#__PURE__*/
+function () {
+  _createClass(VoxelWorldGenerator, [{
+    key: "setSeed",
+    value: function setSeed(n) {
+      this.seed = n;
 
-			this.worldSize = tileSize;
-			this.tileHeight = tileHeight;
-			this.resolution = resolution;
-			this.threshold = threshold;
-			this.terrainheight = terrainheight;
-			this.treeDensity = 0.65;
+      _perlin.default.seed(n);
+    }
+  }, {
+    key: "setOptions",
+    value: function setOptions() {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref$tileSize = _ref.tileSize,
+          tileSize = _ref$tileSize === void 0 ? 4 : _ref$tileSize,
+          _ref$tileHeight = _ref.tileHeight,
+          tileHeight = _ref$tileHeight === void 0 ? 40 : _ref$tileHeight,
+          _ref$seed = _ref.seed,
+          seed = _ref$seed === void 0 ? 0 : _ref$seed,
+          _ref$resolution = _ref.resolution,
+          resolution = _ref$resolution === void 0 ? 15 : _ref$resolution,
+          _ref$threshold = _ref.threshold,
+          threshold = _ref$threshold === void 0 ? 0.2 : _ref$threshold,
+          _ref$terrainheight = _ref.terrainheight,
+          terrainheight = _ref$terrainheight === void 0 ? 15 : _ref$terrainheight;
 
-			this.setSeed(seed);
-		}
-	}]);
+      this.worldSize = tileSize;
+      this.tileHeight = tileHeight;
+      this.resolution = resolution;
+      this.threshold = threshold;
+      this.terrainheight = terrainheight;
+      this.treeDensity = 0.65;
+      this.setSeed(seed);
+    }
+  }]);
 
-	function VoxelWorldGenerator(args) {
-		_classCallCheck(this, VoxelWorldGenerator);
+  function VoxelWorldGenerator(args) {
+    _classCallCheck(this, VoxelWorldGenerator);
 
-		this.setOptions(args);
-		this.tileSize = 16;
-	}
+    this.setOptions(args);
+    this.tileSize = 32;
+  }
 
-	_createClass(VoxelWorldGenerator, [{
-		key: 'generate',
-		value: function generate(startpoint, TILECOUNT, put) {
-			var tileCount = 0;
-			var openSet = new Set();
-			var closedSet = createSet(TILECOUNT * 2);
-			var self = this;
+  _createClass(VoxelWorldGenerator, [{
+    key: "generate",
+    value: function generate(startpoint, TILECOUNT, put) {
+      var tileCount = 0;
+      var openSet = new Set();
+      var closedSet = createSet(TILECOUNT * 2);
+      var self = this;
+      tick(startpoint, TILECOUNT);
 
-			tick(startpoint, TILECOUNT);
+      function tick(tile, maxCount) {
+        if (tileCount > maxCount) return;
 
-			function tick(tile, maxCount) {
-				if (tileCount > maxCount) return;
+        var _tile = _slicedToArray(tile, 2),
+            x = _tile[0],
+            y = _tile[1];
 
-				var _tile = _slicedToArray(tile, 2),
-				    x = _tile[0],
-				    y = _tile[1];
+        var newTile = self.generateTile(x, y);
+        put(newTile);
+        tileCount++;
+        closedSet[x][y] = tile;
+        openSet.delete(tile);
+        getNeighbors(tile);
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
 
-				var newTile = self.generateTile(x, y);
-				put(newTile);
+        try {
+          for (var _iterator = openSet[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var _tile3 = _step.value;
 
-				tileCount++;
+            if (valid(_tile3)) {
+              tick(_tile3, maxCount);
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return != null) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
 
-				closedSet[x][y] = tile;
-				openSet.delete(tile);
+        function valid(tile) {
+          var _tile2 = _slicedToArray(tile, 2),
+              x = _tile2[0],
+              y = _tile2[1];
 
-				getNeighbors(tile);
+          var ctile = closedSet[x][y];
+          return !ctile;
+        }
 
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
+        function getNeighbors() {
+          var neighbors = [[x + 1, y], [x - 1, y], [x, y - 1], [x, y + 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y - 1], [x - 1, y + 1]];
 
-				try {
-					for (var _iterator = openSet[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						var _tile2 = _step.value;
+          for (var _i2 = 0; _i2 < neighbors.length; _i2++) {
+            var n = neighbors[_i2];
+            if (valid(n)) openSet.add(n);
+          }
+        }
+      }
 
-						if (valid(_tile2)) {
-							tick(_tile2, maxCount);
-						}
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
-						}
-					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
-						}
-					}
-				}
+      function createSet(size) {
+        var arr = new Array(size);
 
-				function valid(tile) {
-					var _tile3 = _slicedToArray(tile, 2),
-					    x = _tile3[0],
-					    y = _tile3[1];
+        for (var x = -size / 2; x < size / 2; x++) {
+          arr[x] = new Array(size);
+        }
 
-					var ctile = closedSet[x][y];
-					return !ctile;
-				}
+        return arr;
+      }
+    }
+  }, {
+    key: "regen",
+    value: function regen(seed, callback) {
+      var _this = this;
 
-				function getNeighbors() {
-					var neighbors = [[x + 1, y - 1], [x + 1, y], [x + 1, y + 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1], [x, y - 1], [x, y + 1]];
-					var _iteratorNormalCompletion2 = true;
-					var _didIteratorError2 = false;
-					var _iteratorError2 = undefined;
+      seed = seed || Math.random();
+      this.setSeed(seed);
+      return new Promise(function (resolve, reject) {
+        var size = _this.worldSize;
 
-					try {
-						for (var _iterator2 = neighbors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-							var n = _step2.value;
+        _this.generate([0, 0], size * size + 4, function (newtile) {
+          callback(_this.buildTile(newtile));
+        });
 
-							if (valid(n)) openSet.add(n);
-						}
-					} catch (err) {
-						_didIteratorError2 = true;
-						_iteratorError2 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion2 && _iterator2.return) {
-								_iterator2.return();
-							}
-						} finally {
-							if (_didIteratorError2) {
-								throw _iteratorError2;
-							}
-						}
-					}
-				}
-			}
+        resolve();
+      });
+    }
+  }, {
+    key: "buildTile",
+    value: function buildTile(tile) {
+      var tileData = tile.tileData;
 
-			function createSet(size) {
-				var arr = new Array(size);
-				for (var x = -size / 2; x < size / 2; x++) {
-					arr[x] = new Array(size);
-				}
-				return arr;
-			}
-		}
-	}, {
-		key: 'regen',
-		value: function regen(seed, callback) {
-			var _this = this;
+      for (var x = 0; x < tileData.length; x++) {
+        for (var y = 0; y < tileData[x].length; y++) {
+          for (var z = 0; z < tileData[x][y].length; z++) {
+            if (tileData[x][y][z]) {
+              this.voxel(tile, x, y, z, tile.pos.x, tile.pos.y);
+            }
+          }
+        }
+      }
 
-			seed = seed || Math.random();
-			this.setSeed(seed);
+      return tile;
+    }
+  }, {
+    key: "generateTile",
+    value: function generateTile(x, y) {
+      var tileHeight = this.tileHeight;
+      var tileSize = this.tileSize;
+      var tile = new Tile(x, y, tileSize, tileHeight);
+      var tileData = tile.tileData;
+      var res = this.resolution; // generate terrain
 
-			return new Promise(function (resolve, reject) {
-				var size = _this.worldSize;
+      var material = function material(yvalue, x, y, z, value) {
+        var mats = [UV.STONE];
 
-				_this.generate([0, 0], size * size + 4, function (newtile) {
-					callback(_this.buildTile(newtile));
-				});
+        if (tileData[x][y - 1] && tileData[x][y - 1][z] == null) {
+          mats = [UV.GRASS];
+        }
 
-				resolve();
-			});
-		}
-	}, {
-		key: 'buildTile',
-		value: function buildTile(tile) {
-			var tileData = tile.tileData;
-			for (var x = 0; x < tileData.length; x++) {
-				for (var y = 0; y < tileData[x].length; y++) {
-					for (var z = 0; z < tileData[x][y].length; z++) {
-						if (tileData[x][y][z]) {
-							this.voxel(tile, x, y, z, tile.pos.x, tile.pos.y);
-						}
-					}
-				}
-			}
-			return tile;
-		}
-	}, {
-		key: 'generateTile',
-		value: function generateTile(x, y) {
-			var tileHeight = this.tileHeight;
-			var tileSize = this.tileSize;
-			var tile = new Tile(x, y, tileSize, tileHeight);
-			var tileData = tile.tileData;
-			var res = this.resolution;
+        var dirtLayer = Math.floor(Math.random() * 2 + 2);
 
-			// generate terrain
-			var material = function material(yvalue, x, y, z, value) {
-				var mats = [UV.STONE];
+        if (tileData[x][y - 1] && tileData[x][y - 1][z] == UV.GRASS || tileData[x][y - dirtLayer] && tileData[x][y - dirtLayer][z] == UV.GRASS) {
+          mats = [UV.DIRT];
+        }
 
-				if (tileData[x][y - 1] && tileData[x][y - 1][z] == null) {
-					mats = [UV.GRASS];
-				}
+        if (y > tileHeight - 2 && !tileData[x][y - 1][z]) {
+          mats = [UV.WATER];
+        }
 
-				var dirtLayer = Math.floor(Math.random() * 2 + 2);
+        if (y < tileHeight - 1 && y > tileHeight - 3) {
+          mats = [UV.SAND];
+        }
 
-				if (tileData[x][y - 1] && tileData[x][y - 1][z] == UV.GRASS || tileData[x][y - dirtLayer] && tileData[x][y - dirtLayer][z] == UV.GRASS) {
-					mats = [UV.DIRT];
-				}
+        return mats[Math.floor(value * mats.length)];
+      };
 
-				if (y > tileHeight - 2 && !tileData[x][y - 1][z]) {
-					mats = [UV.WATER];
-				}
-				if (y < tileHeight - 1 && y > tileHeight - 3) {
-					mats = [UV.SAND];
-				}
+      for (var _x = 0; _x < tileData.length; _x++) {
+        for (var _y = 0; _y < tileData[_x].length; _y++) {
+          for (var z = 0; z < tileData[_x][_y].length; z++) {
+            // gen height map
+            var noiseV = _perlin.default.perlin2((_x + tile.pos.x) / res, (z + tile.pos.y) / res) * this.terrainheight;
+            var yvalue = tileHeight - noiseV;
+            var mat = material(yvalue, _x, _y, z, Math.random());
 
-				return mats[Math.floor(value * mats.length)];
-			};
+            if (_y > yvalue - 5.5) {
+              tileData[_x][_y][z] = mat;
+            } else if (_y > tileHeight - 2) {
+              tileData[_x][_y][z] = mat;
+            }
 
-			for (var _x2 = 0; _x2 < tileData.length; _x2++) {
-				for (var _y = 0; _y < tileData[_x2].length; _y++) {
-					for (var z = 0; z < tileData[_x2][_y].length; z++) {
+            if (_y < tileHeight && _y > 0 && _x < this.tileSize && _x >= 0 && z < this.tileSize && z >= 0) {
+              var value = _perlin.default.perlin3((_x + tile.pos.x) / res, _y / res, (z + tile.pos.y) / res);
 
-						// gen height map
-						var noiseV = _perlin2.default.perlin2((_x2 + tile.pos.x) / res, (z + tile.pos.y) / res) * this.terrainheight;
-						var yvalue = tileHeight - noiseV;
+              if (value > this.threshold) {
+                tileData[_x][_y][z] = mat;
+              } else if (_y > tileHeight - 2) {
+                tileData[_x][_y][z] = mat;
+              }
+            } else if (_y > tileHeight - 2) {
+              tileData[_x][_y][z] = mat;
+            }
+          }
+        }
+      } // generate features
+      // return tile;
 
-						var mat = material(yvalue, _x2, _y, z, Math.random());
 
-						if (_y > yvalue - 5.5) {
-							tileData[_x2][_y][z] = mat;
-						} else if (_y > tileHeight - 2) {
-							tileData[_x2][_y][z] = mat;
-						}
+      var treeDensity = this.treeDensity;
 
-						if (_y < tileHeight && _y > 0 && _x2 < this.tileSize && _x2 >= 0 && z < this.tileSize && z >= 0) {
+      for (var _x2 = 0; _x2 < tileData.length; _x2++) {
+        for (var _y2 = 0; _y2 < tileData[_x2].length; _y2++) {
+          for (var _z = 0; _z < tileData[_x2][_y2].length; _z++) {
+            // decide if destination is valid for a tree
+            var treeHeight = Math.floor(Math.random() * 10 + 10);
 
-							var value = _perlin2.default.perlin3((_x2 + tile.pos.x) / res, _y / res, (z + tile.pos.y) / res);
+            if (_x2 + 4 < tileSize && _x2 - 4 > 0 && _y2 > treeHeight && _z + 4 < tileSize && _z - 4 > 0) {
+              if (tileData[_x2][_y2 + 1] && tileData[_x2][_y2 - 1] && tileData[_x2][_y2 + 1][_z] && !tileData[_x2][_y2 - 1][_z] && tileData[_x2][_y2 + 1][_z] == UV.GRASS) {
+                var _yvalue = _perlin.default.perlin2(_x2 * treeDensity + tile.pos.y, _z * treeDensity + tile.pos.y) + 0.1;
 
-							if (value > this.threshold) {
-								tileData[_x2][_y][z] = mat;
-							} else if (_y > tileHeight - 2) {
-								tileData[_x2][_y][z] = mat;
-							}
-						} else if (_y > tileHeight - 2) {
-							tileData[_x2][_y][z] = mat;
-						}
-					}
-				}
-			}
+                if (_yvalue < 0.5 && _yvalue > 0.45) {
+                  this.makeThing(tileData, _x2, _y2, _z);
+                } else if (_yvalue >= treeDensity) {
+                  this.makeTree(tileData, _x2, _y2, _z, treeHeight);
+                }
+              }
+            }
+          }
+        }
+      }
 
-			// generate features
-			// return tile;
+      return tile;
+    }
+  }, {
+    key: "makeTree",
+    value: function makeTree(tileData, x, y, z, height) {
+      var tileHeight = this.tileHeight;
+      var width = 5;
+      var bevel = 0.2;
 
-			var treeDensity = this.treeDensity;
+      if (y - height < tileHeight) {
+        if (tileData[x][y - height] && !tileData[x][y - height][z]) for (var i = 0; i < height; i++) {
+          // make log
+          if (tileData[x][y - i]) {
+            if (i <= height - 1) {
+              tileData[x][y - i][z] = UV.LOG;
+            }
+          } // make crown
 
-			for (var _x3 = 0; _x3 < tileData.length; _x3++) {
-				for (var _y2 = 0; _y2 < tileData[_x3].length; _y2++) {
-					for (var _z = 0; _z < tileData[_x3][_y2].length; _z++) {
-						// decide if destination is valid for a tree
 
-						var treeHeight = Math.floor(Math.random() * 10 + 10);
+          if (i >= 2) {
+            var diff = -i * 0.22;
 
-						if (_x3 + 5 < tileSize && _x3 - 5 > 0 && _y2 > treeHeight && _z + 5 < tileSize && _z - 5 > 0) {
+            if (i % 2 == 0) {
+              diff -= 2;
+            }
 
-							if (tileData[_x3][_y2 + 1] && tileData[_x3][_y2 - 1] && tileData[_x3][_y2 + 1][_z] && !tileData[_x3][_y2 - 1][_z] && tileData[_x3][_y2 + 1][_z] == UV.GRASS) {
+            for (var tx = -width; tx <= width; tx++) {
+              for (var ty = -width; ty <= width; ty++) {
+                if (x - tx != x || y - ty != y || i > height - 2) {
+                  var p1 = [x, y];
+                  var p2 = [x - tx, y - ty];
+                  var a = p1[0] - p2[0];
+                  var b = p1[1] - p2[1];
+                  var dist = Math.sqrt(a * a + b * b);
 
-								var _yvalue = _perlin2.default.perlin2(_x3 * treeDensity + tile.pos.y, _z * treeDensity + tile.pos.y) + 0.1;
+                  if (dist <= width + bevel + diff) {
+                    tileData[x - tx][y - i][z - ty] = UV.LEAVES;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: "makeThing",
+    value: function makeThing(tileData, x, y, z) {// tileData[x][y][z] = UV.LAVA;
+    }
+  }, {
+    key: "voxel",
+    value: function voxel(tile, x, y, z) {
+      var offsetX = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+      var offsetY = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+      var tileData = tile.tileData;
+      var tileSize = this.tileSize;
+      var tileHeight = this.tileHeight;
+      var cube = new _Voxel.Voxel({
+        uv: tileData[x][y][z],
+        position: new _Math.Vec(x * 20 + 10 - tileSize / 2 * 20, y * 20 + 10 - tileHeight * 20 - 0.5, z * 20 + 10 - tileSize / 2 * 20)
+      });
 
-								if (_yvalue < 0.5 && _yvalue > 0.45) {
-									this.makeThing(tileData, _x3, _y2, _z);
-								} else if (_yvalue >= treeDensity) {
-									this.makeTree(tileData, _x3, _y2, _z, treeHeight);
-								}
-							}
-						}
-					}
-				}
-			}
+      if (y - 1 > 0 && y - 1 < tileHeight && tileData[x][y - 1][z]) {
+        cube.visible.TOP = false;
+      }
 
-			return tile;
-		}
-	}, {
-		key: 'makeTree',
-		value: function makeTree(tileData, x, y, z, height) {
-			var tileHeight = this.tileHeight;
+      if (y + 1 > 0 && y + 1 < tileHeight && tileData[x][y + 1][z]) {
+        cube.visible.BOTTOM = false;
+      }
 
-			var width = 5;
-			var bevel = 0.2;
+      if (z - 1 > 0 && z - 1 < tileSize && tileData[x][y][z - 1]) {
+        cube.visible.RIGHT = false;
+      }
 
-			if (y - height < tileHeight) {
+      if (z + 1 > 0 && z + 1 < tileSize && tileData[x][y][z + 1]) {
+        cube.visible.LEFT = false;
+      }
 
-				if (tileData[x][y - height] && !tileData[x][y - height][z]) for (var i = 0; i < height; i++) {
-					// make log
-					if (tileData[x][y - i]) {
-						if (i <= height - 1) {
-							tileData[x][y - i][z] = UV.LOG;
-						}
-					}
+      if (x - 1 > 0 && x - 1 < tileSize && tileData[x - 1][y][z]) {
+        cube.visible.BACK = false;
+      }
 
-					// make crown
-					if (i >= 2) {
-						var diff = -i * 0.22;
+      if (x + 1 > 0 && x + 1 < tileSize && tileData[x + 1][y][z]) {
+        cube.visible.FRONT = false;
+      }
 
-						if (i % 2 == 0) {
-							diff -= 2;
-						}
+      if (!cube.invisible) {
+        if (cube.buffer) {
+          tile.group.add(cube);
+        }
+      }
+    }
+  }]);
 
-						for (var tx = -width; tx <= width; tx++) {
-							for (var ty = -width; ty <= width; ty++) {
-
-								if (x - tx != x || y - ty != y || i > height - 2) {
-
-									var p1 = [x, y];
-									var p2 = [x - tx, y - ty];
-
-									var a = p1[0] - p2[0];
-									var b = p1[1] - p2[1];
-
-									var dist = Math.sqrt(a * a + b * b);
-
-									if (dist <= width + bevel + diff) {
-										tileData[x - tx][y - i][z - ty] = UV.LEAVES;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}, {
-		key: 'makeThing',
-		value: function makeThing(tileData, x, y, z) {
-			// tileData[x][y][z] = UV.LAVA;
-		}
-	}, {
-		key: 'voxel',
-		value: function voxel(tile, x, y, z) {
-			var offsetX = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-			var offsetY = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-
-			var tileData = tile.tileData;
-			var tileSize = this.tileSize;
-			var tileHeight = this.tileHeight;
-			var cube = new _Voxel.Voxel({
-				uv: tileData[x][y][z],
-				position: new _Math.Vec(x * 20 + 10 - tileSize / 2 * 20, y * 20 + 10 - tileHeight * 20 - 0.5, z * 20 + 10 - tileSize / 2 * 20)
-			});
-
-			if (y - 1 > 0 && y - 1 < tileHeight && tileData[x][y - 1][z]) {
-				cube.visible.TOP = false;
-			}
-			if (y + 1 > 0 && y + 1 < tileHeight && tileData[x][y + 1][z]) {
-				cube.visible.BOTTOM = false;
-			}
-			if (z - 1 > 0 && z - 1 < tileSize && tileData[x][y][z - 1]) {
-				cube.visible.RIGHT = false;
-			}
-			if (z + 1 > 0 && z + 1 < tileSize && tileData[x][y][z + 1]) {
-				cube.visible.LEFT = false;
-			}
-			if (x - 1 > 0 && x - 1 < tileSize && tileData[x - 1][y][z]) {
-				cube.visible.BACK = false;
-			}
-			if (x + 1 > 0 && x + 1 < tileSize && tileData[x + 1][y][z]) {
-				cube.visible.FRONT = false;
-			}
-
-			if (!cube.invisible) {
-				if (cube.buffer) {
-					tile.group.add(cube);
-				}
-			}
-		}
-	}]);
-
-	return VoxelWorldGenerator;
+  return VoxelWorldGenerator;
 }();
-},{"../lib/perlin.js":5,"./gl/geo/Voxel.js":9,"./gl/Math.js":7,"./gl/geo/Group.js":11}],1:[function(require,module,exports) {
-'use strict';
 
-var _VoxelWorldGenerator = require('./VoxelWorldGenerator.js');
+exports.VoxelWorldGenerator = VoxelWorldGenerator;
+},{"../lib/perlin.js":"../lib/perlin.js","./gl/geo/Voxel.js":"gl/geo/Voxel.js","./gl/Math.js":"gl/Math.js","./gl/geo/Group.js":"gl/geo/Group.js"}],"Worldgen.js":[function(require,module,exports) {
+"use strict";
+
+var _VoxelWorldGenerator = require("./VoxelWorldGenerator.js");
 
 var worldGen = new _VoxelWorldGenerator.VoxelWorldGenerator();
 
 onmessage = function onmessage(e) {
-    switch (e.data.type) {
-
-        case 'regen':
-            worldGen.setOptions(e.data.settings);
-            var startTime = performance.now();
-            worldGen.regen(0, function (tile) {
-                self.postMessage({ type: 'tile', tile: tile });
-            }).then(function () {
-                console.log("World gen in", Math.floor(performance.now() - startTime), "ms");
-            });
-            break;
-
-    }
+  switch (e.data.type) {
+    case 'regen':
+      worldGen.setOptions(e.data.settings);
+      var startTime = performance.now();
+      worldGen.regen(0, function (tile) {
+        self.postMessage({
+          type: 'tile',
+          tile: tile
+        });
+      }).then(function () {
+        console.log("World gen in", Math.floor(performance.now() - startTime), "ms");
+      });
+      break;
+  }
 };
-},{"./VoxelWorldGenerator.js":3}],19:[function(require,module,exports) {
-
+},{"./VoxelWorldGenerator.js":"VoxelWorldGenerator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
-
-var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
 
 function Module(moduleName) {
@@ -1250,25 +1406,25 @@ function Module(moduleName) {
       this._disposeCallbacks.push(fn);
     }
   };
-
   module.bundle.hotData = null;
 }
 
 module.bundle.Module = Module;
-
 var parent = module.bundle.parent;
+
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = '' || location.hostname;
+  var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52658' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63708" + '/');
+
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
     if (data.type === 'update') {
+      console.clear();
       data.assets.forEach(function (asset) {
         hmrApply(global.parcelRequire, asset);
       });
-
       data.assets.forEach(function (asset) {
         if (!asset.isNew) {
           hmrAccept(global.parcelRequire, asset.id);
@@ -1278,6 +1434,7 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
 
     if (data.type === 'reload') {
       ws.close();
+
       ws.onclose = function () {
         location.reload();
       };
@@ -1285,15 +1442,12 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
 
     if (data.type === 'error-resolved') {
       console.log('[parcel] ✨ Error resolved');
-
       removeErrorOverlay();
     }
 
     if (data.type === 'error') {
       console.error('[parcel] 🚨  ' + data.error.message + '\n' + data.error.stack);
-
       removeErrorOverlay();
-
       var overlay = createErrorOverlay(data);
       document.body.appendChild(overlay);
     }
@@ -1302,6 +1456,7 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
 
 function removeErrorOverlay() {
   var overlay = document.getElementById(OVERLAY_ID);
+
   if (overlay) {
     overlay.remove();
   }
@@ -1309,21 +1464,19 @@ function removeErrorOverlay() {
 
 function createErrorOverlay(data) {
   var overlay = document.createElement('div');
-  overlay.id = OVERLAY_ID;
+  overlay.id = OVERLAY_ID; // html encode message and stack trace
 
-  // html encode message and stack trace
   var message = document.createElement('div');
   var stackTrace = document.createElement('pre');
   message.innerText = data.error.message;
   stackTrace.innerText = data.error.stack;
-
   overlay.innerHTML = '<div style="background: black; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; opacity: 0.85; font-family: Menlo, Consolas, monospace; z-index: 9999;">' + '<span style="background: red; padding: 2px 4px; border-radius: 2px;">ERROR</span>' + '<span style="top: 2px; margin-left: 5px; position: relative;">🚨</span>' + '<div style="font-size: 18px; font-weight: bold; margin-top: 20px;">' + message.innerHTML + '</div>' + '<pre>' + stackTrace.innerHTML + '</pre>' + '</div>';
-
   return overlay;
 }
 
 function getParents(bundle, id) {
   var modules = bundle.modules;
+
   if (!modules) {
     return [];
   }
@@ -1334,8 +1487,9 @@ function getParents(bundle, id) {
   for (k in modules) {
     for (d in modules[k][1]) {
       dep = modules[k][1][d];
+
       if (dep === id || Array.isArray(dep) && dep[dep.length - 1] === id) {
-        parents.push(+k);
+        parents.push(k);
       }
     }
   }
@@ -1349,6 +1503,7 @@ function getParents(bundle, id) {
 
 function hmrApply(bundle, asset) {
   var modules = bundle.modules;
+
   if (!modules) {
     return;
   }
@@ -1364,6 +1519,7 @@ function hmrApply(bundle, asset) {
 
 function hmrAccept(bundle, id) {
   var modules = bundle.modules;
+
   if (!modules) {
     return;
   }
@@ -1374,6 +1530,7 @@ function hmrAccept(bundle, id) {
 
   var cached = bundle.cache[id];
   bundle.hotData = {};
+
   if (cached) {
     cached.hot.data = bundle.hotData;
   }
@@ -1386,12 +1543,13 @@ function hmrAccept(bundle, id) {
 
   delete bundle.cache[id];
   bundle(id);
-
   cached = bundle.cache[id];
+
   if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
     cached.hot._acceptCallbacks.forEach(function (cb) {
       cb();
     });
+
     return true;
   }
 
@@ -1399,4 +1557,4 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[19,1])
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","Worldgen.js"], null)
