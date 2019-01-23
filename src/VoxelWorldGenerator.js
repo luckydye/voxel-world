@@ -3,59 +3,6 @@ import { Voxel } from './gl/geo/Voxel.js';
 import { Vec } from './gl/Math.js';
 import { Group } from './gl/geo/Group.js';
 
-function generate(startpoint, TILECOUNT, put) {
-	let tileCount = 0;
-	let openSet = new Set();
-	let closedSet = createSet(TILECOUNT*2);
-
-	tick(startpoint, TILECOUNT);
-
-	function tick(tile, maxCount) {
-		if(tileCount > maxCount) return;
-
-		const [x, y] = tile;
-		put(x, y);
-		
-		tileCount++;
-
-		closedSet[x][y] = tile;
-		openSet.delete(tile);
-
-		getNeighbors(tile);
-
-		for(let tile of openSet) {
-			if(valid(tile)) {
-				tick(tile, maxCount);
-			}
-		}
-
-		function valid(tile) {
-			const [x, y] = tile;
-			const ctile = closedSet[x][y];
-			return !ctile;
-		}
-
-		function getNeighbors() {
-			const neighbors = [
-				[x-1, y], [x, y-1], [x+1, y], [x, y+1],
-				[x-1, y-1], [x+1, y+1], [x+1, y-1], [x-1, y+1]
-			]
-			for(let n of neighbors) {
-				if(valid(n)) openSet.add(n);
-			}
-		}
-	}
-
-	function createSet(size) {
-		const arr = new Array(size);
-		for(let x = -size/2; x < size/2; x++) {
-			arr[x] = new Array(size);
-		}
-		return arr;
-	}
-}
-
-
 class Tile {
 	constructor(x, y, size, height) {
 		this.tileData = new Array(size);
@@ -115,7 +62,67 @@ export class VoxelWorldGenerator {
 
 	constructor(args) {
 		this.setOptions(args);
-		this.tileSize = 32;
+		this.tileSize = 16;
+	}
+
+	generate(startpoint, TILECOUNT, put) {
+		let tileCount = 0;
+		let openSet = new Set();
+		let closedSet = createSet(TILECOUNT*2);
+		const self = this;
+	
+		tick(startpoint, TILECOUNT);
+	
+		function tick(tile, maxCount) {
+			if(tileCount > maxCount) return;
+	
+			const [x, y] = tile;
+			const newTile = self.generateTile(x, y);
+			put(newTile);
+			
+			tileCount++;
+	
+			closedSet[x][y] = tile;
+			openSet.delete(tile);
+	
+			getNeighbors(tile);
+	
+			for(let tile of openSet) {
+				if(valid(tile)) {
+					tick(tile, maxCount);
+				}
+			}
+	
+			function valid(tile) {
+				const [x, y] = tile;
+				const ctile = closedSet[x][y];
+				return !ctile;
+			}
+	
+			function getNeighbors() {
+				const neighbors = [
+					[x+1, y-1], 
+					[x+1, y], 
+					[x+1, y+1], 
+					[x-1, y-1], 
+					[x-1, y], 
+					[x-1, y+1],
+					[x, y-1], 
+					[x, y+1],
+				]
+				for(let n of neighbors) {
+					if(valid(n)) openSet.add(n);
+				}
+			}
+		}
+	
+		function createSet(size) {
+			const arr = new Array(size);
+			for(let x = -size/2; x < size/2; x++) {
+				arr[x] = new Array(size);
+			}
+			return arr;
+		}
 	}
 
     regen(seed, callback) {
@@ -125,9 +132,8 @@ export class VoxelWorldGenerator {
 		return new Promise((resolve, reject) => {
 			const size = this.worldSize;
 
-			generate([0,0], size * size + 4, (x, y) => {
-				const tile = this.buildTile(this.generateTile(x, y));
-				callback(tile);
+			this.generate([0,0], size * size + 4, (newtile) => {
+				callback(this.buildTile(newtile));
 			});
 			
 			resolve();

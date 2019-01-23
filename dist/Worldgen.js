@@ -790,9 +790,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.VoxelWorldGenerator = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _perlin = require('../lib/perlin.js');
 
@@ -807,103 +807,6 @@ var _Group = require('./gl/geo/Group.js');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function generate(startpoint, TILECOUNT, put) {
-	var tileCount = 0;
-	var openSet = new Set();
-	var closedSet = createSet(TILECOUNT * 2);
-
-	tick(startpoint, TILECOUNT);
-
-	function tick(tile, maxCount) {
-		if (tileCount > maxCount) return;
-
-		var _tile = _slicedToArray(tile, 2),
-		    x = _tile[0],
-		    y = _tile[1];
-
-		put(x, y);
-
-		tileCount++;
-
-		closedSet[x][y] = tile;
-		openSet.delete(tile);
-
-		getNeighbors(tile);
-
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
-
-		try {
-			for (var _iterator = openSet[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var _tile2 = _step.value;
-
-				if (valid(_tile2)) {
-					tick(_tile2, maxCount);
-				}
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
-				}
-			}
-		}
-
-		function valid(tile) {
-			var _tile3 = _slicedToArray(tile, 2),
-			    x = _tile3[0],
-			    y = _tile3[1];
-
-			var ctile = closedSet[x][y];
-			return !ctile;
-		}
-
-		function getNeighbors() {
-			var neighbors = [[x - 1, y], [x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y - 1], [x + 1, y + 1], [x + 1, y - 1], [x - 1, y + 1]];
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
-
-			try {
-				for (var _iterator2 = neighbors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var n = _step2.value;
-
-					if (valid(n)) openSet.add(n);
-				}
-			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
-					}
-				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
-					}
-				}
-			}
-		}
-	}
-
-	function createSet(size) {
-		var arr = new Array(size);
-		for (var x = -size / 2; x < size / 2; x++) {
-			arr[x] = new Array(size);
-		}
-		return arr;
-	}
-}
 
 var Tile = function Tile(x, y, size, height) {
 	_classCallCheck(this, Tile);
@@ -976,10 +879,110 @@ var VoxelWorldGenerator = exports.VoxelWorldGenerator = function () {
 		_classCallCheck(this, VoxelWorldGenerator);
 
 		this.setOptions(args);
-		this.tileSize = 32;
+		this.tileSize = 16;
 	}
 
 	_createClass(VoxelWorldGenerator, [{
+		key: 'generate',
+		value: function generate(startpoint, TILECOUNT, put) {
+			var tileCount = 0;
+			var openSet = new Set();
+			var closedSet = createSet(TILECOUNT * 2);
+			var self = this;
+
+			tick(startpoint, TILECOUNT);
+
+			function tick(tile, maxCount) {
+				if (tileCount > maxCount) return;
+
+				var _tile = _slicedToArray(tile, 2),
+				    x = _tile[0],
+				    y = _tile[1];
+
+				var newTile = self.generateTile(x, y);
+				put(newTile);
+
+				tileCount++;
+
+				closedSet[x][y] = tile;
+				openSet.delete(tile);
+
+				getNeighbors(tile);
+
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = openSet[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var _tile2 = _step.value;
+
+						if (valid(_tile2)) {
+							tick(_tile2, maxCount);
+						}
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+
+				function valid(tile) {
+					var _tile3 = _slicedToArray(tile, 2),
+					    x = _tile3[0],
+					    y = _tile3[1];
+
+					var ctile = closedSet[x][y];
+					return !ctile;
+				}
+
+				function getNeighbors() {
+					var neighbors = [[x + 1, y - 1], [x + 1, y], [x + 1, y + 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1], [x, y - 1], [x, y + 1]];
+					var _iteratorNormalCompletion2 = true;
+					var _didIteratorError2 = false;
+					var _iteratorError2 = undefined;
+
+					try {
+						for (var _iterator2 = neighbors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+							var n = _step2.value;
+
+							if (valid(n)) openSet.add(n);
+						}
+					} catch (err) {
+						_didIteratorError2 = true;
+						_iteratorError2 = err;
+					} finally {
+						try {
+							if (!_iteratorNormalCompletion2 && _iterator2.return) {
+								_iterator2.return();
+							}
+						} finally {
+							if (_didIteratorError2) {
+								throw _iteratorError2;
+							}
+						}
+					}
+				}
+			}
+
+			function createSet(size) {
+				var arr = new Array(size);
+				for (var x = -size / 2; x < size / 2; x++) {
+					arr[x] = new Array(size);
+				}
+				return arr;
+			}
+		}
+	}, {
 		key: 'regen',
 		value: function regen(seed, callback) {
 			var _this = this;
@@ -990,9 +993,8 @@ var VoxelWorldGenerator = exports.VoxelWorldGenerator = function () {
 			return new Promise(function (resolve, reject) {
 				var size = _this.worldSize;
 
-				generate([0, 0], size * size + 4, function (x, y) {
-					var tile = _this.buildTile(_this.generateTile(x, y));
-					callback(tile);
+				_this.generate([0, 0], size * size + 4, function (newtile) {
+					callback(_this.buildTile(newtile));
 				});
 
 				resolve();
@@ -1228,7 +1230,7 @@ onmessage = function onmessage(e) {
 
     }
 };
-},{"./VoxelWorldGenerator.js":3}],21:[function(require,module,exports) {
+},{"./VoxelWorldGenerator.js":3}],19:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -1258,7 +1260,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '50508' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52658' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -1397,4 +1399,4 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[21,1])
+},{}]},{},[19,1])
