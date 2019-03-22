@@ -6,7 +6,7 @@ import { Camera } from "./gl/scene/Camera.js";
 import { Material } from "./gl/graphics/Material.js";
 import { Resources } from "./gl/Resources.js";
 import { Terrain } from './gl/geo/Terrain.js';
-import { MouseControler } from './gl/entity/MouseControler.js';
+import { CameraControler } from './gl/entity/CameraControler.js';
 import { Geometry } from './gl/scene/Geometry.js';
 import { VertexBuffer } from './gl/graphics/VertexBuffer.js';
 import { PointLight } from './gl/scene/PointLight.js';
@@ -102,7 +102,7 @@ export default class World {
             fov: 90,
             position: settingsCamPos ? new Vec(...settingsCamPos) : new Vec(0.5, 200.5, -600.5),
             rotation: settingsCamRot ? new Vec(...settingsCamRot) : new Vec(19.5, 0.5, 0.5),
-			controller: MouseControler,
+			controller: CameraControler,
         });
 
         this.renderer.fogEnabled = true;

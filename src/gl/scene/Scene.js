@@ -34,8 +34,8 @@ export class Scene {
 		const time = performance.now();
 		if(options.turntable) {
 			this.camera.rotation.y += 0.02 * (time - lastTick);
-			this.camera.update();
 		}
+		this.camera.update();
 		if(this.lightSources) {
 			this.lightSources.rotation.y += 0.02 * (time - lastTick);
 			this.lightSources.update();

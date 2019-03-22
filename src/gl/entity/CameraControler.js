@@ -14,7 +14,7 @@ function isMouseButton(e) {
 	return mbutton;
 }
 
-export class MouseControler extends EntityController {
+export class CameraControler extends EntityController {
 
 	constructor(entity) {
 		super(entity);
@@ -81,9 +81,14 @@ export class MouseControler extends EntityController {
 		});
 
 		viewport.addEventListener("wheel", e => {
-			entity.zoom(e.deltaY);
+			this.zoom(e.deltaY);
 			entity.update();
 		})
+	}
+
+	zoom(dir) {
+		const camera = this.entity;
+		camera.position.z += -100 * Math.sign(dir);
 	}
 
 }
