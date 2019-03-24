@@ -15,29 +15,6 @@ out vec4 oFragColor;
 
 const float radius = 5.0;
 
-vec4 blur(sampler2D textureBuffer, vec2 texCoord, float resolution, vec2 dir) {
-	vec4 sum = vec4(0.0);
-	vec2 tc = texCoord;
-
-	float blur = radius/resolution;
-	float hstep = dir.x;
-	float vstep = dir.y;
-
-	sum += texture(textureBuffer, vec2(tc.x - 4.0*blur*hstep, tc.y - 4.0*blur*vstep)) * 0.0162162162;
-	sum += texture(textureBuffer, vec2(tc.x - 3.0*blur*hstep, tc.y - 3.0*blur*vstep)) * 0.0540540541;
-	sum += texture(textureBuffer, vec2(tc.x - 2.0*blur*hstep, tc.y - 2.0*blur*vstep)) * 0.1216216216;
-	sum += texture(textureBuffer, vec2(tc.x - 1.0*blur*hstep, tc.y - 1.0*blur*vstep)) * 0.1945945946;
-
-	sum += texture(textureBuffer, vec2(tc.x, tc.y)) * 0.2270270270;
-
-	sum += texture(textureBuffer, vec2(tc.x + 1.0*blur*hstep, tc.y + 1.0*blur*vstep)) * 0.1945945946;
-	sum += texture(textureBuffer, vec2(tc.x + 2.0*blur*hstep, tc.y + 2.0*blur*vstep)) * 0.1216216216;
-	sum += texture(textureBuffer, vec2(tc.x + 3.0*blur*hstep, tc.y + 3.0*blur*vstep)) * 0.0540540541;
-	sum += texture(textureBuffer, vec2(tc.x + 4.0*blur*hstep, tc.y + 4.0*blur*vstep)) * 0.0162162162;
-
-	return sum;
-}
-
 void main(void) {
 	vec2 texCoords = texCoord;
 	
@@ -60,13 +37,4 @@ void main(void) {
 		vec3 fogValue = vec3(pow(depth, 150.0)) * fogColor;
 		oFragColor += vec4(fogValue, 1.0) * 2.0;
 	}
-
-	// oFragColor = light;
-
-	// 	bloom
-	// vec2 imageSize = vec2(textureSize(bloomBuffer, 0));
-	// vec3 bloomX = blur(bloomBuffer, texCoords, imageSize.x, vec2(1.0, 0.0)).rgb;
-	// oFragColor += vec4(bloomX, 1.0);
-	// vec3 bloomY = blur(bloomBuffer, texCoords, imageSize.x, vec2(0.0, 1.0)).rgb;
-	// oFragColor += vec4(bloomY, 1.0);
 }

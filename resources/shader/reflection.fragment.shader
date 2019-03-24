@@ -7,7 +7,6 @@ in vec3 vNormal;
 uniform sampler2D colorTexture;
 uniform sampler2D reflectionMap;
 
-uniform float textureScale;
 uniform float transparency;
 uniform vec3 diffuseColor;
 
@@ -19,7 +18,7 @@ void main() {
 
     vec2 imageSize = vec2(textureSize(colorTexture, 0));
     if(imageSize.x > 1.0) {
-        vec2 textureCoords = vec2(vTexCoords) / (imageSize.x / textureScale);
+        vec2 textureCoords = vec2(vTexCoords) / (imageSize.x / 16.0);
 
         vec4 textureColor = texture(colorTexture, textureCoords);
         oFragColor *= textureColor;

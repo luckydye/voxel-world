@@ -7,6 +7,10 @@ window.addEventListener("contextmenu", e => e.preventDefault());
 function onPageLod() {
 	const world = document.querySelector('#viewport');
 
+	world.onReady = () => {
+		world.createVoxelScene();
+	}
+
 	createToolbar({
 		zoomIn: IconButton({
 			icon: Icons.zoomin,

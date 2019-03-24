@@ -9,6 +9,8 @@ uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 uniform mat4 uNormalMatrix;
 
+uniform sampler2D displacementMap;
+
 uniform mat4 lightProjViewMatrix;
 
 uniform float uTime;
@@ -22,12 +24,18 @@ out mat4 vLightProjViewMatrix;
 void main() {
   vec4 pos = uModelMatrix * vec4(aPosition, 1.0);
 
+  float bump = texture(displacementMap, aTexCoords).r * 200.0;
+
+  float xbump = bump * aNormal.x;
+  float ybump = bump * (aNormal.y-1.0 * -1.0);
+  float zbump = bump * aNormal.z;
+
+  gl_Position = uProjMatrix * uViewMatrix * vec4(pos.x + xbump, pos.y + ybump, pos.z + zbump, 1.0);
+  gl_PointSize = 5.0;
+
   vLightProjViewMatrix = lightProjViewMatrix;
   vertexPos = aPosition;
   vWorldPos = pos;
   vNormal = aNormal;
   vTexCoords = aTexCoords;
-
-  gl_Position = uProjMatrix * uViewMatrix * vec4(pos.xyz, 1.0);
-  gl_PointSize = 5.0;
 }

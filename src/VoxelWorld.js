@@ -26,6 +26,13 @@ worker = createWorker();
 
 class VoxelWorld extends Viewport {
 
+    onReady() {}
+
+    init() {
+        super.init();
+        this.onReady();
+    }
+
     createTerrainScene(args) {
         this.scene = new Scene({
             camera: this.camera,
