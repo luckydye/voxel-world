@@ -1,4 +1,3 @@
-import { Statistics } from '../Statistics.js';
 import { Plane } from '../geo/Plane.js';
 import { GLContext } from './GL.js';
 import FinalShader from '../shader/FinalShader.js';
@@ -8,77 +7,37 @@ import { Resources } from '../Resources.js';
 import ReflectionShader from '../shader/ReflectionShader.js';
 import { Grid } from '../geo/Grid.js';
 import GridShader from '../shader/GridShader.js';
+import { Logger } from '../../Logger.js';
 
-Resources.add({
-	'defaulttexture': './resources/textures/placeholder.png',
-}, false);
-
-class RenderPass {
-
-	get buffer() {
-		return this.renderer.getBufferTexture(this.id);
-	}
-
-	get depthbuffer() {
-		return this.renderer.getBufferTexture(this.id + 'Depth');
-	}
-
-	constructor(renderer, id, shader, ar, resolution, isDepthBuffer) {
-		this.id = id;
-		this.shader = shader;
-		this.renderer = renderer;
-
-		if(!shader.initialized) {
-			this.renderer.prepareShader(shader);
-        }
-        
-		this.width = resolution;
-		this.height = resolution / ar;
-
-		if(isDepthBuffer) {
-            this.renderer.createFramebuffer(this.id, this.width, this.height).depthbuffer();
-        } else {
-            this.renderer.createFramebuffer(this.id, this.width, this.height).colorbuffer();
-        }
-	}
-
-	use() {
-		this.renderer.useFramebuffer(this.id);
-		this.renderer.clear();
-		this.renderer.viewport(this.width, this.height);
-		this.renderer.useShader(this.shader);
-	}
-}
+const logger = new Logger('Renderer');
 
 export class Renderer extends GLContext {
 
-	get width() { return 1280; }
-	get height() { return 1280; }
-
-	get aspectratio() { return this.width / this.height; }
+	static get defaults() {
+		return {
+			resolution: [1920, 1080]
+		}
+	}
 
 	setScene(scene) {
 		this.scene = scene;
-
-		this.screen = new Plane({ material: null });
-
-		this.updateViewport();
 	}
 
 	updateViewport() {
-		this.setResolution(this.width, this.height);
 		this.scene.camera.sensor = {
 			width: this.width,
 			height: this.height
 		};
 		this.scene.camera.update();
-
-		Statistics.data.resolution = this.resolution;
 	}
 
     onCreate() {
 		this.fogEnabled = false;
 		this.bloomEnabled = false;
+
+		this.renderTarget = new Plane({ material: null });
+
+		this.setResolution(...Renderer.defaults.resolution);
 
 		this.renderPasses = [
 			new RenderPass(this, 'shadow', new ColorShader(), this.aspectratio, 3840, true),
@@ -99,7 +58,21 @@ export class Renderer extends GLContext {
 		this.compShader = new FinalShader();
 		this.prepareShader(this.compShader);
 
-        Statistics.data.passes = this.renderPasses.length;
+		logger.log(`Resolution set to ${this.width}x${this.height}`);
+	}
+
+	draw() {
+		if(!this.scene) return;
+
+		// update animated textures
+		for(let geo of this.scene.objects) {
+			if(geo.mat && geo.mat.animated) {
+				this.updateTexture(geo.mat.texture.gltexture, geo.mat.texture.image);
+			}
+		}
+
+		this.renderMultiPasses(this.renderPasses);
+		this.compositePasses(this.renderPasses);
 	}
 
 	renderMultiPasses(passes) {
@@ -117,7 +90,7 @@ export class Renderer extends GLContext {
 					break;
 
 				case "light":
-					this.useTexture(this.getBufferTexture('shadow'), "shadowDepthMap", 2);
+					this.useTexture(this.getBufferTexture('shadow'), "shadowDepthMap", 0);
 
 					this.gl.uniformMatrix4fv(pass.shader.uniforms.lightProjViewMatrix, 
 						false, lightS.projViewMatrix);
@@ -135,7 +108,7 @@ export class Renderer extends GLContext {
 					break;
 
 				case "diffuse":
-					this.useTexture(this.getBufferTexture('reflection'), "reflectionBuffer", 2);
+					this.useTexture(this.getBufferTexture('reflection'), "reflectionBuffer", 0);
 					this.drawScene(this.scene);
 					this.drawGrid();
 					break;
@@ -176,7 +149,7 @@ export class Renderer extends GLContext {
 		this.clear();
 		this.gl.clearColor(0.05, 0.1, 0.15, 1.0);
 		
-		this.viewport(this.resolution.width, this.resolution.height);
+		this.viewport(this.width, this.height);
 
 		this.useShader(this.compShader);
 			
@@ -186,27 +159,9 @@ export class Renderer extends GLContext {
 		}
 		this.useTexture(this.getBufferTexture('depth'), 'depthBuffer', passes.length+1);
 
-		this.gl.uniform1f(this.compShader.uniforms.aspectRatio, 
-			this.width / this.height * 
-			this.resolution.width / this.resolution.height);
-
 		this.gl.uniform1i(this.compShader.uniforms.fog, this.fogEnabled);
 
-		this.drawGeo(this.screen);
-	}
-
-	draw() {
-		if(!this.scene) return;
-
-		// update animated textures
-		for(let geo of this.scene.objects) {
-			if(geo.mat && geo.mat.animated) {
-				this.updateTexture(geo.mat.texture.gltexture, geo.mat.texture.image);
-			}
-		}
-
-		this.renderMultiPasses(this.renderPasses);
-		this.compositePasses(this.renderPasses);
+		this.drawGeo(this.renderTarget);
 	}
 
 	// give texture a .gltexture
@@ -219,14 +174,29 @@ export class Renderer extends GLContext {
 	// give material attributes to shader
 	applyMaterial(shader, material) {
 		const colorTexture = material.texture;
-		this.prepareTexture(colorTexture);
-		this.useTexture(colorTexture.gltexture, "colorTexture", 0);
-
 		const reflectionMap = material.reflectionMap;
-		this.prepareTexture(reflectionMap);
-		this.useTexture(reflectionMap.gltexture, "reflectionMap", 1);
+		const displacementMap = material.displacementMap;
 
-		this.gl.uniform1f(shader.uniforms.textureScale, colorTexture.scale);
+		this.useTexture(null, "colorTexture", 1);
+		this.useTexture(null, "reflectionMap", 2);
+		this.useTexture(null, "displacementMap", 3);
+
+		this.prepareTexture(colorTexture);
+		if(colorTexture.img && colorTexture.gltexture) {
+			this.useTexture(colorTexture.gltexture, "colorTexture", 1);
+		}
+		this.gl.uniform1f(shader.uniforms.textureized, colorTexture.img ? 1 : 0);
+
+		this.prepareTexture(reflectionMap);
+		if(reflectionMap.img && reflectionMap.gltexture) {
+			this.useTexture(reflectionMap.gltexture, "reflectionMap", 2);
+		}
+
+		this.prepareTexture(displacementMap);
+		if(displacementMap.img && displacementMap.gltexture) {
+			this.useTexture(displacementMap.gltexture, "displacementMap", 3);
+		}
+
 		this.gl.uniform3fv(shader.uniforms.diffuseColor, material.diffuseColor);
 		this.gl.uniform1f(shader.uniforms.reflection, material.reflection);
 		this.gl.uniform1f(shader.uniforms.transparency, material.transparency);
@@ -257,7 +227,7 @@ export class Renderer extends GLContext {
 
 		for(let obj of objects) {
 			if(filter && filter(obj) || !filter) {
-				// check if obj is in view, dont render it if not
+				// TODO: check if obj is in view, dont render it if not
 				this.drawMesh(obj);
 			}
 		}
@@ -281,4 +251,41 @@ export class Renderer extends GLContext {
 		this.gl.drawArrays(this.gl[geo.buffer.type], 0, buffer.vertecies.length / buffer.elements);
 	}
 
+}
+
+class RenderPass {
+
+	get buffer() {
+		return this.renderer.getBufferTexture(this.id);
+	}
+
+	get depthbuffer() {
+		return this.renderer.getBufferTexture(this.id + 'Depth');
+	}
+
+	constructor(renderer, id, shader, ar, resolution, isDepthBuffer) {
+		this.id = id;
+		this.shader = shader;
+		this.renderer = renderer;
+
+		if(!shader.initialized) {
+			this.renderer.prepareShader(shader);
+        }
+        
+		this.width = resolution;
+		this.height = resolution / ar;
+
+		if(isDepthBuffer) {
+            this.renderer.createFramebuffer(this.id, this.width, this.height).depthbuffer();
+        } else {
+            this.renderer.createFramebuffer(this.id, this.width, this.height).colorbuffer();
+        }
+	}
+
+	use() {
+		this.renderer.useFramebuffer(this.id);
+		this.renderer.clear();
+		this.renderer.viewport(this.width, this.height);
+		this.renderer.useShader(this.shader);
+	}
 }

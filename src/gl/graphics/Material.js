@@ -11,6 +11,7 @@ export class Material {
     constructor() {
         this.texture = new Texture();
         this.reflectionMap = new Texture();
+        this.displacementMap = new Texture();
         
         this.diffuseColor = [1, 1, 1];
         this.transparency = 0;

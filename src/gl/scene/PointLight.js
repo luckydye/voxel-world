@@ -14,8 +14,6 @@ export class PointLight extends Cube {
 		this.size = size;
 
 		this.scale = this.size * 0.33;
-
-		// this.mat.diffuseColor = color;
 	}
 
 }

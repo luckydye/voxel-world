@@ -16,7 +16,9 @@ function isMouseButton(e) {
 
 export class CameraControler extends EntityController {
 
-	constructor(entity) {
+	static get sensivity() { return 300; }
+
+	constructor(entity, viewport) {
 		super(entity);
 
 		this.initalSettings = {
@@ -26,7 +28,6 @@ export class CameraControler extends EntityController {
 
 		let moving = false;
 		let lastEvent = null;
-		const viewport = document.querySelector('canvas');
 
 		const down = e => {
 			moving = true;
@@ -56,6 +57,7 @@ export class CameraControler extends EntityController {
 			lastEvent = e;
 		}
 
+        viewport.addEventListener('contextmenu', e => e.preventDefault());
 		viewport.addEventListener("mousedown", down);
 		window.addEventListener("mouseup", up);
 		window.addEventListener("mousemove", move);

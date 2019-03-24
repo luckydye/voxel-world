@@ -20,8 +20,10 @@ export class FirstPersonControler extends EntityController {
 		return 100;
 	}
 
-	constructor(entity) {
+	constructor(entity, viewport) {
 		super(entity);
+		
+		this.viewport = viewport;
 
 		entity.update = () => {
 			this.updateCamera();
@@ -40,7 +42,6 @@ export class FirstPersonControler extends EntityController {
 		const entity = this.entity;
 
 		let lastEvent = null;
-		const viewport = document.querySelector('canvas');
 
 		const down = e => {
 			this.moving = true;
@@ -48,7 +49,7 @@ export class FirstPersonControler extends EntityController {
 
 		const up = e => {
 			this.moving = false;
-			viewport.style.cursor = "default";
+			this.viewport.style.cursor = "default";
 			lastEvent = null;
 		}
 
@@ -57,13 +58,13 @@ export class FirstPersonControler extends EntityController {
 				if(isMouseButton(e) == 1 || e.type == "touchmove") {
 					entity.rotation.y += (e.x - lastEvent.x) / window.innerWidth * this.constructor.sensivity;
 					entity.rotation.x += (e.y - lastEvent.y) / window.innerWidth * this.constructor.sensivity;
-					viewport.style.cursor = "grabbing";
+					this.viewport.style.cursor = "grabbing";
 				}
 			}
 			lastEvent = e;
 		}
 
-		viewport.addEventListener("mousedown", down);
+		this.viewport.addEventListener("mousedown", down);
 		window.addEventListener("mouseup", up);
 		window.addEventListener("mousemove", move);
 	}
@@ -92,8 +93,8 @@ export class FirstPersonControler extends EntityController {
 		const camera = this.entity;
 		const moveDir = [0, 0];
 
-		moveDir[1] = this.checkKey("s") ? -1 : moveDir[1];
-		moveDir[1] = this.checkKey("w") ? 1 : moveDir[1];
+		// moveDir[1] = this.checkKey("s") ? -1 : moveDir[1];
+		// moveDir[1] = this.checkKey("w") ? 1 : moveDir[1];
 
 		moveDir[0] = this.checkKey("a") ? 1 : moveDir[0];
 		moveDir[0] = this.checkKey("d") ? -1 : moveDir[0];
@@ -118,8 +119,8 @@ export class FirstPersonControler extends EntityController {
 
 		const viewDir = Math.PI / 180 * camera.rotation.y;
 
-		camera.position.z += moveDir[1];
-		camera.position.x += moveDir[0];
+		camera.position.z += moveDir[1] * 10;
+		camera.position.x += moveDir[0] * 10;
 
 		mat4.translate(viewMatrix, viewMatrix, vec3.fromValues(
 			camera.position.x,

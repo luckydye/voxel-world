@@ -3,12 +3,10 @@ import { GLShader } from "./GLShader.js";
 
 export class GLContext {
 
-	get resolution() {
-		return {
-			width: this.gl.canvas.width,
-			height: this.gl.canvas.height
-		};
-	}
+	get width() { return this.gl.canvas.width; }
+	get height() { return this.gl.canvas.height; }
+
+	get aspectratio() { return this.width / this.height; }
 
 	onCreate() {
 		// on create method
@@ -47,11 +45,9 @@ export class GLContext {
 	}
 
 	setResolution(width, height) {
-		if(width && height) {
-			this.gl.canvas.width = width;
-			this.gl.canvas.height = height;
-		}
-		this.viewport(this.resolution.width, this.resolution.height);
+		this.gl.canvas.width = width;
+		this.gl.canvas.height = height;
+		this.viewport(this.width, this.height);
 	}
 
 	clear() {

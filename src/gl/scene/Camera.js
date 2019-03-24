@@ -8,7 +8,6 @@ export class Camera extends Transform {
 			scale = 0.004,
 			farplane = 350,
 			nearplane = 0.025,
-			controller = null,
 			width = 1280,
 			height = 720,
 		} = args;
@@ -27,10 +26,6 @@ export class Camera extends Transform {
 		this.sensor = {
 			width: width,
 			height: height
-		}
-
-		if(controller) {
-			this.controller = new controller(this);
 		}
 
 		this.update();
@@ -71,8 +66,5 @@ export class Camera extends Transform {
 		mat4.rotateY(viewMatrix, viewMatrix, Math.PI / 180 * camera.rotation.y);
 		
 		mat4.multiply(this.projViewMatrix, this.projMatrix, this.viewMatrix);
-
-		if(this.controller)
-			this.controller.update();
 	}
 }

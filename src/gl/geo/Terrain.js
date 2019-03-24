@@ -5,10 +5,15 @@ import { VertexBuffer } from "../graphics/VertexBuffer.js";
 export class Terrain extends Geometry {
 
 	onCreate({ 
-		smoothness = 0.025,
-		resolution = 50,
-		height = 1000,
-		size = 100,
+		// smoothness = 0.01,
+		// resolution = 25,
+		// height = 2000,
+		// size = 400,
+		// seed = Math.random(),
+		smoothness = 0,
+		resolution = 25,
+		height = 0,
+		size = 400,
 		seed = Math.random(),
 	} = {}) {
 		this.smoothness = smoothness;
@@ -33,10 +38,10 @@ export class Terrain extends Geometry {
 		const size = this.size;
 		const vertArray = [];
 
-		const heightmap1 = this.heightMap(size, size, this.smoothness, this.height);
-		const heightmap2 = this.heightMap(size, size, this.smoothness * 8, this.height / 10);
+		const heightmap = this.heightMap(size, size, this.smoothness, this.height);
+		const heightmap2 = this.heightMap(size, size, 0.99, 200);
 
-		const heightmap = this.mergeMap(heightmap1, heightmap2);
+		// const heightmap = this.mergeMap(heightmap1, heightmap2);
 
 		for(let x = 0; x < heightmap.length; x++) {
 			for(let z = 0; z < heightmap[x].length; z++) {
@@ -71,11 +76,11 @@ export class Terrain extends Geometry {
 		
 		noise.seed(this.seed);
 		
-		for(let x = 0; x <= width; x++) {
+		for(let x = 0; x < width; x++) {
 			if(!verts[x]) {
 				verts[x] = new Array(height);
 			}
-			for(let y = 0; y <= height; y++) {
+			for(let y = 0; y < height; y++) {
 				const noiseValue = noise.perlin2(x * freq, y * freq) * terrainheight;
 				verts[x][y] = -noiseValue;
 			}

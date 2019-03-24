@@ -1,5 +1,4 @@
-window.resources = window.resources || {};
-const global = window.resources;
+const global = {};
 
 global.initLoaded = false;
 global.resourceTypes = {
@@ -14,7 +13,7 @@ global.resourceTypes = {
 global.queue = new Set();
 global.map = new Map();
 
-/* @DOCS
+/*
 	Resource.add({ name, path }: arr, startLoading: bool): startLoading ? Promise : null
 		# add resource to queue
 
@@ -95,15 +94,6 @@ export class Resources {
 				return fetch(path).then(res => res.json().catch(err => {
 					console.error("File failed parsing:", path);
 				}));
-
-			case Resources.Types.IMAGE:
-				return new Promise((resolve, reject) => {
-					const img = new Image();
-					img.onload = () => {
-						resolve(img);
-					}
-					img.src = path;
-				});
 
 			case Resources.Types.IMAGE:
 				return new Promise((resolve, reject) => {
