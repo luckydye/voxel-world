@@ -545,6 +545,91 @@ class ConsoleEngiene {
     return eval(js);
   }
 
+  formatValue(value) {
+    if (!value) {
+      value = `<span style="font-style: italic; color: #eee;">${value}</span>`;
+    } else {
+      switch (typeof value) {
+        case "string":
+          if (value.length < 400) {
+            const ele = document.createElement('span');
+            ele.innerText = value;
+            value = ele.outerHTML;
+          } else {
+            value = '"..."';
+          }
+
+          break;
+
+        case "number":
+          value = `${value}`;
+          break;
+
+        case "boolean":
+          value = `<span style="font-style: italic; color: #eee;">${value}</span>`;
+          break;
+
+        default:
+          value = value.constructor.name;
+          break;
+      }
+    }
+
+    return value;
+  }
+
+  formatOutput(evaluation) {
+    let output = "";
+
+    if (!evaluation) {
+      // format undefined null and false
+      output = this.formatValue(evaluation);
+    } else if (Array.isArray(evaluation)) {
+      // format arrays
+      output += "[";
+      const maxCount = 15;
+      let count = 0;
+      let attr = [];
+
+      for (let key in evaluation) {
+        let value = this.formatValue(evaluation[key]);
+        attr.push(value);
+        count++;
+
+        if (count >= maxCount) {
+          attr.push("...");
+          break;
+        }
+      }
+
+      output += attr.join(', ') + "]";
+    } else if (typeof evaluation == "object") {
+      // format general objects
+      output += evaluation.constructor.name + " { ";
+      const maxCount = 15;
+      let count = 0;
+      let attr = [];
+
+      for (let key in evaluation) {
+        let value = this.formatValue(evaluation[key]);
+        attr.push(`<span style="font-style: italic; color: #eee;">${key}</span>: ${value}`);
+        count++;
+
+        if (count >= maxCount) {
+          attr.push("...");
+          break;
+        }
+      }
+
+      output += attr.join(', ') + " }";
+    } else {
+      // format single values
+      output = this.formatValue(evaluation);
+    }
+
+    return output;
+  }
+
 }
 
 exports.ConsoleEngiene = ConsoleEngiene;
@@ -605,8 +690,14 @@ class THConsole extends ConsoleElement {
 
   onNewLine(inputString) {
     this.createLine('input', inputString);
-    const evaluation = this.engiene.evaluate(inputString);
-    this.createLine('output', evaluation);
+
+    try {
+      const evaluation = this.engiene.evaluate(inputString);
+      let output = this.engiene.formatOutput(evaluation);
+      this.createLine('output', output);
+    } catch (err) {
+      this.error(err);
+    }
   }
 
   createLine(type, inputString) {
@@ -623,14 +714,15 @@ class THConsole extends ConsoleElement {
     const height = lines.clientHeight;
     const scrollheight = lines.scrollHeight;
     const delta = scrollheight - height;
-
-    if (delta - lines.scrollTop < 32) {
-      lines.scrollTo(0, delta);
-    }
+    lines.scrollTo(0, delta);
   }
 
   log(...strArr) {
     this.createLine('output', strArr.join(''));
+  }
+
+  error(...strArr) {
+    this.createLine('error', strArr.join(''));
   }
 
 }
@@ -721,6 +813,10 @@ class THConsoleInput extends ConsoleElement {
     if (value) {
       this.value = value;
     }
+
+    setTimeout(() => {
+      this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+    }, 0);
   }
 
   prevInput() {
@@ -789,6 +885,7 @@ class THConsoleLine extends ConsoleElement {
                     padding-left: 10px;
                 }
 
+                .console-line.error::before,
                 .console-line.input::before,
                 .console-line.output::before {
                     content: "";
@@ -805,6 +902,15 @@ class THConsoleLine extends ConsoleElement {
                     top: 50%;
                 }
 
+                .console-line.error::before {
+                    border-color: currentColor;
+                }
+                
+                .console-line.error {
+                    color: #ff4141;
+                }
+
+                .console-line.error::before,
                 .console-line.output::before {
                     transform: translate(-50%, -50%) rotate(135deg);
                     margin-left: -3px;
@@ -834,10 +940,6 @@ exports.THConsoleLine = THConsoleLine;
 customElements.define('th-console', THConsole);
 customElements.define('th-console-line', THConsoleLine);
 customElements.define('th-console-input', THConsoleInput);
-module.exports = {
-  ConsoleEngiene,
-  THConsole
-};
 },{}],"../node_modules/@uncut/viewport/src/gl/Math.js":[function(require,module,exports) {
 "use strict";
 
@@ -980,7 +1082,7 @@ class Plane extends _Geometry.Geometry {
 }
 
 exports.Plane = Plane;
-},{"../scene/Geometry.js":"../node_modules/@uncut/viewport/src/gl/scene/Geometry.js","../graphics/VertexBuffer.js":"../node_modules/@uncut/viewport/src/gl/graphics/VertexBuffer.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js":[function(require,module,exports) {
+},{"../scene/Geometry.js":"../node_modules/@uncut/viewport/src/gl/scene/Geometry.js","../graphics/VertexBuffer.js":"../node_modules/@uncut/viewport/src/gl/graphics/VertexBuffer.js"}],"../node_modules/gl-matrix/esm/common.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1037,7 +1139,7 @@ function toRadian(a) {
 function equals(a, b) {
   return Math.abs(a - b) <= EPSILON * Math.max(1.0, Math.abs(a), Math.abs(b));
 }
-},{}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat2.js":[function(require,module,exports) {
+},{}],"../node_modules/gl-matrix/esm/mat2.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1529,7 +1631,7 @@ var mul = multiply;
 exports.mul = mul;
 var sub = subtract;
 exports.sub = sub;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat2d.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/mat2d.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2073,7 +2175,7 @@ var mul = multiply;
 exports.mul = mul;
 var sub = subtract;
 exports.sub = sub;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat3.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/mat3.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2924,7 +3026,7 @@ var mul = multiply;
 exports.mul = mul;
 var sub = subtract;
 exports.sub = sub;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat4.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/mat4.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4828,7 +4930,7 @@ var mul = multiply;
 exports.mul = mul;
 var sub = subtract;
 exports.sub = sub;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec3.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/vec3.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5717,7 +5819,7 @@ var forEach = function () {
 }();
 
 exports.forEach = forEach;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec4.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/vec4.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6467,7 +6569,7 @@ var forEach = function () {
 }();
 
 exports.forEach = forEach;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/quat.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/quat.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7177,7 +7279,7 @@ var setAxes = function () {
 }();
 
 exports.setAxes = setAxes;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js","./mat3.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat3.js","./vec3.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec3.js","./vec4.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec4.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/quat2.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js","./mat3.js":"../node_modules/gl-matrix/esm/mat3.js","./vec3.js":"../node_modules/gl-matrix/esm/vec3.js","./vec4.js":"../node_modules/gl-matrix/esm/vec4.js"}],"../node_modules/gl-matrix/esm/quat2.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8098,7 +8200,7 @@ function equals(a, b) {
       b7 = b[7];
   return Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) && Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) && Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) && Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) && Math.abs(a4 - b4) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) && Math.abs(a5 - b5) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) && Math.abs(a6 - b6) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) && Math.abs(a7 - b7) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7));
 }
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js","./quat.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/quat.js","./mat4.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat4.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec2.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js","./quat.js":"../node_modules/gl-matrix/esm/quat.js","./mat4.js":"../node_modules/gl-matrix/esm/mat4.js"}],"../node_modules/gl-matrix/esm/vec2.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8833,7 +8935,7 @@ var forEach = function () {
 }();
 
 exports.forEach = forEach;
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js"}],"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/index.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js"}],"../node_modules/gl-matrix/esm/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8882,7 +8984,7 @@ var vec4 = _interopRequireWildcard(require("./vec4.js"));
 exports.vec4 = vec4;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-},{"./common.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/common.js","./mat2.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat2.js","./mat2d.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat2d.js","./mat3.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat3.js","./mat4.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/mat4.js","./quat.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/quat.js","./quat2.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/quat2.js","./vec2.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec2.js","./vec3.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec3.js","./vec4.js":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/vec4.js"}],"../node_modules/@uncut/viewport/src/gl/graphics/GLShader.js":[function(require,module,exports) {
+},{"./common.js":"../node_modules/gl-matrix/esm/common.js","./mat2.js":"../node_modules/gl-matrix/esm/mat2.js","./mat2d.js":"../node_modules/gl-matrix/esm/mat2d.js","./mat3.js":"../node_modules/gl-matrix/esm/mat3.js","./mat4.js":"../node_modules/gl-matrix/esm/mat4.js","./quat.js":"../node_modules/gl-matrix/esm/quat.js","./quat2.js":"../node_modules/gl-matrix/esm/quat2.js","./vec2.js":"../node_modules/gl-matrix/esm/vec2.js","./vec3.js":"../node_modules/gl-matrix/esm/vec3.js","./vec4.js":"../node_modules/gl-matrix/esm/vec4.js"}],"../node_modules/@uncut/viewport/src/gl/graphics/GLShader.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9291,7 +9393,7 @@ class GLContext {
 }
 
 exports.GLContext = GLContext;
-},{"gl-matrix":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/index.js","../Math.js":"../node_modules/@uncut/viewport/src/gl/Math.js","./GLShader.js":"../node_modules/@uncut/viewport/src/gl/graphics/GLShader.js"}],"../node_modules/@uncut/viewport/src/gl/Resources.js":[function(require,module,exports) {
+},{"gl-matrix":"../node_modules/gl-matrix/esm/index.js","../Math.js":"../node_modules/@uncut/viewport/src/gl/Math.js","./GLShader.js":"../node_modules/@uncut/viewport/src/gl/graphics/GLShader.js"}],"../node_modules/@uncut/viewport/src/gl/Resources.js":[function(require,module,exports) {
 
 "use strict";
 
@@ -10170,7 +10272,7 @@ class Camera extends _Math.Transform {
 }
 
 exports.Camera = Camera;
-},{"gl-matrix":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/index.js","../Math.js":"../node_modules/@uncut/viewport/src/gl/Math.js"}],"../node_modules/@uncut/viewport/src/gl/scene/DirectionalLight.js":[function(require,module,exports) {
+},{"gl-matrix":"../node_modules/gl-matrix/esm/index.js","../Math.js":"../node_modules/@uncut/viewport/src/gl/Math.js"}],"../node_modules/@uncut/viewport/src/gl/scene/DirectionalLight.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10211,7 +10313,7 @@ class DirectionalLight extends _Camera.Camera {
 }
 
 exports.DirectionalLight = DirectionalLight;
-},{"gl-matrix":"../node_modules/@uncut/viewport/node_modules/gl-matrix/esm/index.js","./Camera.js":"../node_modules/@uncut/viewport/src/gl/scene/Camera.js"}],"../node_modules/@uncut/viewport/src/gl/scene/Scene.js":[function(require,module,exports) {
+},{"gl-matrix":"../node_modules/gl-matrix/esm/index.js","./Camera.js":"../node_modules/@uncut/viewport/src/gl/scene/Camera.js"}],"../node_modules/@uncut/viewport/src/gl/scene/Scene.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11282,7 +11384,7 @@ const Icons = {
 		<svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 660 284"><defs><style>.a{fill:#f8f8f8;}.b{fill:#d6d6d6;}</style></defs><g transform="translate(66 -18)"><ellipse class="a" cx="330" cy="142" rx="330" ry="142" transform="translate(-66 18)"/><ellipse class="b" cx="101" cy="44" rx="101" ry="44" transform="translate(163 104)"/></g></svg>
 	`
 };
-},{"../components/Toolbar.js":"../components/Toolbar.js","../components/Dialog.js":"../components/Dialog.js","@uncut/console":"../node_modules/@uncut/console/THConsole.js","./VoxelWorld.js":"VoxelWorld.js"}],"C:/Users/tim/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../components/Toolbar.js":"../components/Toolbar.js","../components/Dialog.js":"../components/Dialog.js","@uncut/console":"../node_modules/@uncut/console/THConsole.js","./VoxelWorld.js":"VoxelWorld.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -11310,7 +11412,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63167" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50077" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -11485,4 +11587,4 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["C:/Users/tim/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
