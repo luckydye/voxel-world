@@ -1,7 +1,9 @@
 import noise from '../lib/perlin.js';
-import { Voxel } from './gl/geo/Voxel.js';
-import { Vec } from './gl/Math.js';
-import { Group } from './gl/geo/Group.js';
+import {
+    Group,
+    Vec,
+    Voxel
+} from '@uncut/viewport/elements';
 
 class Tile {
 	constructor(x, y, size, height) {

@@ -1,11 +1,13 @@
-import Viewport from "./Viewport.js";
-import { Resources } from "./gl/Resources.js";
-import { Scene } from "./gl/scene/Scene.js";
-import { PointLight } from "./gl/scene/PointLight.js";
-import { Terrain } from "./gl/geo/Terrain.js";
-import { Group } from "./gl/geo/Group.js";
-import { Vec } from "./gl/Math.js";
-import { Material } from "./gl/graphics/Material.js";
+import {
+    Viewport, 
+    Resources,
+    Scene,
+    PointLight,
+    Terrain,
+    Group,
+    Vec,
+    Material
+} from '@uncut/viewport';
 
 Resources.add({
     'world': './resources/worlds/default.json',
@@ -19,12 +21,12 @@ Resources.add({
 let worker;
 
 function createWorker() {
-    return new Worker('./dist/Worldgen.js');
+    return new Worker('./Worldgen.js');
 }
 
 worker = createWorker();
 
-class VoxelWorld extends Viewport {
+export class VoxelWorld extends Viewport {
 
     onReady() {}
 

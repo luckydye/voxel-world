@@ -1,5 +1,7 @@
-import { Toolbar, IconButton } from './components/Toolbar.js';
-import { DialogBox } from './components/Dialog.js';
+import { Toolbar, IconButton } from '../components/Toolbar.js';
+import { DialogBox } from '../components/Dialog.js';
+import '@uncut/console';
+import './VoxelWorld.js';
 
 window.addEventListener("DOMContentLoaded", () => onPageLod());
 window.addEventListener("contextmenu", e => e.preventDefault());
