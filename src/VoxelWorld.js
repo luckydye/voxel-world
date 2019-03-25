@@ -6,16 +6,21 @@ import {
     Terrain,
     Group,
     Vec,
-    Material
+    Material,
+    Importer,
+    Logger
 } from '@uncut/viewport';
 
 Resources.add({
-    'world': './resources/worlds/default.json',
-    'materials': './resources/materials/materials.json',
-	'defaultTextureAtlas': './resources/textures/blocks_solid.png',
-	'defaultReflectionMap': './resources/textures/blocks_solid_reflectionmap.png',
-    'spaceship': './resources/models/spaceship.obj',
-    'placeholder': './resources/textures/placeholder.png',
+    'world': './res/worlds/default.json',
+    'materials': './res/materials/materials.json',
+	'defaultTextureAtlas': './res/textures/blocks_solid.png',
+	'defaultReflectionMap': './res/textures/blocks_solid_reflectionmap.png',
+    'placeholder': './res/textures/placeholder.png',
+
+    'color.fs': './res/shader/color.fragment.shader',
+    'reflection.fs': './res/shader/reflection.fragment.shader',
+    'light.fs': './res/shader/light.fragment.shader'
 }, false);
 
 let worker;
@@ -24,7 +29,14 @@ function createWorker() {
     return new Worker('./Worldgen.js');
 }
 
-worker = createWorker();
+Logger.listen('Viewport', data => {
+    if(thconsole) {
+        thconsole.log(
+            `<span style="${data.style.prefix}">${data.prefix}</span>`, 
+            `<span style="${data.style.text}">${data.text}</span>`,
+        );
+    }
+})
 
 export class VoxelWorld extends Viewport {
 
@@ -32,7 +44,23 @@ export class VoxelWorld extends Viewport {
 
     init() {
         super.init();
+
+        worker = createWorker();
+
+        const mats = Resources.get('materials');
+        for(let name in mats) {
+            Importer.createMatFromJson(name, mats[name]);
+        }
+
         this.onReady();
+
+        thconsole.engiene.evaluate = function(str) {
+            let viewport = this;
+            let renderer = this.renderer;
+            let camera = this.camera;
+            let gl = this.renderer.gl;
+            return eval(str);
+        }.bind(this)
     }
 
     createTerrainScene(args) {
@@ -95,6 +123,10 @@ export class VoxelWorld extends Viewport {
         //     size: 3,
         // });
         // this.scene.add(pointLight2);
+
+        this.scene.lightSources.position.z = -2500;
+        this.scene.lightSources.position.y = 1000;
+        this.scene.lightSources.fov = 100;
 
         const pointLight3 = new PointLight({
             material: null,

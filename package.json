@@ -23,7 +23,7 @@
   "homepage": "https://gitlab.com/luckydye/voxel-world#readme",
   "dependencies": {
     "@uncut/console": "^1.0.1",
-    "@uncut/viewport": "^1.0.1",
+    "@uncut/viewport": "file:../../modules/gl-viewport",
     "parcel-bundler": "^1.12.3"
   },
   "devDependencies": {
