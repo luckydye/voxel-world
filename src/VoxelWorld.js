@@ -23,6 +23,8 @@ export class VoxelWorld extends Viewport {
         super.init();
 
         worker = createWorker();
+
+        this.createVoxelScene();
     }
 
     createVoxelScene(args) {

@@ -2,14 +2,12 @@
   "name": "voxel-world",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "build:worker": "parcel ./src/Worldgen.js --no-cache --no-source-maps",
-    "build:watch": "parcel watch ./src/main.js --no-cache --no-source-maps --public-url ./dist",
-    "build": "parcel build ./src/main.js --no-cache --no-source-maps --public-url ./dist"
+    "build:watch": "parcel watch ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
+    "build": "parcel build ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist"
   },
   "repository": {
     "type": "git",
