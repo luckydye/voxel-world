@@ -1,26 +1,14 @@
-import {
-    Viewport,
-    Resources,
-    Scene,
-    PointLight,
-    Terrain,
-    Group,
-    Vec,
-    Material,
-    Importer,
-    Logger
-} from '@uncut/viewport';
+import { Resources } from '@uncut/viewport/src/Resources';
+import Viewport from '@uncut/viewport/components/Viewport';
+import { Scene } from '@uncut/viewport/src/scene/Scene';
+import { Group } from '@uncut/viewport/src/geo/Group';
+import { Material } from '@uncut/viewport/src/materials/Material';
 
 Resources.add({
     'world': './res/worlds/default.json',
-    'materials': './res/materials/materials.json',
     'defaultTextureAtlas': './res/textures/blocks_solid.png',
     'defaultReflectionMap': './res/textures/blocks_solid_reflectionmap.png',
     'placeholder': './res/textures/placeholder.png',
-
-    'color.fs': './res/shader/color.fragment.shader',
-    'reflection.fs': './res/shader/reflection.fragment.shader',
-    'light.fs': './res/shader/light.fragment.shader'
 }, false);
 
 let worker;
@@ -29,56 +17,12 @@ function createWorker() {
     return new Worker('./Worldgen.js');
 }
 
-Logger.listen('Viewport', data => {
-    if (thconsole) {
-        thconsole.log(
-            `<span style="${data.style.prefix}">${data.prefix}</span>`,
-            `<span style="${data.style.text}">${data.text}</span>`,
-        );
-    }
-})
-
 export class VoxelWorld extends Viewport {
-
-    onReady() { }
 
     init() {
         super.init();
 
         worker = createWorker();
-
-        const mats = Resources.get('materials');
-        for (let name in mats) {
-            Importer.createMatFromJson(name, mats[name]);
-        }
-
-        this.onReady();
-
-        thconsole.engiene.evaluate = function (str) {
-            let viewport = this;
-            let renderer = this.renderer;
-            let camera = this.camera;
-            let gl = this.renderer.gl;
-            return eval(str);
-        }.bind(this)
-    }
-
-    createTerrainScene(args) {
-        this.scene = new Scene({
-            camera: this.camera,
-        });
-
-        this.renderer.setScene(this.scene);
-
-        this.terrain = new Terrain({
-            material: Material.TEST,
-            ...args
-        });
-
-        this.scene.clear();
-        this.scene.add(this.terrain);
-
-        this.defaultLighting();
     }
 
     createVoxelScene(args) {
@@ -106,52 +50,9 @@ export class VoxelWorld extends Viewport {
     }
 
     defaultLighting() {
-        // const pointLight = new PointLight({
-        //     material: Material.LIGHT,
-        //     position: new Vec(0, -300, 0),
-        //     intensity: 1.0,
-        //     color: [0.2, 0.5, 1.0],
-        //     size: 3,
-        // });
-        // this.scene.add(pointLight);
-
-        // const pointLight2 = new PointLight({
-        //     material: Material.LIGHT,
-        //     position: new Vec(0, -300, 0),
-        //     intensity: 2.0,
-        //     color: [0.4, 1.0, 0.1],
-        //     size: 3,
-        // });
-        // this.scene.add(pointLight2);
-
         this.scene.lightSources.position.z = -2500;
         this.scene.lightSources.position.y = 1000;
         this.scene.lightSources.fov = 100;
-
-        const pointLight3 = new PointLight({
-            material: null,
-            position: new Vec(0, -800, 0),
-            intensity: 3.0,
-            color: [1.0, 1.0, 1.0],
-            size: 10,
-        });
-        this.scene.add(pointLight3);
-
-        this.scene.onupdate = () => {
-            // const time = performance.now();
-            // pointLight.rotation.x += 0.54;
-            // pointLight.rotation.y += 0.54;
-
-            // pointLight.position.x = Math.sin(time / 600) * 300;
-            // pointLight.position.z = Math.cos(time / 600) * 300;
-
-            // pointLight2.rotation.x += 0.54;
-            // pointLight2.rotation.y += 0.54;
-
-            // pointLight2.position.x = Math.sin(time / 1000) * 600;
-            // pointLight2.position.z = Math.cos(time / 1000) * 600;
-            // pointLight2.position.y = (Math.sin(time / 2000) * 100) - 400;
-        }
     }
 
 }

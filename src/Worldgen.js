@@ -1,5 +1,6 @@
 import noise from '../lib/perlin.js';
-import { Group, Vec, Voxel } from '@uncut/viewport/elements';
+import { Group } from '@uncut/viewport/src/geo/Group';
+import { Voxel } from '@uncut/viewport/src/geo/Voxel';
 
 class Tile {
     constructor(x, y, size, height) {
@@ -322,11 +323,11 @@ export class VoxelWorldGenerator {
         const tileHeight = this.tileHeight;
         const cube = new Voxel({
             uv: tileData[x][y][z],
-            position: new Vec(
+            position: [
                 ((x * 20) + 10) - ((tileSize / 2) * 20),
                 ((y * 20) + 10) - ((tileHeight) * 20) - 0.5,
                 ((z * 20) + 10) - ((tileSize / 2) * 20),
-            )
+            ]
         });
 
         if ((y - 1 > 0 && y - 1 < tileHeight) && tileData[x][y - 1][z]) {
