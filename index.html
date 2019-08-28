@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-    <script src="//luckydye.de/components/th-footer.js"></script>
-    
     <script src="./dist/main.js"></script>
 
     <style>
@@ -13,6 +12,7 @@
             background: #1c1c1c;
             overscroll-behavior: none;
         }
+
         main {
             position: absolute;
             top: 0;
@@ -24,6 +24,7 @@
             align-items: center;
             overflow: hidden;
         }
+
         main::after,
         main::before {
             content: "";
@@ -39,49 +40,31 @@
             left: calc(50% - 25px);
             color: white;
         }
+
         main::after {
             animation: loading 1568.63ms ease infinite;
             color: rgb(0, 189, 0);
         }
+
         main::before {
             animation: loading 784.32ms ease infinite;
             color: #e5172b;
         }
+
         @keyframes loading {
-            from { transform: rotate(0deg); opacity: 0; }
-            25% { opacity: 1; }
-            to { transform: rotate(360deg); opacity: 0; }
-        }
+            from {
+                transform: rotate(0deg);
+                opacity: 0;
+            }
 
-        th-footer {
-            position: absolute;
-            bottom: 0;
-            color: #eee;
-            opacity: 0.15;
-            font-family: sans-serif;
-            padding: 0 20px;
-            letter-spacing: 1px;
-        }
-        
-        tb-toolbar {
-            position: fixed;
-            left: 50%;
-            top: 20px;
-            transform: translateX(-50%);
-        }
+            25% {
+                opacity: 1;
+            }
 
-        th-console {
-            z-index: 100;
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 450px;
-            height: 80%;
-            opacity: 0.65;
-            transition: opacity .15s ease-out;
-        }
-        th-console:hover {
-            opacity: 1;
+            to {
+                transform: rotate(360deg);
+                opacity: 0;
+            }
         }
 
         voxel-world {
@@ -90,11 +73,11 @@
         }
     </style>
 </head>
+
 <body>
     <main>
-        <th-console id="thconsole"></th-console>
         <voxel-world id="viewport"></voxel-world>
-        <th-footer></th-footer>
     </main>
 </body>
+
 </html>
