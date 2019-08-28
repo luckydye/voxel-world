@@ -1,5 +1,5 @@
 import {
-    Viewport, 
+    Viewport,
     Resources,
     Scene,
     PointLight,
@@ -14,8 +14,8 @@ import {
 Resources.add({
     'world': './res/worlds/default.json',
     'materials': './res/materials/materials.json',
-	'defaultTextureAtlas': './res/textures/blocks_solid.png',
-	'defaultReflectionMap': './res/textures/blocks_solid_reflectionmap.png',
+    'defaultTextureAtlas': './res/textures/blocks_solid.png',
+    'defaultReflectionMap': './res/textures/blocks_solid_reflectionmap.png',
     'placeholder': './res/textures/placeholder.png',
 
     'color.fs': './res/shader/color.fragment.shader',
@@ -30,9 +30,9 @@ function createWorker() {
 }
 
 Logger.listen('Viewport', data => {
-    if(thconsole) {
+    if (thconsole) {
         thconsole.log(
-            `<span style="${data.style.prefix}">${data.prefix}</span>`, 
+            `<span style="${data.style.prefix}">${data.prefix}</span>`,
             `<span style="${data.style.text}">${data.text}</span>`,
         );
     }
@@ -40,7 +40,7 @@ Logger.listen('Viewport', data => {
 
 export class VoxelWorld extends Viewport {
 
-    onReady() {}
+    onReady() { }
 
     init() {
         super.init();
@@ -48,13 +48,13 @@ export class VoxelWorld extends Viewport {
         worker = createWorker();
 
         const mats = Resources.get('materials');
-        for(let name in mats) {
+        for (let name in mats) {
             Importer.createMatFromJson(name, mats[name]);
         }
 
         this.onReady();
 
-        thconsole.engiene.evaluate = function(str) {
+        thconsole.engiene.evaluate = function (str) {
             let viewport = this;
             let renderer = this.renderer;
             let camera = this.camera;
@@ -95,7 +95,7 @@ export class VoxelWorld extends Viewport {
         this.scene.clear();
 
         worker.onmessage = e => {
-            if(e.data.type == 'tile') {
+            if (e.data.type == 'tile') {
                 const tile = Object.assign(new Group, e.data.tile.group);
                 tile.mat = Material.WORLD;
                 this.scene.add(tile);

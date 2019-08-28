@@ -22,11 +22,7 @@
   },
   "homepage": "https://gitlab.com/luckydye/voxel-world#readme",
   "dependencies": {
-    "@uncut/viewport": "^1.0.1",
-    "parcel-bundler": "^1.12.3"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.4.0"
+    "@uncut/viewport": "git+https://github.com/luckydye/viewport.git"
   },
   "browserslist": [
     "last 1 chrome versions"
