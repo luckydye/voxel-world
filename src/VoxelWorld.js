@@ -33,7 +33,7 @@ export class VoxelWorld extends Viewport {
 
         this.camera.fov = 50;
 
-        this.renderer.setResolution(640, 272);
+        // this.renderer.setResolution(640, 272);
 
         const controler = new ViewportController(this.camera, this);
 
