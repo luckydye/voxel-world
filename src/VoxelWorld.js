@@ -10,13 +10,9 @@ import PrimitivetMaterial from '@uncut/viewport/src/materials/PrimitiveMaterial'
 import { Geometry } from '@uncut/viewport/src/scene/Geometry';
 import { Texture } from '@uncut/viewport/src/materials/Texture';
 
-Resources.resourceRoot = "../res";
-
 Resources.add({
     'world': 'worlds/default.json',
-    'blockTexture': 'textures/blocks_solid.png',
-    'defaultReflectionMap': 'textures/blocks_solid_reflectionmap.png',
-    'placeholder': 'textures/placeholder.png',
+    'blockTexture': 'textures/blocks_solid_textured.png',
 }, false);
 
 Config.global.setValue('show.grid', true);
@@ -34,6 +30,10 @@ export class VoxelWorld extends Viewport {
     createVoxelScene(args) {
         this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
+
+        this.camera.fov = 50;
+
+        this.renderer.setResolution(640, 272);
 
         const controler = new ViewportController(this.camera, this);
 
