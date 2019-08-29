@@ -2,59 +2,60 @@ import { Resources } from '@uncut/viewport/src/Resources';
 import Viewport from '@uncut/viewport/components/Viewport';
 import { Scene } from '@uncut/viewport/src/scene/Scene';
 import { Group } from '@uncut/viewport/src/geo/Group';
-import { Material } from '@uncut/viewport/src/materials/Material';
+import DefaultMaterial from '@uncut/viewport/src/materials/DefaultMaterial';
+import Config from '@uncut/viewport/src/Config';
+import { ViewportController } from '@uncut/viewport/src/controlers/ViewportController';
+import { Cube } from '@uncut/viewport/src/geo/Cube';
+import PrimitivetMaterial from '@uncut/viewport/src/materials/PrimitiveMaterial';
+import { Geometry } from '@uncut/viewport/src/scene/Geometry';
+import { Texture } from '@uncut/viewport/src/materials/Texture';
+
+Resources.resourceRoot = "../res";
 
 Resources.add({
-    'world': './res/worlds/default.json',
-    'defaultTextureAtlas': './res/textures/blocks_solid.png',
-    'defaultReflectionMap': './res/textures/blocks_solid_reflectionmap.png',
-    'placeholder': './res/textures/placeholder.png',
+    'world': 'worlds/default.json',
+    'blockTexture': 'textures/blocks_solid.png',
+    'defaultReflectionMap': 'textures/blocks_solid_reflectionmap.png',
+    'placeholder': 'textures/placeholder.png',
 }, false);
 
-let worker;
-
-function createWorker() {
-    return new Worker('./Worldgen.js');
-}
+Config.global.setValue('show.grid', true);
 
 export class VoxelWorld extends Viewport {
 
-    init() {
-        super.init();
+    init(args) {
+        super.init(args);
 
-        worker = createWorker();
+        this.worker = new Worker('./Worldgen.js');
 
         this.createVoxelScene();
     }
 
     createVoxelScene(args) {
-        this.scene = new Scene({
-            camera: this.camera,
-        });
-
+        this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
 
-        const settings = args || Resources.get('world').world;
-
-        worker.postMessage({ type: 'regen', settings: settings });
+        const controler = new ViewportController(this.camera, this);
 
         this.scene.clear();
 
-        worker.onmessage = e => {
+        this.worker.postMessage({ type: 'regen', settings: Resources.get('world').world });
+
+        this.worker.onmessage = e => {
             if (e.data.type == 'tile') {
-                const tile = Object.assign(new Group, e.data.tile.group);
-                tile.mat = Material.WORLD;
-                this.scene.add(tile);
+
+                const geo = new Geometry({
+                    vertecies: e.data.buffer.vertecies,
+                    position: e.data.position,
+                    material: new DefaultMaterial({
+                        texture: new Texture(Resources.get('blockTexture')),
+                        textureScale: 16
+                    })
+                });
+
+                this.scene.add(geo);
             }
         }
-
-        this.defaultLighting();
-    }
-
-    defaultLighting() {
-        this.scene.lightSources.position.z = -2500;
-        this.scene.lightSources.position.y = 1000;
-        this.scene.lightSources.fov = 100;
     }
 
 }

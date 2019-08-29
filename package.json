@@ -6,7 +6,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "build:watch": "parcel watch ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
+    "build:watch": "parcel ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
     "build": "parcel build ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist"
   },
   "repository": {
@@ -20,7 +20,7 @@
   },
   "homepage": "https://gitlab.com/luckydye/voxel-world#readme",
   "dependencies": {
-    "@uncut/viewport": "git+https://github.com/luckydye/viewport.git"
+    "@uncut/viewport": "file:../viewport"
   },
   "browserslist": [
     "last 1 chrome versions"

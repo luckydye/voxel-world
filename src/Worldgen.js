@@ -367,7 +367,11 @@ onmessage = (e) => {
             worldGen.setOptions(e.data.settings);
             const startTime = performance.now();
             worldGen.regen(0, tile => {
-                self.postMessage({ type: 'tile', tile });
+                self.postMessage({
+                    type: 'tile',
+                    buffer: tile.group.buffer,
+                    position: tile.group.position
+                });
             }).then(() => {
                 console.log("World gen in", Math.floor(performance.now() - startTime), "ms");
             })
