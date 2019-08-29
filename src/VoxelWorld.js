@@ -48,6 +48,7 @@ export class VoxelWorld extends Viewport {
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
                     material: new DefaultMaterial({
+                        diffuseColor: [0, 0, 0, 0],
                         texture: new Texture(Resources.get('blockTexture')),
                         textureScale: 16
                     })
