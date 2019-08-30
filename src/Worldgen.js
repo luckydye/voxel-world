@@ -34,6 +34,8 @@ const UV = {
     SAND: [3, 1],
 }
 
+const generatedTiles = [];
+
 export class VoxelWorldGenerator {
 
     setSeed(n) {
@@ -48,13 +50,15 @@ export class VoxelWorldGenerator {
         resolution = 15,
         threshold = 0.2,
         terrainheight = 15,
-    } = {}) {
+    } = {}, startPos = [0, 0]) {
         this.worldSize = tileSize;
         this.tileHeight = tileHeight;
         this.resolution = resolution;
         this.threshold = threshold;
         this.terrainheight = terrainheight;
         this.treeDensity = 0.65;
+
+        this.startPos = startPos;
 
         this.setSeed(seed);
     }
@@ -76,21 +80,6 @@ export class VoxelWorldGenerator {
             if (tileCount > maxCount) return;
 
             const [x, y] = tile;
-            const newTile = self.generateTile(x, y);
-            put(newTile);
-
-            tileCount++;
-
-            closedSet[x][y] = tile;
-            openSet.delete(tile);
-
-            getNeighbors(tile);
-
-            for (let tile of openSet) {
-                if (valid(tile)) {
-                    tick(tile, maxCount);
-                }
-            }
 
             function valid(tile) {
                 const [x, y] = tile;
@@ -114,6 +103,26 @@ export class VoxelWorldGenerator {
                     if (valid(n)) openSet.add(n);
                 }
             }
+
+            if (generatedTiles.indexOf(`${x},${y}`) === -1) {
+                const newTile = self.generateTile(x, y);
+                generatedTiles.push(`${x},${y}`);
+
+                put(newTile);
+
+                tileCount++;
+
+                closedSet[x][y] = tile;
+                openSet.delete(tile);
+
+                getNeighbors(tile);
+
+                for (let tile of openSet) {
+                    if (valid(tile)) {
+                        tick(tile, maxCount);
+                    }
+                }
+            }
         }
 
         function createSet(size) {
@@ -132,7 +141,7 @@ export class VoxelWorldGenerator {
         return new Promise((resolve, reject) => {
             const size = this.worldSize;
 
-            this.generate([0, 0], size * size + 4, (newtile) => {
+            this.generate(this.startPos, size * size + 4, (newtile) => {
                 callback(this.buildTile(newtile));
             });
 
@@ -364,7 +373,7 @@ onmessage = (e) => {
     switch (e.data.type) {
 
         case 'regen':
-            worldGen.setOptions(e.data.settings);
+            worldGen.setOptions(e.data.settings, e.data.offset);
             const startTime = performance.now();
             worldGen.regen(0, tile => {
                 self.postMessage({

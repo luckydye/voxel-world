@@ -1,6 +1,6 @@
 {
 	"world": {
-		"tileSize": 7,
+		"tileSize": 6,
 		"tileHeight": 64,
 		"threshold": 0.45,
 		"resolution": 32

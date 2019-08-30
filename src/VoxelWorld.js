@@ -28,14 +28,45 @@ export class VoxelWorld extends Viewport {
     }
 
     createVoxelScene(args) {
+
+        this.camera.position.y = -550;
+        this.camera.position.x = 50;
+
+        let lastPos = 0;
+
+        setInterval(() => {
+            this.camera.position.z += 2;
+
+            const pos = [
+                Math.floor(this.camera.position.x / 600),
+                Math.floor(-this.camera.position.z / 600) - 2,
+            ];
+
+            if (lastPos > pos[1]) {
+
+                lastPos = pos[1];
+
+                this.worker.postMessage({
+                    type: 'regen',
+                    settings: Resources.get('world').world,
+                    offset: pos
+                });
+
+                while (this.scene.objects.size > 60) {
+                    const objects = [...this.scene.objects].reverse();
+                    this.scene.remove(objects.pop());
+                }
+            }
+        }, 1000 / 60);
+
         this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
 
         this.camera.fov = 50;
 
-        // this.renderer.setResolution(640, 272);
+        this.renderer.setResolution(640, 272);
 
-        const controler = new ViewportController(this.camera, this);
+        // const controler = new ViewportController(this.camera, this);
 
         this.scene.clear();
 
