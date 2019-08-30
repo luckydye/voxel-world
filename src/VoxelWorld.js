@@ -9,6 +9,9 @@ import { Cube } from '@uncut/viewport/src/geo/Cube';
 import PrimitivetMaterial from '@uncut/viewport/src/materials/PrimitiveMaterial';
 import { Geometry } from '@uncut/viewport/src/scene/Geometry';
 import { Texture } from '@uncut/viewport/src/materials/Texture';
+import { Task } from '@uncut/viewport/src/Scheduler';
+
+Resources.resourceRoot = "./res";
 
 Resources.add({
     'world': 'worlds/default.json',
@@ -32,32 +35,27 @@ export class VoxelWorld extends Viewport {
         this.camera.position.y = -550;
         this.camera.position.x = 50;
 
-        let lastPos = 0;
+        this.scheduler.addTask(new Task(ms => {
+            this.camera.position.z += 0.125 * ms;
+        }));
 
         setInterval(() => {
-            this.camera.position.z += 2;
-
             const pos = [
                 Math.floor(this.camera.position.x / 600),
                 Math.floor(-this.camera.position.z / 600) - 2,
             ];
 
-            if (lastPos > pos[1]) {
+            this.worker.postMessage({
+                type: 'regen',
+                settings: Resources.get('world').world,
+                offset: pos
+            });
 
-                lastPos = pos[1];
-
-                this.worker.postMessage({
-                    type: 'regen',
-                    settings: Resources.get('world').world,
-                    offset: pos
-                });
-
-                while (this.scene.objects.size > 60) {
-                    const objects = [...this.scene.objects].reverse();
-                    this.scene.remove(objects.pop());
-                }
+            while (this.scene.objects.size > 100) {
+                const objects = [...this.scene.objects].reverse();
+                this.scene.remove(objects.pop());
             }
-        }, 1000 / 60);
+        }, 1000 / 5);
 
         this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
