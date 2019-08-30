@@ -4,12 +4,12 @@ import { Scene } from '@uncut/viewport/src/scene/Scene';
 import { Group } from '@uncut/viewport/src/geo/Group';
 import DefaultMaterial from '@uncut/viewport/src/materials/DefaultMaterial';
 import Config from '@uncut/viewport/src/Config';
-import { ViewportController } from '@uncut/viewport/src/controlers/ViewportController';
 import { Cube } from '@uncut/viewport/src/geo/Cube';
 import PrimitivetMaterial from '@uncut/viewport/src/materials/PrimitiveMaterial';
 import { Geometry } from '@uncut/viewport/src/scene/Geometry';
 import { Texture } from '@uncut/viewport/src/materials/Texture';
 import { Task } from '@uncut/viewport/src/Scheduler';
+import { CameraControler } from '@uncut/viewport/src/controlers/CameraControler';
 
 Resources.resourceRoot = "./res";
 
@@ -41,8 +41,8 @@ export class VoxelWorld extends Viewport {
 
         setInterval(() => {
             const pos = [
-                Math.floor(this.camera.position.x / 600),
-                Math.floor(-this.camera.position.z / 600) - 2,
+                Math.floor(-this.camera.position.x / 600),
+                Math.floor(-this.camera.position.z / 600) - 3,
             ];
 
             this.worker.postMessage({
@@ -60,7 +60,7 @@ export class VoxelWorld extends Viewport {
         this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
 
-        this.camera.fov = 50;
+        this.camera.fov = 35;
 
         let ratio = 2.35;
 
@@ -70,7 +70,7 @@ export class VoxelWorld extends Viewport {
 
         this.renderer.setResolution(640, 640 / ratio);
 
-        // const controler = new ViewportController(this.camera, this);
+        // const controler = new CameraControler(this.camera, this);
 
         this.scene.clear();
 
