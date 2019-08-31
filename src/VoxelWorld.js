@@ -22,9 +22,12 @@ Config.global.setValue('show.grid', false);
 
 Config.global.define('freemode', false, false);
 Config.global.define('debug', false, false);
-Config.global.define('view_distance', 7, 7);
+Config.global.define('view_distance', 6, 6);
 
 Config.global.load();
+
+Config.global.setValue('view_distance', 6);
+
 Config.global.save();
 
 export class VoxelWorld extends Viewport {
