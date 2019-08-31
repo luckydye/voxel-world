@@ -18,7 +18,13 @@ Resources.add({
     'blockTexture': 'textures/blocks_solid_textured.png',
 }, false);
 
-Config.global.setValue('show.grid', true);
+Config.global.setValue('show.grid', false);
+
+Config.global.define('freemode', false, false);
+Config.global.define('debug', false, false);
+
+Config.global.load();
+Config.global.save();
 
 export class VoxelWorld extends Viewport {
 
@@ -32,17 +38,22 @@ export class VoxelWorld extends Viewport {
 
     createVoxelScene(args) {
 
-        this.camera.position.y = -550;
-        this.camera.position.x = 50;
+        this.scene.clear();
 
-        this.scheduler.addTask(new Task(ms => {
-            this.camera.position.z += 0.125 * ms;
-        }));
+        this.scene = new Scene(this.camera);
+        this.renderer.setScene(this.scene);
+
+        this.renderer.background = [0, 0, 0, 0];
+
+        this.camera.position.y = -550;
+        this.camera.position.x = 10;
+
+        this.camera.fov = 35;
 
         setInterval(() => {
             const pos = [
-                Math.floor(-this.camera.position.x / 600),
-                Math.floor(-this.camera.position.z / 600) - 3,
+                Math.floor(-this.camera.position.x / 640.5),
+                Math.floor(-this.camera.position.z / 640.5),
             ];
 
             this.worker.postMessage({
@@ -51,16 +62,34 @@ export class VoxelWorld extends Viewport {
                 offset: pos
             });
 
-            while (this.scene.objects.size > 100) {
-                const objects = [...this.scene.objects].reverse();
-                this.scene.remove(objects.pop());
+            // freemode
+            if (!Config.global.getValue('freemode')) {
+
             }
+
         }, 1000 / 5);
 
-        this.scene = new Scene(this.camera);
-        this.renderer.setScene(this.scene);
+        // freemode
+        if (!Config.global.getValue('freemode')) {
+            this.scheduler.addTask(new Task(ms => {
+                this.camera.position.z += 0.125 * ms;
+                this.camera.position.z += 5;
+            }));
+        }
 
-        this.camera.fov = 35;
+        this.scene.getRenderableObjects = () => {
+            let arr = [...this.scene.objects].filter(obj => {
+
+                const distX = Math.abs(-this.camera.position.x - obj.position.x);
+                const distZ = Math.abs(-this.camera.position.z - obj.position.z);
+
+                const viewDistance = 640.5 * 4;
+
+                return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
+            });
+
+            return arr;
+        }
 
         let ratio = 2.35;
 
@@ -68,13 +97,15 @@ export class VoxelWorld extends Viewport {
             ratio = +location.hash.substr(1);
         }
 
-        this.renderer.setResolution(640, 640 / ratio);
+        // freemode
+        if (Config.global.getValue('freemode')) {
+            this.renderer.setResolution(1280, 1280 / ratio);
+            this.camera.fov = 90;
+            const controler = new CameraControler(this.camera, this);
+        } else {
 
-        // const controler = new CameraControler(this.camera, this);
-
-        this.scene.clear();
-
-        this.worker.postMessage({ type: 'regen', settings: Resources.get('world').world });
+            this.renderer.setResolution(640, 640 / ratio);
+        }
 
         this.worker.onmessage = e => {
             if (e.data.type == 'tile') {
@@ -90,6 +121,52 @@ export class VoxelWorld extends Viewport {
                 });
 
                 this.scene.add(geo);
+
+                if (Config.global.getValue('debug')) {
+                    const grid = new Geometry({
+                        guide: true,
+                        vertecies: [
+                            -320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+
+                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 0, -320.25, 0, 0, 1, 0, 0,
+                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
+
+                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 0, -320.25, 0, 0, 1, 0, 0,
+                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
+
+                            // up
+
+                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+
+                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+
+                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
+                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                        ],
+                        position: e.data.position,
+                        material: new PrimitivetMaterial(),
+                    });
+
+                    this.scene.add(grid);
+                }
             }
         }
     }

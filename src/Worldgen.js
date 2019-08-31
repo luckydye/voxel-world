@@ -381,8 +381,6 @@ onmessage = (e) => {
                     buffer: tile.group.buffer,
                     position: tile.group.position
                 });
-            }).then(() => {
-                console.log("World gen in", Math.floor(performance.now() - startTime), "ms");
             })
             break;
 
