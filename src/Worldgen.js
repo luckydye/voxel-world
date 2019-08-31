@@ -44,15 +44,15 @@ export class VoxelWorldGenerator {
     }
 
     setOptions({
-        tileSize = 4,
-        tileHeight = 40,
+        view_distance = 4,
+        world_height = 40,
         seed = 0,
         resolution = 15,
         threshold = 0.2,
         terrainheight = 15,
     } = {}, startPos = [0, 0]) {
-        this.worldSize = tileSize;
-        this.tileHeight = tileHeight;
+        this.worldSize = view_distance;
+        this.tileHeight = world_height;
         this.resolution = resolution;
         this.threshold = threshold;
         this.terrainheight = terrainheight;
@@ -109,18 +109,18 @@ export class VoxelWorldGenerator {
                 generatedTiles.push(`${x},${y}`);
 
                 put(newTile);
+            }
 
-                tileCount++;
+            tileCount++;
 
-                closedSet[x][y] = tile;
-                openSet.delete(tile);
+            closedSet[x][y] = tile;
+            openSet.delete(tile);
 
-                getNeighbors(tile);
+            getNeighbors(tile);
 
-                for (let tile of openSet) {
-                    if (valid(tile)) {
-                        tick(tile, maxCount);
-                    }
+            for (let tile of openSet) {
+                if (valid(tile)) {
+                    tick(tile, maxCount);
                 }
             }
         }

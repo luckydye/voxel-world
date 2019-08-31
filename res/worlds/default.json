@@ -1,7 +1,7 @@
 {
 	"world": {
-		"tileSize": 5,
-		"tileHeight": 64,
+		"view_distance": 5,
+		"world_height": 64,
 		"threshold": 0.45,
 		"resolution": 32
 	}
