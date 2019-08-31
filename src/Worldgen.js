@@ -45,7 +45,8 @@ export class VoxelWorldGenerator {
 
     setOptions({
         view_distance = 4,
-        world_height = 40,
+        world_height = 64,
+        tile_size = 32,
         seed = 0,
         resolution = 15,
         threshold = 0.2,
@@ -57,6 +58,7 @@ export class VoxelWorldGenerator {
         this.threshold = threshold;
         this.terrainheight = terrainheight;
         this.treeDensity = 0.65;
+        this.tileSize = tile_size;
 
         this.startPos = startPos;
 
@@ -65,7 +67,6 @@ export class VoxelWorldGenerator {
 
     constructor(args) {
         this.setOptions(args);
-        this.tileSize = 32;
     }
 
     generate(startpoint, TILECOUNT, put) {

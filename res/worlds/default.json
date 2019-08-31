@@ -1,7 +1,5 @@
 {
 	"world": {
-		"view_distance": 6,
-		"world_height": 64,
 		"threshold": 0.5,
 		"resolution": 32
 	}

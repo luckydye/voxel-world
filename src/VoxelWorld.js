@@ -22,11 +22,11 @@ Config.global.setValue('show.grid', false);
 
 Config.global.define('freemode', false, false);
 Config.global.define('debug', false, false);
-Config.global.define('view_distance', 6, 6);
+Config.global.define('view_distance', 7, 7);
 
 Config.global.load();
 
-Config.global.setValue('view_distance', 6);
+Config.global.setValue('view_distance', 5);
 
 Config.global.save();
 
@@ -58,33 +58,38 @@ export class VoxelWorld extends Viewport {
         this.camera.position.y = -550;
         this.camera.position.x = -10;
 
-        this.camera.fov = 35;
+        this.camera.fov = 50;
 
         let zOffset = 0;
 
+        const tileSize = 20 * 32;
+
         // freemode
         if (!Config.global.getValue('freemode')) {
-            zOffset = Math.floor((+Config.global.getValue('view_distance')) / 1.5);
+            zOffset = 6;
         }
 
         setInterval(() => {
             const pos = [
-                Math.floor(-this.camera.position.x / 640.5),
-                Math.floor(-this.camera.position.z / 640.5) - zOffset,
+                Math.floor(-this.camera.position.x / tileSize),
+                Math.floor(-this.camera.position.z / tileSize) - zOffset,
             ];
 
             this.worker.postMessage({
                 type: 'regen',
-                settings: Resources.get('world').world,
+                settings: Object.assign(Resources.get('world').world, {
+                    view_distance: +Config.global.getValue('view_distance'),
+                    tile_size: 32,
+                }),
                 offset: pos
             });
 
-        }, 1000 / 5);
+        }, 1000 / 14);
 
         // freemode
         if (!Config.global.getValue('freemode')) {
             this.scheduler.addTask(new Task(ms => {
-                this.camera.position.z += 0.125 * ms;
+                this.camera.position.z += 0.25 * ms;
             }));
         }
 
@@ -95,7 +100,7 @@ export class VoxelWorld extends Viewport {
                 const distX = Math.abs(-this.camera.position.x - obj.position.x);
                 const distZ = Math.abs(-this.camera.position.z - obj.position.z);
 
-                const viewDistance = 640.5 * (+Config.global.getValue('view_distance'));
+                const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
 
                 return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
             });
@@ -140,53 +145,61 @@ export class VoxelWorld extends Viewport {
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: new DefaultMaterial({
-                        diffuseColor: [0, 0, 0, 0],
-                        texture: new Texture(Resources.get('blockTexture')),
-                        textureScale: 16
-                    })
+                    material: new PrimitivetMaterial()
                 });
 
                 this.scene.add(geo);
 
+                setTimeout(() => {
+                    geo.material = new DefaultMaterial({
+                        diffuseColor: [0, 0, 0, 0],
+                        texture: new Texture(Resources.get('blockTexture')),
+                        textureScale: 16
+                    });
+                }, 250);
+
                 if (Config.global.getValue('debug')) {
+
+                    const tiledim = tileSize / 2;
+                    const tileheight = 20 * 64;
+
                     const grid = new Geometry({
                         guide: true,
                         vertecies: [
-                            -320.25, 1000, -320.25, 0, 0, 1, 0, 0,
-                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            -tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
+                            -tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
 
-                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
-                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 1000, -320.25, 0, 0, 1, 0, 0,
-                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                            -tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
-                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            -tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 0, -320.25, 0, 0, 1, 0, 0,
-                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            -tiledim, 0, -tiledim, 0, 0, 1, 0, 0,
+                            -tiledim, 0, tiledim, 0, 0, 1, 0, 0,
 
-                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
-                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
+                            tiledim, 0, tiledim, 0, 0, 1, 0, 0,
+                            tiledim, 0, -tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 0, -320.25, 0, 0, 1, 0, 0,
-                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
+                            -tiledim, 0, -tiledim, 0, 0, 1, 0, 0,
+                            tiledim, 0, -tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
-                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
+                            -tiledim, 0, tiledim, 0, 0, 1, 0, 0,
+                            tiledim, 0, tiledim, 0, 0, 1, 0, 0,
 
                             // up
 
-                            320.25, 0, 320.25, 0, 0, 1, 0, 0,
-                            320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            tiledim, 0, tiledim, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
 
-                            -320.25, 0, 320.25, 0, 0, 1, 0, 0,
-                            -320.25, 1000, 320.25, 0, 0, 1, 0, 0,
+                            -tiledim, 0, tiledim, 0, 0, 1, 0, 0,
+                            -tiledim, tileheight, tiledim, 0, 0, 1, 0, 0,
 
-                            320.25, 0, -320.25, 0, 0, 1, 0, 0,
-                            320.25, 1000, -320.25, 0, 0, 1, 0, 0,
+                            tiledim, 0, -tiledim, 0, 0, 1, 0, 0,
+                            tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
                         ],
                         position: e.data.position,
                         material: new PrimitivetMaterial(),
