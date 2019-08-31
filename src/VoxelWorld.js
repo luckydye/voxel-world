@@ -39,7 +39,7 @@ export class VoxelWorld extends Viewport {
 
         this.renderer.setOptions({
             DEPTH_TEST: true,
-            CULL_FACE: false,
+            CULL_FACE: true,
             BLEND: true,
         });
 
