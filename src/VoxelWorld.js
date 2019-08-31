@@ -22,6 +22,7 @@ Config.global.setValue('show.grid', false);
 
 Config.global.define('freemode', false, false);
 Config.global.define('debug', false, false);
+Config.global.define('view_distance', 7, 7);
 
 Config.global.load();
 Config.global.save();
@@ -32,6 +33,12 @@ export class VoxelWorld extends Viewport {
         super.init(args);
 
         this.worker = new Worker('./Worldgen.js');
+
+        this.renderer.setOptions({
+            DEPTH_TEST: true,
+            CULL_FACE: false,
+            BLEND: true,
+        });
 
         this.createVoxelScene();
     }
@@ -46,14 +53,21 @@ export class VoxelWorld extends Viewport {
         this.renderer.background = [0, 0, 0, 0];
 
         this.camera.position.y = -550;
-        this.camera.position.x = 10;
+        this.camera.position.x = -10;
 
         this.camera.fov = 35;
+
+        let zOffset = 0;
+
+        // freemode
+        if (!Config.global.getValue('freemode')) {
+            zOffset = Math.floor((+Config.global.getValue('view_distance')) / 1.5);
+        }
 
         setInterval(() => {
             const pos = [
                 Math.floor(-this.camera.position.x / 640.5),
-                Math.floor(-this.camera.position.z / 640.5),
+                Math.floor(-this.camera.position.z / 640.5) - zOffset,
             ];
 
             this.worker.postMessage({
@@ -62,31 +76,41 @@ export class VoxelWorld extends Viewport {
                 offset: pos
             });
 
-            // freemode
-            if (!Config.global.getValue('freemode')) {
-
-            }
-
         }, 1000 / 5);
 
         // freemode
         if (!Config.global.getValue('freemode')) {
             this.scheduler.addTask(new Task(ms => {
                 this.camera.position.z += 0.125 * ms;
-                this.camera.position.z += 5;
             }));
         }
 
         this.scene.getRenderableObjects = () => {
+
             let arr = [...this.scene.objects].filter(obj => {
 
                 const distX = Math.abs(-this.camera.position.x - obj.position.x);
                 const distZ = Math.abs(-this.camera.position.z - obj.position.z);
 
-                const viewDistance = 640.5 * 4;
+                const viewDistance = 640.5 * (+Config.global.getValue('view_distance'));
 
                 return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
             });
+
+            arr = arr.sort((a, b) => {
+
+                const distA = Math.sqrt(
+                    Math.pow(-this.camera.position.x - a.position.x, 2),
+                    Math.pow(-this.camera.position.z - a.position.z, 2),
+                );
+
+                const distB = Math.sqrt(
+                    Math.pow(-this.camera.position.x - b.position.x, 2),
+                    Math.pow(-this.camera.position.z - b.position.z, 2),
+                );
+
+                return distB - distA;
+            })
 
             return arr;
         }

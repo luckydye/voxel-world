@@ -83,7 +83,7 @@ export class VoxelWorldGenerator {
 
             function valid(tile) {
                 const [x, y] = tile;
-                const ctile = closedSet[x][y];
+                const ctile = closedSet[x] ? closedSet[x][y] : null;
                 return !ctile;
             }
 
