@@ -10,6 +10,7 @@ import { Geometry } from '@uncut/viewport/src/scene/Geometry';
 import { Texture } from '@uncut/viewport/src/materials/Texture';
 import { Task } from '@uncut/viewport/src/Scheduler';
 import { CameraControler } from '@uncut/viewport/src/controlers/CameraControler';
+import { PlayerControler } from '@uncut/viewport/src/controlers/PlayerControler';
 
 Resources.resourceRoot = "./res";
 
@@ -26,7 +27,7 @@ Config.global.define('view_distance', 7, 7);
 
 Config.global.load();
 
-Config.global.setValue('view_distance', 5);
+Config.global.setValue('view_distance', 6);
 
 Config.global.save();
 
@@ -63,11 +64,21 @@ export class VoxelWorld extends Viewport {
         let zOffset = 0;
 
         const tileSize = 20 * 32;
+        const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
 
         // freemode
         if (!Config.global.getValue('freemode')) {
-            zOffset = 6;
+            zOffset = 5;
         }
+
+        this.worker.postMessage({
+            type: 'regen',
+            settings: Object.assign(Resources.get('world').world, {
+                view_distance: +Config.global.getValue('view_distance'),
+                tile_size: 32,
+            }),
+            offset: [0, -2]
+        });
 
         setInterval(() => {
             const pos = [
@@ -96,11 +107,17 @@ export class VoxelWorld extends Viewport {
         this.scene.getRenderableObjects = () => {
 
             let arr = [...this.scene.objects].filter(obj => {
-
                 const distX = Math.abs(-this.camera.position.x - obj.position.x);
                 const distZ = Math.abs(-this.camera.position.z - obj.position.z);
 
-                const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
+                const dist = Math.sqrt(
+                    Math.pow(-this.camera.position.x - obj.position.x, 2) +
+                    Math.pow(-this.camera.position.z - obj.position.z, 2)
+                );
+
+                // chunk transparent in distance and on initial render
+                obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
+                obj.material.transparency += dist / (viewDistance / 1.1);
 
                 return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
             });
@@ -108,13 +125,13 @@ export class VoxelWorld extends Viewport {
             arr = arr.sort((a, b) => {
 
                 const distA = Math.sqrt(
-                    Math.pow(-this.camera.position.x - a.position.x, 2),
-                    Math.pow(-this.camera.position.z - a.position.z, 2),
+                    Math.pow(-this.camera.position.x - a.position.x, 2) +
+                    Math.pow(-this.camera.position.z - a.position.z, 2)
                 );
 
                 const distB = Math.sqrt(
-                    Math.pow(-this.camera.position.x - b.position.x, 2),
-                    Math.pow(-this.camera.position.z - b.position.z, 2),
+                    Math.pow(-this.camera.position.x - b.position.x, 2) +
+                    Math.pow(-this.camera.position.z - b.position.z, 2)
                 );
 
                 return distB - distA;
@@ -133,7 +150,13 @@ export class VoxelWorld extends Viewport {
         if (Config.global.getValue('freemode')) {
             this.renderer.setResolution(1280, 1280 / ratio);
             this.camera.fov = 90;
-            const controler = new CameraControler(this.camera, this);
+
+            this.camera.height = 60;
+
+            const controler = new PlayerControler(this.camera, this);
+            controler.speed = 4;
+            controler.maxSpeed = 0.5;
+
         } else {
 
             this.renderer.setResolution(640, 640 / ratio);
@@ -145,18 +168,16 @@ export class VoxelWorld extends Viewport {
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: new PrimitivetMaterial()
-                });
-
-                this.scene.add(geo);
-
-                setTimeout(() => {
-                    geo.material = new DefaultMaterial({
+                    material: new DefaultMaterial({
                         diffuseColor: [0, 0, 0, 0],
                         texture: new Texture(Resources.get('blockTexture')),
                         textureScale: 16
-                    });
-                }, 250);
+                    })
+                });
+
+                geo.timestamp = Date.now();
+
+                this.scene.add(geo);
 
                 if (Config.global.getValue('debug')) {
 
