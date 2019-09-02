@@ -27,7 +27,7 @@ Config.global.define('view_distance', 7, 7);
 
 Config.global.load();
 
-Config.global.setValue('view_distance', 6);
+Config.global.setValue('view_distance', 7);
 
 Config.global.save();
 
@@ -62,15 +62,8 @@ export class VoxelWorld extends Viewport {
     createVoxelScene(args) {
         this.scene.clear();
 
-        let zOffset = 0;
-
         const tileSize = 20 * 32;
         const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
-
-        // freemode
-        if (!Config.global.getValue('freemode')) {
-            zOffset = 5;
-        }
 
         this.worker.postMessage({
             type: 'regen',
@@ -78,13 +71,13 @@ export class VoxelWorld extends Viewport {
                 view_distance: +Config.global.getValue('view_distance'),
                 tile_size: 32,
             }),
-            offset: [0, -zOffset / 2.5]
+            offset: [0, 0]
         });
 
         setInterval(() => {
             const pos = [
                 Math.floor(-this.camera.position.x / tileSize),
-                Math.floor(-this.camera.position.z / tileSize) - zOffset,
+                Math.floor(-this.camera.position.z / tileSize),
             ];
 
             this.worker.postMessage({
@@ -101,7 +94,7 @@ export class VoxelWorld extends Viewport {
         // freemode
         if (!Config.global.getValue('freemode')) {
             this.scheduler.addTask(new Task(ms => {
-                this.camera.position.z += 0.125 * ms;
+                this.camera.position.z -= 0.25 * ms;
             }));
         }
 
