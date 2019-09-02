@@ -99,7 +99,7 @@ export class VoxelWorld extends Viewport {
         // freemode
         if (!Config.global.getValue('freemode')) {
             this.scheduler.addTask(new Task(ms => {
-                this.camera.position.z += 0.25 * ms;
+                this.camera.position.z += 0.125 * ms;
             }));
         }
 
@@ -114,13 +114,11 @@ export class VoxelWorld extends Viewport {
                     Math.pow(-this.camera.position.z - obj.position.z, 2)
                 );
 
-                // BROKE THIS: use single material now, so... changing material not good.
-
                 // chunk transparent in distance and on initial render
-                // obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
-                // obj.material.transparency += dist / (viewDistance / 1.1);
+                obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
+                obj.material.transparency += dist / (viewDistance / 1.1);
 
-                return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
+                return obj.guide || !obj.hidden && dist < viewDistance;
             });
 
             arr = arr.sort((a, b) => {
@@ -164,12 +162,6 @@ export class VoxelWorld extends Viewport {
         }
 
         const chunkTexture = new Texture(Resources.get('blockTexture'));
-        const chunkMaterial = new DefaultMaterial({
-            diffuseColor: [0, 0, 0, 0],
-            texture: chunkTexture,
-            textureScale: 16
-        });
-
         const debugMaterial = new PrimitivetMaterial();
 
         this.worker.onmessage = e => {
@@ -178,7 +170,11 @@ export class VoxelWorld extends Viewport {
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: chunkMaterial
+                    material: new DefaultMaterial({
+                        diffuseColor: [0, 0, 0, 0],
+                        texture: chunkTexture,
+                        textureScale: 16
+                    })
                 });
 
                 geo.timestamp = Date.now();
