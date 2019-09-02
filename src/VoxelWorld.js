@@ -11,6 +11,7 @@ import { Texture } from '@uncut/viewport/src/materials/Texture';
 import { Task } from '@uncut/viewport/src/Scheduler';
 import { CameraControler } from '@uncut/viewport/src/controlers/CameraControler';
 import { PlayerControler } from '@uncut/viewport/src/controlers/PlayerControler';
+import PostProcessingShader from './PostProcessingShader';
 
 Resources.resourceRoot = "./res";
 
@@ -37,28 +38,29 @@ export class VoxelWorld extends Viewport {
 
         this.worker = new Worker('./Worldgen.js');
 
+        this.renderer.compShader = new PostProcessingShader();
+
+        this.renderer.background = [0, 0, 0, 0];
+
         this.renderer.setOptions({
             DEPTH_TEST: true,
             CULL_FACE: true,
             BLEND: true,
         });
 
-        this.createVoxelScene();
-    }
-
-    createVoxelScene(args) {
-
-        this.scene.clear();
-
         this.scene = new Scene(this.camera);
         this.renderer.setScene(this.scene);
-
-        this.renderer.background = [0, 0, 0, 0];
 
         this.camera.position.y = -550;
         this.camera.position.x = -10;
 
         this.camera.fov = 50;
+
+        this.createVoxelScene();
+    }
+
+    createVoxelScene(args) {
+        this.scene.clear();
 
         let zOffset = 0;
 
@@ -114,10 +116,6 @@ export class VoxelWorld extends Viewport {
                     Math.pow(-this.camera.position.z - obj.position.z, 2)
                 );
 
-                // chunk transparent in distance and on initial render
-                obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
-                obj.material.transparency += dist / (viewDistance / 1.1);
-
                 return obj.guide || !obj.hidden && dist < viewDistance;
             });
 
@@ -163,6 +161,11 @@ export class VoxelWorld extends Viewport {
 
         const chunkTexture = new Texture(Resources.get('blockTexture'));
         const debugMaterial = new PrimitivetMaterial();
+        const chunkMaterial = new DefaultMaterial({
+            diffuseColor: [0, 0, 0, 0],
+            texture: chunkTexture,
+            textureScale: 16
+        });
 
         this.worker.onmessage = e => {
             if (e.data.type == 'tile') {
@@ -170,11 +173,7 @@ export class VoxelWorld extends Viewport {
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: new DefaultMaterial({
-                        diffuseColor: [0, 0, 0, 0],
-                        texture: chunkTexture,
-                        textureScale: 16
-                    })
+                    material: chunkMaterial
                 });
 
                 geo.timestamp = Date.now();
