@@ -84,12 +84,11 @@ export class VoxelWorldGenerator {
 
             function valid(tile) {
                 const [x, y] = tile;
-                const ctile = closedSet[x] ? closedSet[x][y] : null;
-                return !ctile;
+                return !(closedSet[x] ? closedSet[x][y] : null);
             }
 
             function getNeighbors() {
-                const neighbors = [
+                for (let n of [
                     [x + 1, y],
                     [x - 1, y],
                     [x, y - 1],
@@ -99,17 +98,14 @@ export class VoxelWorldGenerator {
                     [x + 1, y + 1],
                     [x - 1, y - 1],
                     [x - 1, y + 1],
-                ]
-                for (let n of neighbors) {
+                ]) {
                     if (valid(n)) openSet.add(n);
                 }
             }
 
             if (generatedTiles.indexOf(`${x},${y}`) === -1) {
-                const newTile = self.generateTile(x, y);
                 generatedTiles.push(`${x},${y}`);
-
-                put(newTile);
+                put(self.generateTile(x, y));
             }
 
             tileCount++;
@@ -216,9 +212,7 @@ export class VoxelWorldGenerator {
                         x < this.tileSize && x >= 0 &&
                         z < this.tileSize && z >= 0) {
 
-                        const value = noise.perlin3((x + tile.pos.x) / res, y / res, (z + tile.pos.y) / res);
-
-                        if (value > this.threshold) {
+                        if (noise.perlin3((x + tile.pos.x) / res, y / res, (z + tile.pos.y) / res) > this.threshold) {
                             tileData[x][y][z] = mat;
                         } else if (y > tileHeight - 2) {
                             tileData[x][y][z] = mat;
@@ -302,11 +296,8 @@ export class VoxelWorldGenerator {
 
                                 if (x - tx != x || y - ty != y || i > height - 2) {
 
-                                    const p1 = [x, y];
-                                    const p2 = [x - tx, y - ty];
-
-                                    const a = p1[0] - p2[0];
-                                    const b = p1[1] - p2[1];
+                                    const a = x - (x - tx);
+                                    const b = y - (y - ty);
 
                                     const dist = Math.sqrt(a * a + b * b);
 
@@ -328,34 +319,32 @@ export class VoxelWorldGenerator {
     }
 
     voxel(tile, x, y, z, offsetX = 0, offsetY = 0) {
-        const tileData = tile.tileData;
-        const tileSize = this.tileSize;
-        const tileHeight = this.tileHeight;
+
         const cube = new Voxel({
-            uv: tileData[x][y][z],
+            uv: tile.tileData[x][y][z],
             position: [
-                ((x * 20) + 10) - ((tileSize / 2) * 20),
-                ((y * 20) + 10) - ((tileHeight) * 20) - 0.5,
-                ((z * 20) + 10) - ((tileSize / 2) * 20),
+                ((x * 20) + 10) - ((this.tileSize / 2) * 20),
+                ((y * 20) + 10) - ((this.tileHeight) * 20) - 0.5,
+                ((z * 20) + 10) - ((this.tileSize / 2) * 20),
             ]
         });
 
-        if ((y - 1 > 0 && y - 1 < tileHeight) && tileData[x][y - 1][z]) {
+        if ((y - 1 > 0 && y - 1 < this.tileHeight) && tile.tileData[x][y - 1][z]) {
             cube.visible.TOP = false;
         }
-        if ((y + 1 > 0 && y + 1 < tileHeight) && tileData[x][y + 1][z]) {
+        if ((y + 1 > 0 && y + 1 < this.tileHeight) && tile.tileData[x][y + 1][z]) {
             cube.visible.BOTTOM = false;
         }
-        if ((z - 1 > 0 && z - 1 < tileSize) && tileData[x][y][z - 1]) {
+        if ((z - 1 > 0 && z - 1 < this.tileSize) && tile.tileData[x][y][z - 1]) {
             cube.visible.RIGHT = false;
         }
-        if ((z + 1 > 0 && z + 1 < tileSize) && tileData[x][y][z + 1]) {
+        if ((z + 1 > 0 && z + 1 < this.tileSize) && tile.tileData[x][y][z + 1]) {
             cube.visible.LEFT = false;
         }
-        if ((x - 1 > 0 && x - 1 < tileSize) && tileData[x - 1][y][z]) {
+        if ((x - 1 > 0 && x - 1 < this.tileSize) && tile.tileData[x - 1][y][z]) {
             cube.visible.BACK = false;
         }
-        if ((x + 1 > 0 && x + 1 < tileSize) && tileData[x + 1][y][z]) {
+        if ((x + 1 > 0 && x + 1 < this.tileSize) && tile.tileData[x + 1][y][z]) {
             cube.visible.FRONT = false;
         }
 

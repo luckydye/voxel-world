@@ -22,7 +22,6 @@ Resources.add({
 Config.global.setValue('show.grid', false);
 
 Config.global.define('freemode', false, false);
-Config.global.define('debug', false, false);
 Config.global.define('view_distance', 7, 7);
 
 Config.global.load();
@@ -77,7 +76,7 @@ export class VoxelWorld extends Viewport {
                 view_distance: +Config.global.getValue('view_distance'),
                 tile_size: 32,
             }),
-            offset: [0, -2]
+            offset: [0, -zOffset / 2.5]
         });
 
         setInterval(() => {
@@ -115,9 +114,11 @@ export class VoxelWorld extends Viewport {
                     Math.pow(-this.camera.position.z - obj.position.z, 2)
                 );
 
+                // BROKE THIS: use single material now, so... changing material not good.
+
                 // chunk transparent in distance and on initial render
-                obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
-                obj.material.transparency += dist / (viewDistance / 1.1);
+                // obj.material.transparency = Math.min(100 / (Date.now() - obj.timestamp), 1);
+                // obj.material.transparency += dist / (viewDistance / 1.1);
 
                 return obj.guide || !obj.hidden && distX < viewDistance && distZ < viewDistance;
             });
@@ -162,17 +163,22 @@ export class VoxelWorld extends Viewport {
             this.renderer.setResolution(640, 640 / ratio);
         }
 
+        const chunkTexture = new Texture(Resources.get('blockTexture'));
+        const chunkMaterial = new DefaultMaterial({
+            diffuseColor: [0, 0, 0, 0],
+            texture: chunkTexture,
+            textureScale: 16
+        });
+
+        const debugMaterial = new PrimitivetMaterial();
+
         this.worker.onmessage = e => {
             if (e.data.type == 'tile') {
 
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: new DefaultMaterial({
-                        diffuseColor: [0, 0, 0, 0],
-                        texture: new Texture(Resources.get('blockTexture')),
-                        textureScale: 16
-                    })
+                    material: chunkMaterial
                 });
 
                 geo.timestamp = Date.now();
@@ -223,7 +229,7 @@ export class VoxelWorld extends Viewport {
                             tiledim, tileheight, -tiledim, 0, 0, 1, 0, 0,
                         ],
                         position: e.data.position,
-                        material: new PrimitivetMaterial(),
+                        material: debugMaterial,
                     });
 
                     this.scene.add(grid);
