@@ -12,8 +12,13 @@ import { Task } from '@uncut/viewport/src/Scheduler';
 import { CameraControler } from '@uncut/viewport/src/controlers/CameraControler';
 import { PlayerControler } from '@uncut/viewport/src/controlers/PlayerControler';
 import PostProcessingShader from './PostProcessingShader';
+import MeshShader from '@uncut/viewport/src/shader/MeshShader';
 
 Resources.resourceRoot = "./res";
+
+if (!location.hash) {
+    MeshShader.spuash = false;
+}
 
 Resources.add({
     'world': 'worlds/default.json',

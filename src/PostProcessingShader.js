@@ -1,6 +1,8 @@
 import CompShader from '@uncut/viewport/src/shader/CompShader';
 import MeshShader from '@uncut/viewport/src/shader/MeshShader';
 
+MeshShader.spuash = true;
+
 MeshShader.vertexSource = () => {
     return `#version 300 es
 
@@ -67,7 +69,7 @@ MeshShader.vertexSource = () => {
         gl_Position = scene.projection * scene.view * vec4(pos.x + xbump, pos.y + ybump, pos.z + zbump, 1.0);
         gl_PointSize = 5.0;
 
-        gl_Position.y -= sin(gl_Position.z * 0.25) * 6.0 - gl_Position.z;
+        ${!MeshShader.spuash ? "//" : ""}gl_Position.y -= sin(gl_Position.z * 0.25) * 6.0 - gl_Position.z;
 
         vertexPos = aPosition;
         vWorldPos = pos;
