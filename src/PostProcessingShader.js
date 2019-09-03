@@ -67,7 +67,7 @@ MeshShader.vertexSource = () => {
         gl_Position = scene.projection * scene.view * vec4(pos.x + xbump, pos.y + ybump, pos.z + zbump, 1.0);
         gl_PointSize = 5.0;
 
-        // gl_Position.y -= sin(gl_Position.z * 0.25) * 6.0 - gl_Position.z;
+        gl_Position.y -= sin(gl_Position.z * 0.25) * 6.0 - gl_Position.z;
 
         vertexPos = aPosition;
         vWorldPos = pos;

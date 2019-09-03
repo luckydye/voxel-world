@@ -94,7 +94,7 @@ export class VoxelWorld extends Viewport {
         // freemode
         if (!Config.global.getValue('freemode')) {
             this.scheduler.addTask(new Task(ms => {
-                this.camera.position.z -= 0.25 * ms;
+                this.camera.position.z -= 0.125 * ms;
             }));
         }
 
