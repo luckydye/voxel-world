@@ -23,6 +23,8 @@ if (!location.hash) {
 Resources.add({
     'world': 'worlds/default.json',
     'blockTexture': 'textures/blocks_solid_textured.png',
+    'blockRoughness': 'textures/blocks_solid_roughness.png',
+    'blockNormals': 'textures/blocks_solid_normals.png',
 }, false);
 
 Config.global.setValue('show.grid', false);
@@ -158,11 +160,15 @@ export class VoxelWorld extends Viewport {
         }
 
         const chunkTexture = new Texture(Resources.get('blockTexture'));
+        const chunkTextureRoughness = new Texture(Resources.get('blockRoughness'));
+        const chunkTextureNormals = new Texture(Resources.get('blockNormals'));
+
         const debugMaterial = new PrimitivetMaterial();
         const chunkMaterial = new DefaultMaterial({
-            diffuseColor: [0, 0, 0, 0],
             texture: chunkTexture,
-            textureScale: 16
+            specularMap: chunkTextureRoughness,
+            normalMap: chunkTextureNormals,
+            textureScale: 16,
         });
 
         this.worker.onmessage = e => {
