@@ -105,6 +105,8 @@ export class VoxelWorld extends Viewport {
             }));
         }
 
+        // let closestChunk = null;
+
         this.scene.getRenderableObjects = () => {
 
             let arr = [...this.scene.objects].filter(obj => {
@@ -133,6 +135,34 @@ export class VoxelWorld extends Viewport {
 
                 return distB - distA;
             })
+
+            // closestChunk = arr[arr.length - 1];
+
+            // if (closestChunk) {
+            //     const playVoxel = [
+            //         Math.floor(Math.abs(this.camera.position.x) / 20),
+            //         Math.floor(Math.abs(this.camera.position.y) / 20),
+            //         Math.floor(Math.abs(this.camera.position.z) / 20),
+            //     ];
+
+            //     let xyz = null;
+
+            //     const row = closestChunk.voxels[playVoxel[0] % 32];
+            //     if (row) {
+            //         const col = closestChunk.voxels[playVoxel[1] % 32];
+            //         if (col) {
+            //             xyz = [
+            //                 playVoxel[0] % 32,
+            //                 playVoxel[1] % 32,
+            //                 playVoxel[2] % 32,
+            //             ]
+            //         }
+            //     }
+
+            //     if (xyz) {
+            //         const uv = closestChunk.voxels[xyz[0]][xyz[1]][xyz[2]];
+            //     }
+            // }
 
             return arr;
         }
@@ -177,8 +207,10 @@ export class VoxelWorld extends Viewport {
                 const geo = new Geometry({
                     vertecies: e.data.buffer.vertecies,
                     position: e.data.position,
-                    material: chunkMaterial
+                    material: chunkMaterial,
                 });
+
+                geo.voxels = e.data.tileData;
 
                 geo.timestamp = Date.now();
 

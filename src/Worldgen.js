@@ -368,6 +368,7 @@ onmessage = (e) => {
             worldGen.regen(0, tile => {
                 self.postMessage({
                     type: 'tile',
+                    tileData: tile.tileData,
                     buffer: tile.group.buffer,
                     position: tile.group.position
                 });
