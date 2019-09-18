@@ -1,8 +1,6 @@
 import CompShader from '@uncut/viewport/src/shader/CompShader';
 import MeshShader from '@uncut/viewport/src/shader/MeshShader';
 
-MeshShader.spuash = true;
-
 MeshShader.vertexSource = () => {
     return `#version 300 es
     
@@ -80,8 +78,6 @@ MeshShader.vertexSource = () => {
         gl_PointSize = 5.0;
 
         vTexelPos = gl_Position;
-
-        ${!MeshShader.spuash ? "//" : ""}gl_Position.y -= sin(gl_Position.z * 0.25) * 6.0 - gl_Position.z;
     }`;
 }
 
@@ -94,35 +90,22 @@ export default class PostProcessingShader extends CompShader {
         
         in vec2 vTexCoords;
         
-        struct SceneProjection {
-            mat4 model;
-            mat4 view;
-            mat4 projection;
-        };
-        uniform SceneProjection scene;
-        
-        uniform vec3 cameraPosition;
-        
         uniform sampler2D colorBuffer;
-        uniform sampler2D shadowBuffer;
         uniform sampler2D depthBuffer;
-        uniform sampler2D normalBuffer;
         
         out vec4 oFragColor;
         
         void main() {
-            float depth = texture(depthBuffer, vTexCoords).r;
             vec4 color = texture(colorBuffer, vTexCoords);
-            vec4 shadow = texture(shadowBuffer, vTexCoords);
-            vec4 normal = texture(normalBuffer, vTexCoords);
+            float depth = texture(depthBuffer, vTexCoords).r;
 
             float selfShadow = clamp(pow(depth, 20.0), 0.75, 1.0);
 
-            float fog = pow(depth, 400.0);
+            vec3 fog = vec3(pow(texture(depthBuffer, vTexCoords).r, 200000.0));
 
             float ambient = 0.05;
 
-            oFragColor = vec4((color * selfShadow + fog + ambient).rgb, color.a - fog);
+            oFragColor = vec4(color.rgb * selfShadow + fog + ambient, color.a - fog);
         }`;
     }
 }
