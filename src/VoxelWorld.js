@@ -198,6 +198,8 @@ export class VoxelWorld extends Viewport {
             texture: chunkTexture,
             specularMap: chunkTextureRoughness,
             normalMap: chunkTextureNormals,
+            specular: 1,
+            roughness: 1,
             textureScale: 16,
         });
 
