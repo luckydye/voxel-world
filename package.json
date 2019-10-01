@@ -6,7 +6,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "build:watch": "parcel ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
+    "build:w": "parcel ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
     "build": "parcel build ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist"
   },
   "repository": {

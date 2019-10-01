@@ -349,9 +349,7 @@ export class VoxelWorldGenerator {
         }
 
         if (!cube.invisible) {
-            if (cube.buffer) {
-                tile.group.add(cube);
-            }
+            tile.group.add(cube);
         }
     }
 
@@ -369,7 +367,7 @@ onmessage = (e) => {
                 self.postMessage({
                     type: 'tile',
                     tileData: tile.tileData,
-                    buffer: tile.group.buffer,
+                    buffer: tile.group.createBuffer(),
                     position: tile.group.position
                 });
             })

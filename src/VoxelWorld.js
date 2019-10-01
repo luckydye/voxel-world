@@ -40,6 +40,10 @@ Config.global.save();
 
 export class VoxelWorld extends Viewport {
 
+    constructor() {
+        super(null);
+    }
+
     init(args) {
         super.init(args);
 
@@ -55,8 +59,15 @@ export class VoxelWorld extends Viewport {
             BLEND: true,
         });
 
-        this.scene = new Scene(this.camera);
-        this.renderer.setScene(this.scene);
+        this.scene = new Scene();
+
+        this.scene.add(this.camera);
+
+        setInterval(() => {
+            const light = this.scene.lightsource;
+            light.position.x = this.camera.position.x + 1000;
+            light.position.z = this.camera.position.z - 500;
+        }, 16);
 
         this.camera.position.y = -550;
         this.camera.position.x = -10;
@@ -67,8 +78,6 @@ export class VoxelWorld extends Viewport {
     }
 
     createVoxelScene(args) {
-        this.scene.clear();
-
         const tileSize = 20 * 32;
         const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
 
