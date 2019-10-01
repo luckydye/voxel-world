@@ -7,7 +7,9 @@
   },
   "scripts": {
     "build:w": "parcel ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
-    "build": "parcel build ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist"
+    "build": "parcel build ./src/VoxelWorld.js --no-cache --no-source-maps --public-url ./dist",
+    "predeploy": "npm run build",
+    "deploy": "firebase deploy"
   },
   "repository": {
     "type": "git",
