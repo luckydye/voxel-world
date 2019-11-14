@@ -10,8 +10,8 @@ class Tile {
 
         this.group = new Group();
 
-        this.group.position.x = this.pos.x * 20;
-        this.group.position.z = this.pos.y * 20;
+        this.group.position.x = this.pos.x * 2;
+        this.group.position.z = this.pos.y * 2;
 
         for (let i = 0; i < this.tileData.length; i++) {
             this.tileData[i] = new Array(this.height);
@@ -224,9 +224,6 @@ export class VoxelWorldGenerator {
             }
         }
 
-        // generate features
-        // return tile;
-
         const treeDensity = this.treeDensity;
 
         for (let x = 0; x < tileData.length; x++) {
@@ -248,13 +245,9 @@ export class VoxelWorldGenerator {
 
                             let yvalue = noise.perlin2(x * treeDensity + tile.pos.y, z * treeDensity + tile.pos.y) + 0.1;
 
-                            if (yvalue < 0.5 && yvalue > 0.45) {
-                                this.makeThing(tileData, x, y, z);
-                            } else
-
-                                if (yvalue >= treeDensity) {
-                                    this.makeTree(tileData, x, y, z, treeHeight);
-                                }
+                            if (yvalue >= treeDensity) {
+                                this.makeTree(tileData, x, y, z, treeHeight);
+                            }
                         }
                     }
 
@@ -314,18 +307,20 @@ export class VoxelWorldGenerator {
 
     }
 
-    makeThing(tileData, x, y, z) {
-        // tileData[x][y][z] = UV.LAVA;
-    }
-
     voxel(tile, x, y, z, offsetX = 0, offsetY = 0) {
 
+        const uv = tile.tileData[x][y][z];
         const cube = new Voxel({
-            uv: tile.tileData[x][y][z],
+            uv: [
+                -4 + uv[0],
+                -1 - uv[1],
+                1 / 4,
+                1 / 4,
+            ],
             position: [
-                ((x * 20) + 10) - ((this.tileSize / 2) * 20),
-                ((y * 20) + 10) - ((this.tileHeight) * 20) - 0.5,
-                ((z * 20) + 10) - ((this.tileSize / 2) * 20),
+                ((x * 2) + 1) - ((this.tileSize / 2) * 2),
+                ((y * 2) + 1) - ((this.tileHeight) * 2) - 0.5,
+                ((z * 2) + 1) - ((this.tileSize / 2) * 2),
             ]
         });
 

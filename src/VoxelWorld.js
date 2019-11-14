@@ -27,21 +27,17 @@ Resources.add({
     'blockNormals': 'textures/blocks_solid_normals.png',
 }, false);
 
-Config.global.setValue('show.grid', false);
-
-Config.global.define('freemode', false, false);
-Config.global.define('view_distance', 7, 7);
-
-Config.global.load();
-
-Config.global.setValue('view_distance', 7);
-
-Config.global.save();
+const canvas = document.createElement('canvas');
+const offscreen = canvas.transferControlToOffscreen();
 
 export class VoxelWorld extends Viewport {
 
     constructor() {
-        super(null);
+        super({
+            controllertype: null,
+            offscreen: offscreen,
+            canvas: canvas,
+        });
     }
 
     init(args) {
@@ -49,7 +45,7 @@ export class VoxelWorld extends Viewport {
 
         this.worker = new Worker('./Worldgen.js');
 
-        this.renderer.compShader = new PostProcessingShader();
+        // this.renderer.compShader = new PostProcessingShader();
 
         this.renderer.background = [0, 0, 0, 0];
 
@@ -59,62 +55,72 @@ export class VoxelWorld extends Viewport {
             BLEND: true,
         });
 
+        this.renderer.TEXTURE_MAG_FILTER = this.renderer.gl.NEAREST;
+		this.renderer.TEXTURE_MIN_FILTER = this.renderer.gl.NEAREST;
+
         this.scene = new Scene();
 
         this.scene.add(this.camera);
 
-        setInterval(() => {
-            const light = this.scene.lightsource;
-            light.position.x = this.camera.position.x + 1000;
-            light.position.z = this.camera.position.z - 500;
-        }, 16);
-
-        this.camera.position.y = -550;
-        this.camera.position.x = -10;
-
         this.camera.fov = 50;
+        this.camera.farplane = 5000;
+
+        this.renderer.setResolution(this.parentNode.clientWidth, this.parentNode.clientHeight);
+        window.addEventListener('resize', () => {
+            this.renderer.setResolution(this.parentNode.clientWidth, this.parentNode.clientHeight);
+        })
 
         this.createVoxelScene();
     }
 
     createVoxelScene(args) {
-        const tileSize = 20 * 32;
-        const viewDistance = tileSize * (+Config.global.getValue('view_distance'));
+        const tileSize = 32;
+        const viewDistance = 512;
 
-        this.worker.postMessage({
-            type: 'regen',
-            settings: Object.assign(Resources.get('world').world, {
-                view_distance: +Config.global.getValue('view_distance'),
-                tile_size: 32,
-            }),
-            offset: [0, 0]
-        });
-
-        setInterval(() => {
+        const requestTile = () => {
             const pos = [
                 Math.floor(-this.camera.position.x / tileSize),
-                Math.floor(-this.camera.position.z / tileSize),
+                Math.floor(-(this.camera.position.z + 75) / tileSize),
             ];
 
             this.worker.postMessage({
                 type: 'regen',
                 settings: Object.assign(Resources.get('world').world, {
-                    view_distance: +Config.global.getValue('view_distance'),
-                    tile_size: 32,
+                    view_distance: 7,
+                    tile_size: tileSize,
                 }),
                 offset: pos
             });
 
-        }, 1000 / 14);
-
-        // freemode
-        if (!Config.global.getValue('freemode')) {
-            this.scheduler.addTask(new Task(ms => {
-                this.camera.position.z -= 0.125 * ms;
-            }));
         }
 
-        // let closestChunk = null;
+        setInterval(requestTile, 1000 / 14);
+        requestTile();
+
+        this.scheduler.addTask(new Task(ms => {
+            this.camera.position.z -= 0.002 * ms;
+
+            this.camera.position.y = -120;
+            this.camera.position.x = 0;
+    
+            this.camera.rotation.x = 0.4;
+            this.camera.rotation.y = 0;
+            this.camera.rotation.z = 0;
+
+            this.scene.lightsource.parent = this.camera;
+            this.scene.lightsource.position.y = -1000;
+            this.scene.lightsource.position.x = 0;
+            this.scene.lightsource.position.z = 0;
+
+            // this.scene.lightsource.rotation.x = (3.14 / 2) - 0.5;
+            // this.scene.lightsource.rotation.y = -0.1;
+            // this.scene.lightsource.rotation.z = -0.33;
+
+            this.scene.lightsource.sensor.width = 128;
+            this.scene.lightsource.sensor.height = 128;
+
+            this.scene.lightsource.hidden = false;
+        }));
 
         this.scene.getRenderableObjects = () => {
 
@@ -130,72 +136,7 @@ export class VoxelWorld extends Viewport {
                 return obj.guide || !obj.hidden && dist < viewDistance;
             });
 
-            arr = arr.sort((a, b) => {
-
-                const distA = Math.sqrt(
-                    Math.pow(-this.camera.position.x - a.position.x, 2) +
-                    Math.pow(-this.camera.position.z - a.position.z, 2)
-                );
-
-                const distB = Math.sqrt(
-                    Math.pow(-this.camera.position.x - b.position.x, 2) +
-                    Math.pow(-this.camera.position.z - b.position.z, 2)
-                );
-
-                return distB - distA;
-            })
-
-            // closestChunk = arr[arr.length - 1];
-
-            // if (closestChunk) {
-            //     const playVoxel = [
-            //         Math.floor(Math.abs(this.camera.position.x) / 20),
-            //         Math.floor(Math.abs(this.camera.position.y) / 20),
-            //         Math.floor(Math.abs(this.camera.position.z) / 20),
-            //     ];
-
-            //     let xyz = null;
-
-            //     const row = closestChunk.voxels[playVoxel[0] % 32];
-            //     if (row) {
-            //         const col = closestChunk.voxels[playVoxel[1] % 32];
-            //         if (col) {
-            //             xyz = [
-            //                 playVoxel[0] % 32,
-            //                 playVoxel[1] % 32,
-            //                 playVoxel[2] % 32,
-            //             ]
-            //         }
-            //     }
-
-            //     if (xyz) {
-            //         const uv = closestChunk.voxels[xyz[0]][xyz[1]][xyz[2]];
-            //     }
-            // }
-
             return arr;
-        }
-
-        let ratio = 2.35;
-
-        if (location.hash) {
-            ratio = +location.hash.substr(1);
-        }
-
-        // freemode
-        if (Config.global.getValue('freemode')) {
-            this.renderer.setResolution(1280, 1280 / ratio);
-            this.camera.fov = 90;
-
-            this.camera.height = 60;
-
-            const controler = new PlayerControler(this.camera, this);
-            controler.speed = 4;
-            controler.maxSpeed = 0.5;
-
-        } else {
-
-            this.renderer.setResolution(640, 640 / ratio);
         }
 
         const chunkTexture = new Texture(Resources.get('blockTexture'));
@@ -204,12 +145,12 @@ export class VoxelWorld extends Viewport {
 
         const debugMaterial = new PrimitivetMaterial();
         const chunkMaterial = new DefaultMaterial({
+            diffuseColor: [0, 0, 0, 0],
             texture: chunkTexture,
             specularMap: chunkTextureRoughness,
             normalMap: chunkTextureNormals,
             specular: 1,
             roughness: 1,
-            textureScale: 16,
         });
 
         this.worker.onmessage = e => {
